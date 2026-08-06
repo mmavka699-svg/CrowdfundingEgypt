@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Crowd-Funding Egypt — Fund the Future{% endblock %}
+
+{% block content %}
+
+<!-- ============ TOP SLIDER: Top 5 highest-rated running projects ============ -->
+<section class="hero-slider">
+    <div id="topProjectsCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            {% for p in top_rated_projects %}
+            <button type="button" data-bs-target="#topProjectsCarousel" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}"></button>
+            {% endfor %}
+        </div>
+        <div class="carousel-inner">
+            {% for p in top_rated_projects %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <div class="hero-slide" style="background-image: url('{% if p.images.first %}{{ p.images.first.image.url }}{% else %}{% static 'img/placeholder.jpg' %}{% endif %}');">
+                    <div class="hero-overlay">
+                        <div class="container">
+                            <span class="badge bg-primary mb-2">{{ p.category.name }}</span>
+                            <h1>{{ p.title }}</h1>
+                            <p class="mb-1"><i class="fa-solid fa-star text-warning"></i> {{ p.average_rating }} / 5 ({{ p.ratings_count }} ratings)</p>
+                            <p class="w-75">{{ p.details|truncatewords:25 }}</p>
+                            <a href="{{ p.get_absolute_url }}" class="btn btn-primary btn-lg mt-2">Donate Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="carousel-item active">
+                <div class="hero-slide hero-empty">
+                    <div class="container text-center">
+                        <h1>Welcome to Crowd-Funding Egypt</h1>
+                        <p>Discover and support amazing projects across Egypt.</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% if top_rated_projects %}
+        <button class="carousel-control-prev" type="button" data-bs-target="#topProjectsCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#topProjectsCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+        {% endif %}
+    </div>
+</section>
+
+<div class="container">
+
+    <!-- ============ CATEGORIES ============ -->
+    <section class="my-5">
+        <h2 class="section-title">Browse by Category</h2>
+        <div class="row g-3">
+            {% for cat in categories %}
+            <div class="col-6 col-md-3 col-lg-2">
+                <a href="{% url 'projects:category_detail' cat.slug %}" class="category-card">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>{{ cat.name }}</span>
+                    <small class="text-muted">{{ cat.project_count }} project{{ cat.project_count|pluralize }}</small>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- ============ FEATURED PROJECTS ============ -->
+    {% if featured_projects %}
+    <section class="my-5">
+        <h2 class="section-title">Featured Projects <i class="fa-solid fa-crown text-warning"></i></h2>
+        <div class="row g-4">
+            {% for p in featured_projects %}
+                {% include "includes/project_card.html" with project=p %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ============ LATEST PROJECTS ============ -->
+    <section class="my-5">
+        <h2 class="section-title">Latest Projects</h2>
+        <div class="row g-4">
+            {% for p in latest_projects %}
+                {% include "includes/project_card.html" with project=p %}
+            {% endfor %}
+        </div>
+    </section>
+
+</div>
+{% endblock %}

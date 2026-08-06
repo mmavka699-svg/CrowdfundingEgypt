@@ -1,0 +1,61 @@
+{% load static %}
+<div class="comment mb-3 {% if comment.is_reply %}ms-5{% endif %}">
+    <div class="d-flex">
+        <img src="{{ comment.author.profile_picture.url }}" class="rounded-circle me-2" width="36" height="36" style="object-fit:cover;">
+        <div class="flex-grow-1">
+            <div class="bg-light rounded p-2">
+                <strong>{{ comment.author.get_full_name }}</strong>
+                <small class="text-muted ms-2">{{ comment.created_at|timesince }} ago</small>
+                <p class="mb-0">{{ comment.body }}</p>
+            </div>
+            <div class="small mt-1">
+                {% if user.is_authenticated %}
+                <a href="#" class="text-muted reply-toggle" data-comment-id="{{ comment.id }}">Reply</a> &middot;
+                <a href="#" class="text-muted" data-bs-toggle="modal" data-bs-target="#reportCommentModal{{ comment.id }}">Report</a>
+                {% endif %}
+            </div>
+
+            <!-- Reply form (bonus: nested replies) -->
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'projects:comment_create' comment.project.slug %}" class="reply-form d-none mt-2" id="reply-form-{{ comment.id }}">
+                {% csrf_token %}
+                <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                <textarea name="body" class="form-control form-control-sm" rows="2" placeholder="Write a reply..."></textarea>
+                <button type="submit" class="btn btn-sm btn-primary mt-1">Reply</button>
+            </form>
+            {% endif %}
+
+            <!-- Recursively render nested replies -->
+            {% for reply in comment.replies.all %}
+                {% include "includes/comment.html" with comment=reply %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Report Comment Modal -->
+<div class="modal fade" id="reportCommentModal{{ comment.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" action="{% url 'projects:report_comment' comment.id %}" class="modal-content">
+            {% csrf_token %}
+            <div class="modal-header">
+                <h5 class="modal-title">Report this comment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <select name="reason" class="form-select mb-2" required>
+                    <option value="">Select a reason</option>
+                    <option value="spam">Spam</option>
+                    <option value="inappropriate">Inappropriate content</option>
+                    <option value="fraud">Fraud / Scam</option>
+                    <option value="other">Other</option>
+                </select>
+                <textarea name="details" class="form-control" rows="2" placeholder="Optional details..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-danger">Submit Report</button>
+            </div>
+        </form>
+    </div>
+</div>

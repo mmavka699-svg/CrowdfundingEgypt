@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ category.name }} Projects{% endblock %}
+{% block content %}
+<div class="container my-5">
+    <h2 class="section-title">{{ category.name }}</h2>
+    <p class="text-muted">{{ category.description }}</p>
+    <div class="row g-4">
+        {% for project in page_obj %}
+            {% include "includes/project_card.html" %}
+        {% empty %}
+        <p class="text-muted">No projects in this category yet.</p>
+        {% endfor %}
+    </div>
+    {% include "includes/pagination.html" %}
+</div>
+{% endblock %}

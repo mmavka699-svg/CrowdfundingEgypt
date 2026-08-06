@@ -1,0 +1,10 @@
+[
+  {"model": "projects.category", "pk": 1, "fields": {"name": "Technology", "slug": "technology", "description": "Apps, hardware, and tech innovations."}},
+  {"model": "projects.category", "pk": 2, "fields": {"name": "Art & Design", "slug": "art-design", "description": "Creative and artistic projects."}},
+  {"model": "projects.category", "pk": 3, "fields": {"name": "Education", "slug": "education", "description": "Learning platforms and educational initiatives."}},
+  {"model": "projects.category", "pk": 4, "fields": {"name": "Health & Medicine", "slug": "health-medicine", "description": "Medical research and healthcare campaigns."}},
+  {"model": "projects.category", "pk": 5, "fields": {"name": "Community & Social", "slug": "community-social", "description": "Social causes and community initiatives."}},
+  {"model": "projects.category", "pk": 6, "fields": {"name": "Environment", "slug": "environment", "description": "Sustainability and environmental projects."}},
+  {"model": "projects.category", "pk": 7, "fields": {"name": "Business & Startups", "slug": "business-startups", "description": "New ventures and small businesses."}},
+  {"model": "projects.category", "pk": 8, "fields": {"name": "Sports", "slug": "sports", "description": "Athletic teams and sporting events."}}
+]

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Explore Projects{% endblock %}
+{% block content %}
+<div class="container my-5">
+    <h2 class="section-title">Explore Projects</h2>
+    <div class="row g-4">
+        {% for project in page_obj %}
+            {% include "includes/project_card.html" %}
+        {% empty %}
+        <p class="text-muted">No projects available right now.</p>
+        {% endfor %}
+    </div>
+    {% include "includes/pagination.html" %}
+</div>
+{% endblock %}

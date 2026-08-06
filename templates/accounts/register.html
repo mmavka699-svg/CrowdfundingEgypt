@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% block title %}Sign Up{% endblock %}
+{% block content %}
+<div class="container my-5" style="max-width:520px;">
+    <div class="card shadow-sm p-4">
+        <h3 class="mb-3 text-center">Create your account</h3>
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-6 mb-3">
+                    <label class="form-label">First name</label>
+                    {{ form.first_name|add_class:"form-control" }}
+                </div>
+                <div class="col-6 mb-3">
+                    <label class="form-label">Last name</label>
+                    {{ form.last_name|add_class:"form-control" }}
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                {{ form.email|add_class:"form-control" }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Mobile phone</label>
+                {{ form.mobile_phone|add_class:"form-control" }}
+                <div class="form-text">{{ form.mobile_phone.help_text }}</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Profile picture (optional)</label>
+                {{ form.profile_picture|add_class:"form-control" }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                {{ form.password1|add_class:"form-control" }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Confirm password</label>
+                {{ form.password2|add_class:"form-control" }}
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+        </form>
+
+        <hr>
+        <a href="{% url 'facebook_login' %}" class="btn btn-outline-primary w-100">
+            <i class="fa-brands fa-facebook"></i> Continue with Facebook
+        </a>
+        <p class="text-center mt-3 mb-0">Already have an account? <a href="{% url 'accounts:login' %}">Log in</a></p>
+    </div>
+</div>
+{% endblock %}

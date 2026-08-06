@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% block title %}{% if project %}Edit Project{% else %}Start a Project{% endif %}{% endblock %}
+{% block content %}
+<div class="container my-5" style="max-width:700px;">
+    <div class="card shadow-sm p-4">
+        <h3 class="mb-4">{% if project %}Edit "{{ project.title }}"{% else %}Start a New Project{% endif %}</h3>
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label">Title</label>
+                {{ form.title|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Details</label>
+                {{ form.details|add_class:"form-control" }}
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Category</label>
+                    {{ form.category|add_class:"form-select" }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Tags (comma-separated)</label>
+                    {{ form.tags|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Total Financial Target (EGP)</label>
+                {{ form.total_target|add_class:"form-control" }}
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Start Date</label>
+                    {{ form.start_date|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">End Date</label>
+                    {{ form.end_date|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Project Images (you can select multiple)</label>
+                {{ image_form.images }}
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary w-100">
+                {% if project %}Save Changes{% else %}Launch Project{% endif %}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

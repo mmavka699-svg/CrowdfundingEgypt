@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Resend Activation Email{% endblock %}
+{% block content %}
+<div class="container my-5" style="max-width:420px;">
+    <div class="card shadow-sm p-4">
+        <h3 class="mb-3">Resend Activation Link</h3>
+        <p class="text-muted">Enter your email and we'll send you a new 24-hour activation link.</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <input type="email" name="email" class="form-control" placeholder="you@example.com" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Send New Link</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

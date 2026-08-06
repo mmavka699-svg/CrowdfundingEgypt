@@ -1,0 +1,90 @@
+:root {
+    --primary: #2563eb;
+    --success: #16a34a;
+    --dark: #1e293b;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8fafc;
+    color: var(--dark);
+}
+
+.navbar-brand i { color: var(--primary); }
+
+.section-title {
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+.section-title::after {
+    content: "";
+    position: absolute;
+    left: 0; bottom: 0;
+    width: 60px; height: 3px;
+    background: var(--primary);
+    border-radius: 3px;
+}
+
+/* ---------- Hero / Top Slider ---------- */
+.hero-slider .carousel-item { height: 480px; }
+.hero-slide {
+    height: 480px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+.hero-slide.hero-empty {
+    background: linear-gradient(135deg, var(--primary), #1e40af);
+    display: flex;
+    align-items: center;
+}
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.15));
+    display: flex;
+    align-items: flex-end;
+    color: #fff;
+    padding-bottom: 3rem;
+}
+.hero-overlay h1 { font-weight: 700; font-size: 2.5rem; }
+
+/* ---------- Category cards ---------- */
+.category-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.25rem 0.5rem;
+    text-decoration: none;
+    color: var(--dark);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    transition: transform .15s ease, box-shadow .15s ease;
+    height: 100%;
+}
+.category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    color: var(--primary);
+}
+.category-card i { font-size: 1.8rem; margin-bottom: .5rem; color: var(--primary); }
+
+/* ---------- Project cards ---------- */
+.project-card { border: none; box-shadow: 0 1px 6px rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; transition: transform .15s ease; }
+.project-card:hover { transform: translateY(-3px); }
+.project-card .card-img-top { height: 180px; object-fit: cover; }
+
+/* ---------- Project detail ---------- */
+.project-detail-img { height: 420px; object-fit: cover; }
+
+/* ---------- Star rating widget ---------- */
+.star-rating { font-size: 1.6rem; cursor: pointer; }
+.star-rating .star-icon { color: #f59e0b; margin-right: 4px; transition: transform .1s ease; }
+.star-rating .star-icon:hover { transform: scale(1.15); }
+
+/* ---------- Comments ---------- */
+.comment .reply-form { max-width: 500px; }

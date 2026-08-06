@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Delete Account{% endblock %}
+{% block content %}
+<div class="container my-5" style="max-width:500px;">
+    <div class="card shadow-sm p-4 border-danger">
+        <h3 class="text-danger"><i class="fa-solid fa-triangle-exclamation"></i> Delete Account</h3>
+        <p>This action is <strong>permanent</strong> and cannot be undone. All your projects,
+           comments, ratings, and donation history will be removed.</p>
+
+        <!-- Trigger: opens confirmation modal instead of submitting directly -->
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+            Delete my account
+        </button>
+        <a href="{% url 'accounts:profile' %}" class="btn btn-link">Cancel, take me back</a>
+    </div>
+</div>
+
+<!-- Confirmation Modal with re-entered password (bonus) -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" class="modal-content">
+            {% csrf_token %}
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">Confirm Account Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Please re-enter your password to confirm. This cannot be reversed.</p>
+                <label class="form-label">{{ form.current_password.label }}</label>
+                {{ form.current_password }}
+                {% if form.current_password.errors %}
+                <div class="text-danger small mt-1">{{ form.current_password.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep my account</button>
+                <button type="submit" class="btn btn-danger">Permanently Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

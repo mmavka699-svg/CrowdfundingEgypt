@@ -1,0 +1,17 @@
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+    <h2 style="color:#2563eb;">Welcome to Crowd-Funding Egypt, {{ user.first_name }}!</h2>
+    <p>Thanks for signing up. Please confirm your email address to activate your account.</p>
+    <p>
+        <a href="{{ activation_link }}"
+           style="background:#2563eb;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;">
+            Activate My Account
+        </a>
+    </p>
+    <p style="color:#dc2626;font-size:14px;">
+        ⚠️ This link will expire in 24 hours.
+    </p>
+    <p style="font-size:13px;color:#666;">
+        If the button above doesn't work, copy and paste this link into your browser:<br>
+        {{ activation_link }}
+    </p>
+</div>
