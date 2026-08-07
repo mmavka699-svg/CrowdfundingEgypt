@@ -56,10 +56,14 @@
                                     <a href="{{ p.get_absolute_url }}" class="fw-bold text-dark text-decoration-none">{{ p.title }}</a>
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
-                                    <span
-                                        class="badge bg-{% if p.status == 'running' %}success{% elif p.status == 'cancelled' %}danger{% else %}secondary{% endif %}-subtle text-{% if p.status == 'running' %}success{% elif p.status == 'cancelled' %}danger{% else %}secondary{% endif %} border border-{% if p.status == 'running' %}success{% elif p.status == 'cancelled' %}danger{% else %}secondary{% endif %}-subtle rounded-pill px-3 py-1">
-                                        {{ p.get_status_display }}
-                                    </span>
+                                    <span class="badge
+                                        {% if p.status == 'running' %}bg-success-subtle text-success border-success-subtle
+                                        {% elif p.status == 'funded' %}bg-primary-subtle text-primary border-primary-subtle
+                                        {% elif p.status == 'cancelled' %}bg-danger-subtle text-danger border-danger-subtle
+                                        {% else %}bg-secondary-subtle text-secondary border-secondary-subtle
+                                        {% endif %} border rounded-pill px-3 py-1">
+                                        {% if p.status == 'funded' %}<i class="bi bi-trophy-fill me-1"></i>{% endif %}
+                                        {{ p.get_status_display }}</span>
                                     <a href="{% url 'projects:project_edit' p.slug %}"
                                         class="btn btn-sm btn-outline-primary btn-pill" title="Edit Project">
                                         <i class="bi bi-pencil"></i>
@@ -92,8 +96,7 @@
                                 <div>
                                     <a href="{{ d.project.get_absolute_url }}"
                                         class="fw-bold text-dark text-decoration-none d-block">{{ d.project.title }}</a>
-                                    <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{
-                                        d.created_at|date:"M d, Y" }}</small>
+                                    <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ d.created_at|date:"M d, Y" }}</small>
                                 </div>
                                 <span class="fw-bold text-success fs-6">+{{ d.amount|intcomma }} EGP</span>
                             </div>
