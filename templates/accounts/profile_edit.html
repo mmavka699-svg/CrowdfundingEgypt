@@ -3,32 +3,89 @@
 {% block title %}Edit Profile — Crowd-Funding Egypt{% endblock %}
 
 {% block content %}
-<div class="container my-5" style="max-width:540px;">
-    <div class="form-card" data-animate="fade-up">
-        <div class="text-center mb-4">
-            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 mb-2 fw-bold">Settings</span>
-            <h3 class="fw-bold text-dark mb-1">Edit Profile</h3>
-            <p class="text-muted small">Update your personal account details</p>
+<div class="container my-5" style="max-width: 620px;">
+    <div class="form-card p-4 p-md-5" data-animate="fade-up">
+
+        <!-- Header Banner & Avatar Quick View -->
+        <div class="text-center mb-4 pb-3 border-bottom">
+            <div class="position-relative d-inline-block mb-3">
+                <img src="{{ user.avatar_url }}" class="rounded-circle border border-4 border-primary-subtle shadow-sm" width="100" height="100" style="object-fit:cover;" alt="{{ user.get_full_name }}">
+                <span class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-1 px-2 border border-2 border-white shadow-sm" style="font-size: 0.75rem;" title="Account Owner">
+                    <i class="bi bi-person-fill"></i>
+                </span>
+            </div>
+            <h3 class="fw-extrabold text-dark mb-1">Edit Account Profile</h3>
+            <p class="text-muted small mb-0">Update your personal account details and preferences</p>
         </div>
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <div class="mb-3">
-                <label class="form-label">Email Address (cannot be changed)</label>
-                <input type="email" class="form-control bg-light text-muted" value="{{ user.email }}" disabled>
-            </div>
-            
-            {% for field in form %}
-            <div class="mb-3">
-                <label class="form-label">{{ field.label }}</label>
-                {{ field|add_class:"form-control" }}
-                {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors|join:", " }}</div>{% endif %}
-            </div>
-            {% endfor %}
 
-            <div class="d-flex gap-2 mt-4">
+            <!-- Locked Email Field -->
+            <div class="mb-4">
+                <label class="form-label d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-envelope me-1 text-primary"></i> Email Address</span>
+                    <span class="badge bg-secondary-subtle text-secondary border rounded-pill px-2 py-0.5" style="font-size: 0.7rem;"><i class="bi bi-lock-fill me-1"></i>Non-editable</span>
+                </label>
+                <input type="email" class="form-control bg-light text-muted" value="{{ user.email }}" disabled readonly>
+                <div class="form-text small text-muted">Email address cannot be changed after registration.</div>
+            </div>
+
+            <!-- First & Last Name Grid -->
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label"><i class="bi bi-person me-1 text-primary"></i> {{ form.first_name.label }}</label>
+                    {{ form.first_name|add_class:"form-control" }}
+                    {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label"><i class="bi bi-person me-1 text-primary"></i> {{ form.last_name.label }}</label>
+                    {{ form.last_name|add_class:"form-control" }}
+                    {% if form.last_name.errors %}<div class="text-danger small mt-1">{{ form.last_name.errors|join:", " }}</div>{% endif %}
+                </div>
+            </div>
+
+            <!-- Mobile Phone -->
+            <div class="mb-3">
+                <label class="form-label"><i class="bi bi-phone me-1 text-primary"></i> {{ form.mobile_phone.label }}</label>
+                {{ form.mobile_phone|add_class:"form-control" }}
+                {% if form.mobile_phone.errors %}<div class="text-danger small mt-1">{{ form.mobile_phone.errors|join:", " }}</div>{% endif %}
+            </div>
+
+            <!-- Profile Picture Field -->
+            <div class="mb-4 p-3 bg-light rounded-4 border">
+                <label class="form-label fw-semibold"><i class="bi bi-image me-1 text-primary"></i> {{ form.profile_picture.label }}</label>
+                {{ form.profile_picture }}
+                {% if form.profile_picture.errors %}<div class="text-danger small mt-1">{{ form.profile_picture.errors|join:", " }}</div>{% endif %}
+            </div>
+
+            <!-- Additional Details Grid -->
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label"><i class="bi bi-calendar3 me-1 text-primary"></i> {{ form.birthdate.label }}</label>
+                    {{ form.birthdate|add_class:"form-control" }}
+                    {% if form.birthdate.errors %}<div class="text-danger small mt-1">{{ form.birthdate.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label"><i class="bi bi-globe me-1 text-primary"></i> {{ form.country.label }}</label>
+                    {{ form.country|add_class:"form-select" }}
+                    {% if form.country.errors %}<div class="text-danger small mt-1">{{ form.country.errors|join:", " }}</div>{% endif %}
+                </div>
+            </div>
+
+            <!-- Facebook URL -->
+            <div class="mb-4">
+                <label class="form-label"><i class="bi bi-facebook me-1 text-primary"></i> {{ form.facebook_url.label }}</label>
+                {{ form.facebook_url|add_class:"form-control" }}
+                {% if form.facebook_url.errors %}<div class="text-danger small mt-1">{{ form.facebook_url.errors|join:", " }}</div>{% endif %}
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-3 mt-4 pt-2 border-top">
                 <a href="{% url 'accounts:profile' %}" class="btn btn-light btn-pill flex-fill">Cancel</a>
-                <button type="submit" class="btn btn-primary btn-pill flex-fill shadow-sm">Save Changes</button>
+                <button type="submit" class="btn btn-primary btn-pill flex-fill shadow-sm">
+                    <i class="bi bi-check-circle-fill me-1"></i> Save Changes
+                </button>
             </div>
         </form>
     </div>
