@@ -67,6 +67,12 @@ class Project(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Track which sections of the project have been edited by the creator
+    edited_fields = models.JSONField(
+        default=list, blank=True,
+        help_text=_("List of field names that were edited after creation (e.g. ['title', 'details', 'images'])"),
+    )
+
     class Meta:
         ordering = ["-created_at"]
         indexes = [

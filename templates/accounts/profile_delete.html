@@ -1,40 +1,54 @@
 {% extends "base.html" %}
-{% block title %}Delete Account{% endblock %}
-{% block content %}
-<div class="container my-5" style="max-width:500px;">
-    <div class="card shadow-sm p-4 border-danger">
-        <h3 class="text-danger"><i class="fa-solid fa-triangle-exclamation"></i> Delete Account</h3>
-        <p>This action is <strong>permanent</strong> and cannot be undone. All your projects,
-           comments, ratings, and donation history will be removed.</p>
+{% block title %}Delete Account — Crowd-Funding Egypt{% endblock %}
 
-        <!-- Trigger: opens confirmation modal instead of submitting directly -->
-        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
-            Delete my account
-        </button>
-        <a href="{% url 'accounts:profile' %}" class="btn btn-link">Cancel, take me back</a>
+{% block content %}
+<div class="container my-5" style="max-width:520px;">
+    <div class="form-card border-danger" data-animate="fade-up">
+        <div class="text-center mb-4">
+            <div class="stat-icon bg-danger-subtle text-danger mx-auto mb-3" style="width:60px; height:60px; font-size:1.75rem;">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <h3 class="fw-bold text-danger mb-1">Delete Account</h3>
+            <p class="text-muted small">This action is permanent and cannot be reversed.</p>
+        </div>
+
+        <div class="p-3 bg-danger-subtle text-danger rounded-3 mb-4 small">
+            Warning: All your campaigns, comments, ratings, and backer donation records will be permanently removed from Crowd-Funding Egypt.
+        </div>
+
+        <div class="d-flex flex-column gap-2">
+            <button type="button" class="btn btn-danger btn-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+                <i class="bi bi-trash-fill me-1"></i> Delete My Account
+            </button>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-light btn-pill text-center">
+                Cancel, take me back
+            </a>
+        </div>
     </div>
 </div>
 
-<!-- Confirmation Modal with re-entered password (bonus) -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <form method="post" class="modal-content">
+<!-- Confirmation Modal with Password Field -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" class="modal-content rounded-4 border-0 shadow-lg">
             {% csrf_token %}
-            <div class="modal-header">
-                <h5 class="modal-title text-danger">Confirm Account Deletion</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-danger">
+                    <i class="bi bi-shield-lock me-2"></i> Confirm Account Deletion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <p>Please re-enter your password to confirm. This cannot be reversed.</p>
-                <label class="form-label">{{ form.current_password.label }}</label>
+            <div class="modal-body py-3">
+                <p class="text-muted small mb-3">Please re-enter your account password to confirm deletion.</p>
+                <label class="form-label fw-semibold">{{ form.current_password.label }}</label>
                 {{ form.current_password }}
                 {% if form.current_password.errors %}
                 <div class="text-danger small mt-1">{{ form.current_password.errors|join:", " }}</div>
                 {% endif %}
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep my account</button>
-                <button type="submit" class="btn btn-danger">Permanently Delete</button>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-light btn-pill" data-bs-dismiss="modal">Keep My Account</button>
+                <button type="submit" class="btn btn-danger btn-pill">Permanently Delete</button>
             </div>
         </form>
     </div>

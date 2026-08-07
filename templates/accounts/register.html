@@ -1,56 +1,88 @@
 {% extends "base.html" %}
 {% load widget_tweaks %}
-{% block title %}Sign Up{% endblock %}
+{% block title %}Sign Up — Crowd-Funding Egypt{% endblock %}
+
 {% block content %}
-<div class="container my-5" style="max-width:520px;">
-    <div class="card shadow-sm p-4">
-        <h3 class="mb-3 text-center">Create your account</h3>
+<div class="container my-5" style="max-width:540px;">
+    <div class="form-card" data-animate="fade-up">
+        <div class="text-center mb-4">
+            <span class="navbar-brand-icon mx-auto mb-3" style="width:50px; height:50px; font-size:1.5rem;">
+                <i class="fa-solid fa-hand-holding-heart"></i>
+            </span>
+            <h3 class="fw-bold text-dark mb-1">Create your account</h3>
+            <p class="text-muted small">Join thousands of Egyptian creators and backers today</p>
+        </div>
+
         <form method="post" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
             <div class="row">
                 <div class="col-6 mb-3">
                     <label class="form-label">First name</label>
                     {{ form.first_name|add_class:"form-control" }}
+                    {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors|join:", " }}</div>{% endif %}
                 </div>
                 <div class="col-6 mb-3">
                     <label class="form-label">Last name</label>
                     {{ form.last_name|add_class:"form-control" }}
+                    {% if form.last_name.errors %}<div class="text-danger small mt-1">{{ form.last_name.errors|join:", " }}</div>{% endif %}
                 </div>
             </div>
+
             <div class="mb-3">
-                <label class="form-label">Email</label>
+                <label class="form-label">Email Address</label>
                 {{ form.email|add_class:"form-control" }}
+                {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors|join:", " }}</div>{% endif %}
             </div>
+
             <div class="mb-3">
-                <label class="form-label">Mobile phone</label>
+                <label class="form-label">Mobile Phone (Egyptian Format)</label>
                 {{ form.mobile_phone|add_class:"form-control" }}
-                <div class="form-text">{{ form.mobile_phone.help_text }}</div>
+                {% if form.mobile_phone.help_text %}
+                <div class="form-text small">{{ form.mobile_phone.help_text }}</div>
+                {% endif %}
+                {% if form.mobile_phone.errors %}<div class="text-danger small mt-1">{{ form.mobile_phone.errors|join:", " }}</div>{% endif %}
             </div>
+
             <div class="mb-3">
-                <label class="form-label">Profile picture (optional)</label>
+                <label class="form-label">Profile Picture (optional)</label>
                 {{ form.profile_picture|add_class:"form-control" }}
+                {% if form.profile_picture.errors %}<div class="text-danger small mt-1">{{ form.profile_picture.errors|join:", " }}</div>{% endif %}
             </div>
-            <div class="mb-3">
-                <label class="form-label">Password</label>
-                {{ form.password1|add_class:"form-control" }}
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Confirm password</label>
-                {{ form.password2|add_class:"form-control" }}
+
+            <div class="row">
+                <div class="col-6 mb-3">
+                    <label class="form-label">Password</label>
+                    {{ form.password1|add_class:"form-control" }}
+                    {% if form.password1.errors %}<div class="text-danger small mt-1">{{ form.password1.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="col-6 mb-3">
+                    <label class="form-label">Confirm Password</label>
+                    {{ form.password2|add_class:"form-control" }}
+                    {% if form.password2.errors %}<div class="text-danger small mt-1">{{ form.password2.errors|join:", " }}</div>{% endif %}
+                </div>
             </div>
 
             {% if form.non_field_errors %}
-            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            <div class="alert alert-danger rounded-4 mb-3">{{ form.non_field_errors }}</div>
             {% endif %}
 
-            <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+            <button type="submit" class="btn btn-primary btn-lg w-100 btn-pill shadow-sm mb-3">
+                <i class="bi bi-person-plus-fill me-2"></i> Create Account
+            </button>
         </form>
 
-        <hr>
-        <a href="{% url 'facebook_login' %}" class="btn btn-outline-primary w-100">
-            <i class="fa-brands fa-facebook"></i> Continue with Facebook
+        <div class="position-relative my-4 text-center">
+            <hr class="text-muted opacity-25">
+            <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">or register with</span>
+        </div>
+
+        <a href="{% url 'facebook_login' %}" class="btn btn-outline-primary w-100 btn-pill mb-3">
+            <i class="fa-brands fa-facebook me-2"></i> Facebook
         </a>
-        <p class="text-center mt-3 mb-0">Already have an account? <a href="{% url 'accounts:login' %}">Log in</a></p>
+
+        <p class="text-center small text-muted mt-4 mb-0">
+            Already have an account? <a href="{% url 'accounts:login' %}" class="fw-bold">Log in</a>
+        </p>
     </div>
 </div>
 {% endblock %}

@@ -1,66 +1,115 @@
 {% extends "base.html" %}
 {% load static %}
+{% load widget_tweaks %}
 {% block title %}{{ project.title }} — Crowd-Funding Egypt{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row g-5">
+<div class="container mt-4 mb-5">
+    <div class="row g-4 g-lg-5">
 
-        <!-- ===================== LEFT: Images, details, comments ===================== -->
+        <!-- ==========================================================================
+           LEFT MAIN COLUMN: Images, Project Overview, Rating, Comments
+           ========================================================================== -->
         <div class="col-lg-8">
 
-            <!-- Image Carousel -->
-            <div id="projectImageCarousel" class="carousel slide rounded shadow-sm mb-4" data-bs-ride="carousel">
-                <div class="carousel-inner rounded">
+            <!-- Main Project Image Carousel -->
+            <div id="projectImageCarousel" class="carousel slide project-detail-carousel mb-4" data-bs-ride="carousel">
+                <div class="carousel-inner">
                     {% for img in images %}
                     <div class="carousel-item {% if forloop.first %}active{% endif %}">
                         <img src="{{ img.image.url }}" class="d-block w-100 project-detail-img" alt="{{ project.title }}">
                     </div>
                     {% empty %}
                     <div class="carousel-item active">
-                        <img src="{% static 'img/placeholder.jpg' %}" class="d-block w-100 project-detail-img" alt="No image">
+                        <img src="{% static 'img/placeholder.jpg' %}" class="d-block w-100 project-detail-img" alt="No image uploaded">
                     </div>
                     {% endfor %}
                 </div>
                 {% if images|length > 1 %}
-                <button class="carousel-control-prev" type="button" data-bs-target="#projectImageCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon"></span>
+                <button class="carousel-control-prev hero-slider-prev" type="button" data-bs-target="#projectImageCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
                 </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#projectImageCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon"></span>
+                <button class="carousel-control-next hero-slider-next" type="button" data-bs-target="#projectImageCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
                 </button>
                 {% endif %}
             </div>
 
-            <div class="d-flex justify-content-between align-items-start">
+            <!-- Project Title & Creator Metadata Header -->
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-3 mb-3">
                 <div>
-                    <span class="badge bg-primary mb-2">{{ project.category.name }}</span>
-                    <h1>{{ project.title }}</h1>
-                    <p class="text-muted">
-                        By <strong>{{ project.creator.get_full_name }}</strong> &middot;
-                        {{ project.start_date }} → {{ project.end_date }}
-                        {% if project.status == "cancelled" %}<span class="badge bg-danger ms-2">Cancelled</span>{% endif %}
-                    </p>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 mb-2 fw-semibold">
+                        <i class="bi bi-folder2 me-1"></i> {{ project.category.name }}
+                    </span>
+                    <h1 class="display-6 fw-extrabold text-dark mb-2">{{ project.title }}</h1>
+                    <div class="d-flex align-items-center gap-2 text-muted small">
+                        <span class="fw-semibold text-dark">
+                            <i class="bi bi-person-circle me-1 text-primary"></i> By {{ project.creator.get_full_name }}
+                        </span>
+                        <span>&middot;</span>
+                        <span><i class="bi bi-calendar3 me-1"></i> {{ project.start_date }} → {{ project.end_date }}</span>
+                        {% if project.status == "cancelled" %}
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill ms-2">Cancelled</span>
+                        {% endif %}
+                    </div>
                 </div>
-                <!-- Average rating display -->
-                <div class="text-end">
-                    <div class="fs-4 text-warning"><i class="fa-solid fa-star"></i> {{ project.average_rating }}</div>
-                    <small class="text-muted">{{ project.ratings_count }} rating{{ project.ratings_count|pluralize }}</small>
+
+                <!-- Rating Quick Badge -->
+                <div class="p-3 bg-white rounded-4 shadow-sm border border-light text-center min-w-120">
+                    <div class="fs-3 fw-bold text-warning d-flex align-items-center justify-content-center gap-1">
+                        <i class="fa-solid fa-star"></i> {{ project.average_rating }}
+                    </div>
+                    <small class="text-muted d-block" style="font-size: 0.75rem;">
+                        {{ project.ratings_count }} rating{{ project.ratings_count|pluralize }}
+                    </small>
                 </div>
             </div>
 
-            <div class="mb-3">
+            <!-- Tags List -->
+            <div class="mb-4 d-flex flex-wrap gap-1">
                 {% for tag in project.tags.all %}
-                <a href="{% url 'projects:tag_detail' tag.slug %}" class="badge bg-light text-dark text-decoration-none border me-1">#{{ tag.name }}</a>
+                <a href="{% url 'projects:tag_detail' tag.slug %}" class="badge bg-light text-secondary text-decoration-none border rounded-pill px-3 py-2">
+                    #{{ tag.name }}
+                </a>
                 {% endfor %}
             </div>
 
-            <p class="lead">{{ project.details|linebreaks }}</p>
+            <!-- Edited Fields Badges -->
+            {% if project.edited_fields %}
+            <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
+                <span class="text-muted small fw-semibold"><i class="bi bi-pencil-square me-1"></i> Edited:</span>
+                {% for field in project.edited_fields %}
+                <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-2 py-1" style="font-size: 0.75rem;">
+                    {% if field == "title" %}<i class="bi bi-type me-1"></i>Title
+                    {% elif field == "details" %}<i class="bi bi-text-paragraph me-1"></i>Description
+                    {% elif field == "images" %}<i class="bi bi-image me-1"></i>Photos
+                    {% elif field == "category" %}<i class="bi bi-folder2 me-1"></i>Category
+                    {% elif field == "tags" %}<i class="bi bi-tags me-1"></i>Tags
+                    {% elif field == "dates" %}<i class="bi bi-calendar-event me-1"></i>Dates
+                    {% else %}{{ field }}
+                    {% endif %}
+                </span>
+                {% endfor %}
+            </div>
+            {% endif %}
 
-            <!-- Rate this project (star widget, AJAX) -->
+            <hr class="my-4">
+
+            <!-- Detailed Story Body -->
+            <div class="project-details-body mb-5">
+                <h4 class="fw-bold mb-3">About the Project</h4>
+                <div class="lead text-dark lh-lg" style="font-size: 1.05rem;">
+                    {{ project.details|linebreaks }}
+                </div>
+            </div>
+
+            <!-- Interactive Star Rating Widget (AJAX Powered) -->
             {% if user.is_authenticated %}
-            <div class="mb-4">
-                <h6>Your rating:</h6>
+            <div class="p-4 rounded-4 bg-white shadow-sm border mb-5">
+                <h6 class="fw-bold mb-2">Rate this Project</h6>
+                <p class="small text-muted mb-3">Share your feedback with the campaign creator and backer community.</p>
                 <div class="star-rating" data-project-slug="{{ project.slug }}" data-current="{{ user_rating.stars|default:0 }}">
                     {% for i in "12345" %}
                     <i class="fa-star star-icon {% if user_rating and user_rating.stars >= i|add:'0' %}fa-solid{% else %}fa-regular{% endif %}" data-value="{{ i }}"></i>
@@ -69,79 +118,146 @@
             </div>
             {% endif %}
 
-            <!-- ===================== COMMENTS ===================== -->
+            <!-- ==========================================================================
+               COMMENTS SECTION
+               ========================================================================== -->
             <section id="comments" class="mt-5">
-                <h4>Comments ({{ comments.count }})</h4>
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h4 class="fw-bold mb-0">
+                        <i class="bi bi-chat-left-text me-2 text-primary"></i> Comments ({{ comments.count }})
+                    </h4>
+                    <button class="btn btn-sm btn-outline-secondary btn-pill d-inline-flex align-items-center gap-1" type="button" data-bs-toggle="collapse" data-bs-target="#commentsFeedCollapse" aria-expanded="true" aria-controls="commentsFeedCollapse" id="toggleCommentsBtn">
+                        <i class="bi bi-eye-slash-fill me-1" id="toggleCommentsIcon"></i> <span id="toggleCommentsText">Hide Comments</span>
+                    </button>
+                </div>
 
-                {% if user.is_authenticated %}
-                <form method="post" action="{% url 'projects:comment_create' project.slug %}" class="mb-4">
-                    {% csrf_token %}
-                    {{ comment_form.body }}
-                    <button type="submit" class="btn btn-primary btn-sm mt-2">Post Comment</button>
-                </form>
-                {% else %}
-                <p><a href="{% url 'accounts:login' %}?next={{ request.path }}">Log in</a> to comment.</p>
-                {% endif %}
+                <div class="collapse show" id="commentsFeedCollapse">
+                    {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'projects:comment_create' project.slug %}" class="form-card mb-4 p-3">
+                        {% csrf_token %}
+                        <div class="mb-2">
+                            <textarea name="body" class="form-control" rows="3" placeholder="Share your support or ask the creator a question..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm btn-pill ms-auto d-block">
+                            <i class="bi bi-send-fill me-1"></i> Post Comment
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="p-4 rounded-4 bg-light text-center mb-4">
+                        <p class="mb-2 text-muted">Join the discussion with other backers</p>
+                        <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-outline-primary btn-sm btn-pill">
+                            Log in to comment
+                        </a>
+                    </div>
+                    {% endif %}
 
-                {% for comment in comments %}
-                    {% include "includes/comment.html" with comment=comment %}
-                {% empty %}
-                <p class="text-muted">No comments yet — be the first!</p>
-                {% endfor %}
+                    <!-- Comments Feed -->
+                    <div class="comments-feed">
+                        {% for comment in comments %}
+                            {% include "includes/comment.html" with comment=comment %}
+                        {% empty %}
+                        <div class="text-center py-5 bg-white rounded-4 border">
+                            <i class="bi bi-chat-square-dots fs-1 text-muted opacity-50 d-block mb-2"></i>
+                            <p class="text-muted mb-0">No comments posted yet — be the first to start the conversation!</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </section>
         </div>
 
-        <!-- ===================== RIGHT: Donation panel ===================== -->
+        <!-- ==========================================================================
+           RIGHT COLUMN: STICKY DONATION PANEL
+           ========================================================================== -->
         <div class="col-lg-4">
-            <div class="card shadow-sm p-3 sticky-top" style="top:90px;">
-                <h3 class="text-success">{{ project.total_donated }} EGP</h3>
-                <p class="text-muted">raised of {{ project.total_target }} EGP goal</p>
-                <div class="progress mb-3" style="height:10px;">
-                    <div class="progress-bar bg-success" style="width:{{ project.progress_percentage }}%"></div>
-                </div>
-                <div class="d-flex justify-content-between small text-muted mb-3">
-                    <span>{{ project.progress_percentage }}% funded</span>
-                    <span>{{ project.days_left }} days left</span>
+            <div class="sticky-donation-card">
+                
+                <!-- Raised vs Goal Display -->
+                <div class="mb-3">
+                    <div class="display-6 fw-extrabold {% if project.progress_percentage >= 100 %}text-success{% else %}text-primary{% endif %} mb-1">
+                        {{ project.total_donated }} EGP
+                    </div>
+                    <span class="text-muted small">raised of <strong class="text-dark">{{ project.total_target }} EGP</strong> goal</span>
                 </div>
 
+                <!-- Custom Progress Bar -->
+                <div class="progress-custom mb-3" style="height: 12px;">
+                    <div class="progress-bar-custom {% if project.progress_percentage >= 100 %}completed{% endif %}" style="width: {{ project.progress_percentage }}%; height: 100%;"></div>
+                </div>
+
+                <!-- Funding Percentage & Days Left Metadata -->
+                <div class="d-flex justify-content-between align-items-center small mb-4 fw-semibold">
+                    <span class="badge {% if project.progress_percentage >= 100 %}bg-success-subtle text-success border-success-subtle{% else %}bg-primary-subtle text-primary border-primary-subtle{% endif %} border rounded-pill px-3 py-1 fs-6">
+                        {{ project.progress_percentage }}% funded
+                    </span>
+                    <span class="text-muted">
+                        <i class="bi bi-clock me-1 text-primary"></i> {{ project.days_left }} days left
+                    </span>
+                </div>
+
+                <!-- Donation Form Section -->
                 {% if project.is_running %}
                     {% if user.is_authenticated %}
                     <form method="post" action="{% url 'projects:donate' project.slug %}">
                         {% csrf_token %}
-                        <div class="input-group mb-2">
-                            <span class="input-group-text">EGP</span>
-                            {{ donation_form.amount }}
+                        
+                        <!-- Quick Preset Chips -->
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">Quick Amount (EGP)</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="preset-chip flex-fill text-center" data-amount="50">50</span>
+                                <span class="preset-chip flex-fill text-center" data-amount="100">100</span>
+                                <span class="preset-chip flex-fill text-center" data-amount="250">250</span>
+                                <span class="preset-chip flex-fill text-center" data-amount="500">500</span>
+                                <span class="preset-chip flex-fill text-center" data-amount="1000">1,000</span>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Donate Now</button>
+
+                        <div class="input-group donate-input-group mb-3">
+                            <span class="input-group-text donate-input-prefix">EGP</span>
+                            {{ donation_form.amount|add_class:"form-control donate-input-field number-format-input" }}
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100 btn-pill shadow-sm mb-3">
+                            <i class="bi bi-heart-fill me-2"></i> Donate Now
+                        </button>
                     </form>
                     {% else %}
-                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary w-100">Log in to Donate</a>
+                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary btn-lg w-100 btn-pill mb-3">
+                        Log in to Donate
+                    </a>
                     {% endif %}
                 {% else %}
-                    <button class="btn btn-secondary w-100" disabled>Campaign Ended</button>
+                <div class="alert alert-secondary text-center rounded-4 mb-3 fw-semibold">
+                    <i class="bi bi-calendar-x me-1"></i> Campaign Ended
+                </div>
                 {% endif %}
 
-                <!-- Report project -->
-                {% if user.is_authenticated %}
-                <button class="btn btn-outline-danger btn-sm w-100 mt-3" data-bs-toggle="modal" data-bs-target="#reportProjectModal">
-                    <i class="fa-solid fa-flag"></i> Report this project
-                </button>
-                {% endif %}
+                <!-- Report & Creator Actions -->
+                <div class="d-flex flex-column gap-2 border-top pt-3">
+                    {% if user.is_authenticated %}
+                    <button class="btn btn-outline-danger btn-sm w-100 btn-pill" data-bs-toggle="modal" data-bs-target="#reportProjectModal">
+                        <i class="bi bi-flag me-1"></i> Report this project
+                    </button>
+                    {% endif %}
 
-                <!-- Cancel project (creator only, <25% donated) -->
-                {% if can_cancel %}
-                <button class="btn btn-outline-secondary btn-sm w-100 mt-2" data-bs-toggle="modal" data-bs-target="#cancelProjectModal">
-                    <i class="fa-solid fa-ban"></i> Cancel Project
-                </button>
-                {% endif %}
+                    {% if can_cancel %}
+                    <button class="btn btn-outline-secondary btn-sm w-100 btn-pill" data-bs-toggle="modal" data-bs-target="#cancelProjectModal">
+                        <i class="bi bi-slash-circle me-1"></i> Cancel Project
+                    </button>
+                    {% endif %}
+                </div>
             </div>
         </div>
+
     </div>
 
-    <!-- ===================== RELATED PROJECTS ===================== -->
+    <!-- ==========================================================================
+       RELATED PROJECTS SECTION
+       ========================================================================== -->
     {% if related_projects %}
-    <section class="my-5">
-        <h2 class="section-title">Related Projects</h2>
+    <section class="my-5 pt-4 border-top" data-animate="fade-up">
+        <h3 class="section-title mb-4">Related Projects</h3>
         <div class="row g-4">
             {% for p in related_projects %}
                 {% include "includes/project_card.html" with project=p %}
@@ -151,24 +267,34 @@
     {% endif %}
 </div>
 
-<!-- ===================== MODALS ===================== -->
+<!-- ==========================================================================
+   MODAL WINDOWS
+   ========================================================================== -->
 
 <!-- Report Project Modal -->
-<div class="modal fade" id="reportProjectModal" tabindex="-1">
-    <div class="modal-dialog">
-        <form method="post" action="{% url 'projects:report_project' project.slug %}" class="modal-content">
+<div class="modal fade" id="reportProjectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" action="{% url 'projects:report_project' project.slug %}" class="modal-content rounded-4 border-0 shadow-lg">
             {% csrf_token %}
-            <div class="modal-header">
-                <h5 class="modal-title">Report this project</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-flag-fill text-danger me-2"></i> Report this project
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                {{ report_form.reason }}
-                {{ report_form.details }}
+            <div class="modal-body py-3">
+                <div class="mb-3">
+                    <label class="form-label">Reason for report</label>
+                    {{ report_form.reason }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Details / Explanation</label>
+                    {{ report_form.details }}
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-danger">Submit Report</button>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-light btn-pill" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-danger btn-pill">Submit Report</button>
             </div>
         </form>
     </div>
@@ -176,26 +302,30 @@
 
 <!-- Cancel Project Confirmation Modal -->
 {% if can_cancel %}
-<div class="modal fade" id="cancelProjectModal" tabindex="-1">
-    <div class="modal-dialog">
-        <form method="post" action="{% url 'projects:project_cancel' project.slug %}" class="modal-content">
+<div class="modal fade" id="cancelProjectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" action="{% url 'projects:project_cancel' project.slug %}" class="modal-content rounded-4 border-0 shadow-lg">
             {% csrf_token %}
-            <div class="modal-header">
-                <h5 class="modal-title">Cancel "{{ project.title }}"?</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Cancel "{{ project.title }}"?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <p>This action cannot be undone. Your project has raised less than 25% of its target,
-                   so it is still eligible for cancellation.</p>
+            <div class="modal-body py-3">
+                <p class="text-muted">
+                    This action is permanent and cannot be undone. Your project has raised less than 25% of its total target, so it is eligible for cancellation.
+                </p>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep Project</button>
-                <button type="submit" class="btn btn-danger">Yes, Cancel Project</button>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-light btn-pill" data-bs-dismiss="modal">Keep Project Active</button>
+                <button type="submit" class="btn btn-danger btn-pill">Yes, Cancel Project</button>
             </div>
         </form>
     </div>
 </div>
 {% endif %}
+
 {% endblock %}
 
 {% block extra_js %}
