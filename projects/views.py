@@ -207,6 +207,8 @@ def project_detail_view(request, slug):
         Project.objects.select_related("category", "creator").prefetch_related("images", "tags"),
         slug=slug,
     )
+    # Auto-sync status to DB (e.g., ended by time or fully funded)
+    project.sync_status()
 
     top_level_comments = (
         project.comments.filter(parent__isnull=True)
@@ -215,7 +217,7 @@ def project_detail_view(request, slug):
         .order_by("-created_at")
     )
 
-    donation_form = DonationForm()
+    donation_form = DonationForm(project=project)
     comment_form = CommentForm()
     rating_form = RatingForm()
     report_form = ReportForm()
@@ -261,19 +263,42 @@ def project_detail_view(request, slug):
 def donate_view(request, slug):
     project = get_object_or_404(Project, slug=slug)
 
+    state = project.campaign_state
+    if state == "future":
+        messages.error(
+            request,
+            f"This campaign hasn't started yet. It opens on {project.start_date.strftime('%B %d, %Y')}."
+        )
+        return redirect(project.get_absolute_url())
+    if state == "ended":
+        if project.is_fully_funded:
+            messages.error(
+                request,
+                "This project has already reached its funding goal and is no longer accepting donations."
+            )
+        else:
+            messages.error(request, "This campaign has ended and is no longer accepting donations.")
+        return redirect(project.get_absolute_url())
     if not project.is_running:
         messages.error(request, "This project is not currently accepting donations.")
         return redirect(project.get_absolute_url())
 
-    form = DonationForm(request.POST)
+    form = DonationForm(request.POST, project=project)
     if form.is_valid():
         donation = form.save(commit=False)
         donation.project = project
         donation.donor = request.user
         donation.save()
-        messages.success(request, f"Thank you! You donated {donation.amount} EGP.")
+        # Re-sync status in case this donation just hit the target
+        project.sync_status()
+        messages.success(request, f"Thank you! You donated {donation.amount:,.2f} EGP.")
     else:
-        messages.error(request, "Please enter a valid donation amount.")
+        # Surface the first field-level error as a flash message so it's visible
+        for field_errors in form.errors.values():
+            for error in field_errors:
+                messages.error(request, error)
+                break
+            break
     return redirect(project.get_absolute_url())
 
 

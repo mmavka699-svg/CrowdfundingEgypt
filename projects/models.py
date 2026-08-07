@@ -38,6 +38,7 @@ class Project(models.Model):
         RUNNING = "running", _("Running")
         CANCELLED = "cancelled", _("Cancelled")
         ENDED = "ended", _("Ended")
+        FUNDED = "funded", _("Fully Funded")
 
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="projects"
@@ -105,6 +106,11 @@ class Project(models.Model):
         return agg["total"] or Decimal("0.00")
 
     @property
+    def remaining_amount(self):
+        remaining = self.total_target - self.total_donated
+        return max(remaining, Decimal("0.00"))
+
+    @property
     def progress_percentage(self):
         if self.total_target <= 0:
             return 0
@@ -112,12 +118,33 @@ class Project(models.Model):
         return min(round(pct, 1), 100)
 
     @property
-    def is_running(self):
+    def is_fully_funded(self):
+        """True when total donations have reached or exceeded the target."""
+        return self.total_donated >= self.total_target
+
+    @property
+    def campaign_state(self):
+        """
+        Three-state model based on current date:
+        - 'future'  : now < start_date
+        - 'active'  : start_date <= now <= end_date  (and not cancelled / fully funded)
+        - 'ended'   : now > end_date OR fully funded OR cancelled
+        """
         today = timezone.localdate()
-        return (
-            self.status == self.Status.RUNNING
-            and self.start_date <= today <= self.end_date
-        )
+        if self.status in (self.Status.CANCELLED, self.Status.ENDED):
+            return "ended"
+        if self.status == self.Status.FUNDED:
+            return "ended"
+        if today < self.start_date:
+            return "future"
+        if today > self.end_date or self.is_fully_funded:
+            return "ended"
+        return "active"
+
+    @property
+    def is_running(self):
+        """True only when the campaign is actively accepting donations."""
+        return self.campaign_state == "active" and self.status == self.Status.RUNNING
 
     @property
     def days_left(self):
@@ -134,11 +161,40 @@ class Project(models.Model):
     def ratings_count(self):
         return self.ratings.count()
 
+    def sync_status(self):
+        """
+        Write the correct status to the DB based on current real-world state.
+        Called automatically on project_detail_view load and after each donation.
+
+        Rules (priority order):
+          1. CANCELLED — never auto-overridden; already set explicitly by cancel().
+          2. FUNDED     — total_donated >= total_target (still within or past end_date).
+          3. ENDED      — end_date has passed and not fully funded.
+          4. RUNNING    — campaign is still active (no change needed).
+        """
+        if self.status == self.Status.CANCELLED:
+            return  # cancellation is permanent
+
+        today = timezone.localdate()
+        if self.is_fully_funded:
+            new_status = self.Status.FUNDED
+        elif today > self.end_date:
+            new_status = self.Status.ENDED
+        else:
+            new_status = self.Status.RUNNING
+
+        if self.status != new_status:
+            self.status = new_status
+            self.save(update_fields=["status"])
+
     def can_be_cancelled(self):
         """
-        Spec rule: creator may cancel ONLY IF total donations received are
-        LESS THAN 25% of the total target.
+        Spec rule: creator may cancel ONLY IF:
+        - Project is still RUNNING (not already ended/funded/cancelled).
+        - Total donations received are LESS THAN 25% of the total target.
         """
+        if self.status != self.Status.RUNNING:
+            return False
         if self.total_target <= 0:
             return False
         donated_ratio = self.total_donated / self.total_target

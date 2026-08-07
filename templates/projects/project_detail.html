@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load widget_tweaks %}
+{% load humanize %}
 {% block title %}{{ project.title }} — Crowd-Funding Egypt{% endblock %}
 
 {% block content %}
@@ -43,6 +44,16 @@
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 mb-2 fw-semibold">
                         <i class="bi bi-folder2 me-1"></i> {{ project.category.name }}
                     </span>
+                    {% if project.campaign_state == "future" %}
+                    <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3 py-1 mb-2 fw-semibold ms-1">
+                        <i class="bi bi-hourglass-split me-1"></i> Coming Soon
+                    </span>
+                    {% elif project.campaign_state == "ended" %}
+                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3 py-1 mb-2 fw-semibold ms-1">
+                        <i class="bi bi-check2-all me-1"></i>
+                        {% if project.is_fully_funded %}Fully Funded{% else %}Campaign Ended{% endif %}
+                    </span>
+                    {% endif %}
                     <h1 class="display-6 fw-extrabold text-dark mb-2">{{ project.title }}</h1>
                     <div class="d-flex align-items-center gap-2 text-muted small">
                         <span class="fw-semibold text-dark">
@@ -175,9 +186,21 @@
                 <!-- Raised vs Goal Display -->
                 <div class="mb-3">
                     <div class="display-6 fw-extrabold {% if project.progress_percentage >= 100 %}text-success{% else %}text-primary{% endif %} mb-1">
-                        {{ project.total_donated }} EGP
+                        {{ project.total_donated|intcomma }} EGP
                     </div>
-                    <span class="text-muted small">raised of <strong class="text-dark">{{ project.total_target }} EGP</strong> goal</span>
+                    <span class="text-muted small">raised of <strong class="text-dark">{{ project.total_target|intcomma }} EGP</strong> goal</span>
+                </div>
+
+                <!-- Remaining Target Display -->
+                <div class="d-flex justify-content-between align-items-center p-2.5 rounded-3 bg-light border mb-3 small">
+                    <span class="text-muted fw-semibold"><i class="bi bi-bullseye me-1 text-primary"></i> Remaining Needed:</span>
+                    <span class="fw-bold {% if project.remaining_amount == 0 %}text-success{% else %}text-dark{% endif %}">
+                        {% if project.remaining_amount == 0 %}
+                            <i class="bi bi-check-circle-fill me-1 text-success"></i> Goal Reached!
+                        {% else %}
+                            {{ project.remaining_amount|intcomma }} EGP
+                        {% endif %}
+                    </span>
                 </div>
 
                 <!-- Custom Progress Bar -->
@@ -196,11 +219,37 @@
                 </div>
 
                 <!-- Donation Form Section -->
-                {% if project.is_running %}
+                {% if project.campaign_state == "future" %}
+                <div class="alert alert-info text-center rounded-4 mb-3">
+                    <i class="bi bi-hourglass-split fs-4 d-block mb-1 text-info"></i>
+                    <span class="fw-bold d-block">Coming Soon</span>
+                    <small class="text-muted">This campaign opens on <strong>{{ project.start_date }}</strong></small>
+                </div>
+                <button class="btn btn-secondary btn-lg w-100 btn-pill mb-3" disabled>
+                    <i class="bi bi-clock me-2"></i> Not Open Yet
+                </button>
+
+                {% elif project.campaign_state == "ended" %}
+                {% if project.is_fully_funded %}
+                <div class="alert alert-success text-center rounded-4 mb-3">
+                    <i class="bi bi-trophy-fill fs-4 d-block mb-1 text-success"></i>
+                    <span class="fw-bold d-block">Fully Funded!</span>
+                    <small class="text-muted">This project has reached its goal. Thank you to all backers!</small>
+                </div>
+                {% else %}
+                <div class="alert alert-secondary text-center rounded-4 mb-3 fw-semibold">
+                    <i class="bi bi-calendar-x me-1"></i> Campaign Ended
+                </div>
+                {% endif %}
+                <button class="btn btn-secondary btn-lg w-100 btn-pill mb-3" disabled>
+                    <i class="bi bi-heart me-2"></i> Donations Closed
+                </button>
+
+                {% else %}
                     {% if user.is_authenticated %}
                     <form method="post" action="{% url 'projects:donate' project.slug %}">
                         {% csrf_token %}
-                        
+
                         <!-- Quick Preset Chips -->
                         <div class="mb-3">
                             <label class="form-label small text-muted">Quick Amount (EGP)</label>
@@ -217,7 +266,7 @@
                             <span class="input-group-text donate-input-prefix">EGP</span>
                             {{ donation_form.amount|add_class:"form-control donate-input-field number-format-input" }}
                         </div>
-                        
+
                         <button type="submit" class="btn btn-primary btn-lg w-100 btn-pill shadow-sm mb-3">
                             <i class="bi bi-heart-fill me-2"></i> Donate Now
                         </button>
@@ -227,10 +276,6 @@
                         Log in to Donate
                     </a>
                     {% endif %}
-                {% else %}
-                <div class="alert alert-secondary text-center rounded-4 mb-3 fw-semibold">
-                    <i class="bi bi-calendar-x me-1"></i> Campaign Ended
-                </div>
                 {% endif %}
 
                 <!-- Report & Creator Actions -->
