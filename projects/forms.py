@@ -71,10 +71,33 @@ class DonationForm(forms.ModelForm):
         model = Donation
         fields = ["amount"]
 
+    def __init__(self, *args, project=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.project = project
+
     def clean_amount(self):
         amount = self.cleaned_data["amount"]
+
         if amount <= 0:
             raise ValidationError("Donation amount must be greater than zero.")
+
+        # Only enforce cap when a project context is provided
+        if self.project is not None:
+            total_donated = self.project.total_donated        # uses existing model property
+            total_target = self.project.total_target
+            remaining = total_target - total_donated
+
+            if remaining <= 0:
+                raise ValidationError(
+                    "This project has already reached its funding goal and is no longer accepting donations."
+                )
+
+            if amount > remaining:
+                raise ValidationError(
+                    f"You cannot donate more than the remaining target. "
+                    f"Only {remaining:,.2f} EGP is needed to fully fund this project."
+                )
+
         return amount
 
 

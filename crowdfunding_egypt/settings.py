@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",  # required by django-allauth
+    "django.contrib.humanize",
 
     # Third-party
     "django_filters",

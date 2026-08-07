@@ -105,6 +105,11 @@ class Project(models.Model):
         return agg["total"] or Decimal("0.00")
 
     @property
+    def remaining_amount(self):
+        remaining = self.total_target - self.total_donated
+        return max(remaining, Decimal("0.00"))
+
+    @property
     def progress_percentage(self):
         if self.total_target <= 0:
             return 0

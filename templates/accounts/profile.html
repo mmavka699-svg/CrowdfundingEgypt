@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load humanize %}
 {% block title %}My Profile — Crowd-Funding Egypt{% endblock %}
 
 {% block content %}
@@ -94,7 +95,7 @@
                                     <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{
                                         d.created_at|date:"M d, Y" }}</small>
                                 </div>
-                                <span class="fw-bold text-success fs-6">+{{ d.amount }} EGP</span>
+                                <span class="fw-bold text-success fs-6">+{{ d.amount|intcomma }} EGP</span>
                             </div>
                             {% empty %}
                             <div class="text-center py-5 text-muted">

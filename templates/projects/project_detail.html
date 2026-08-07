@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load widget_tweaks %}
+{% load humanize %}
 {% block title %}{{ project.title }} — Crowd-Funding Egypt{% endblock %}
 
 {% block content %}
@@ -175,9 +176,21 @@
                 <!-- Raised vs Goal Display -->
                 <div class="mb-3">
                     <div class="display-6 fw-extrabold {% if project.progress_percentage >= 100 %}text-success{% else %}text-primary{% endif %} mb-1">
-                        {{ project.total_donated }} EGP
+                        {{ project.total_donated|intcomma }} EGP
                     </div>
-                    <span class="text-muted small">raised of <strong class="text-dark">{{ project.total_target }} EGP</strong> goal</span>
+                    <span class="text-muted small">raised of <strong class="text-dark">{{ project.total_target|intcomma }} EGP</strong> goal</span>
+                </div>
+
+                <!-- Remaining Target Display -->
+                <div class="d-flex justify-content-between align-items-center p-2.5 rounded-3 bg-light border mb-3 small">
+                    <span class="text-muted fw-semibold"><i class="bi bi-bullseye me-1 text-primary"></i> Remaining Needed:</span>
+                    <span class="fw-bold {% if project.remaining_amount == 0 %}text-success{% else %}text-dark{% endif %}">
+                        {% if project.remaining_amount == 0 %}
+                            <i class="bi bi-check-circle-fill me-1 text-success"></i> Goal Reached!
+                        {% else %}
+                            {{ project.remaining_amount|intcomma }} EGP
+                        {% endif %}
+                    </span>
                 </div>
 
                 <!-- Custom Progress Bar -->

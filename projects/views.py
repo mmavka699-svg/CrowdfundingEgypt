@@ -215,7 +215,7 @@ def project_detail_view(request, slug):
         .order_by("-created_at")
     )
 
-    donation_form = DonationForm()
+    donation_form = DonationForm(project=project)
     comment_form = CommentForm()
     rating_form = RatingForm()
     report_form = ReportForm()
@@ -265,15 +265,20 @@ def donate_view(request, slug):
         messages.error(request, "This project is not currently accepting donations.")
         return redirect(project.get_absolute_url())
 
-    form = DonationForm(request.POST)
+    form = DonationForm(request.POST, project=project)
     if form.is_valid():
         donation = form.save(commit=False)
         donation.project = project
         donation.donor = request.user
         donation.save()
-        messages.success(request, f"Thank you! You donated {donation.amount} EGP.")
+        messages.success(request, f"Thank you! You donated {donation.amount:,.2f} EGP.")
     else:
-        messages.error(request, "Please enter a valid donation amount.")
+        # Surface the first field-level error as a flash message so it's visible
+        for field_errors in form.errors.values():
+            for error in field_errors:
+                messages.error(request, error)
+                break
+            break
     return redirect(project.get_absolute_url())
 
 
