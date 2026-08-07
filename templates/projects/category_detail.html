@@ -1,16 +1,30 @@
 {% extends "base.html" %}
-{% block title %}{{ category.name }} Projects{% endblock %}
+{% block title %}{{ category.name }} Projects — Crowd-Funding Egypt{% endblock %}
 {% block content %}
 <div class="container my-5">
-    <h2 class="section-title">{{ category.name }}</h2>
-    <p class="text-muted">{{ category.description }}</p>
-    <div class="row g-4">
+    <div class="p-4 p-md-5 rounded-4 bg-white shadow-sm border mb-5" data-animate="fade-up">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 mb-2 fw-bold">Category</span>
+        <h1 class="display-6 fw-extrabold text-dark mb-2">{{ category.name }}</h1>
+        <p class="lead text-muted mb-0">{{ category.description|default:"Discover all community campaigns listed under this category." }}</p>
+    </div>
+
+    <div class="row g-4" data-animate="fade-up">
         {% for project in page_obj %}
             {% include "includes/project_card.html" %}
         {% empty %}
-        <p class="text-muted">No projects in this category yet.</p>
+        <div class="col-12 text-center py-5 bg-white rounded-4 border">
+            <i class="bi bi-layers fs-1 text-muted opacity-50 d-block mb-3"></i>
+            <h4 class="fw-bold text-dark">No projects in this category yet</h4>
+            <p class="text-muted mb-3">Be the pioneer to start a campaign in {{ category.name }}!</p>
+            {% if user.is_authenticated %}
+            <a href="{% url 'projects:project_create' %}" class="btn btn-primary btn-pill">
+                <i class="bi bi-plus-circle me-1"></i> Start a Campaign
+            </a>
+            {% endif %}
+        </div>
         {% endfor %}
     </div>
+
     {% include "includes/pagination.html" %}
 </div>
 {% endblock %}

@@ -1,15 +1,30 @@
 {% extends "base.html" %}
-{% block title %}#{{ tag.name }} Projects{% endblock %}
+{% block title %}#{{ tag.name }} Projects — Crowd-Funding Egypt{% endblock %}
 {% block content %}
 <div class="container my-5">
-    <h2 class="section-title">Tagged: #{{ tag.name }}</h2>
-    <div class="row g-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 pb-3 border-bottom" data-animate="fade-up">
+        <div>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 mb-2 fw-bold">Tagged</span>
+            <h2 class="section-title mb-0">#{{ tag.name }}</h2>
+        </div>
+        <p class="text-muted mb-0 small">Browsing projects tagged with #{{ tag.name }}</p>
+    </div>
+
+    <div class="row g-4" data-animate="fade-up">
         {% for project in page_obj %}
             {% include "includes/project_card.html" %}
         {% empty %}
-        <p class="text-muted">No projects with this tag yet.</p>
+        <div class="col-12 text-center py-5 bg-white rounded-4 border">
+            <i class="bi bi-tag fs-1 text-muted opacity-50 d-block mb-3"></i>
+            <h4 class="fw-bold text-dark">No projects tagged #{{ tag.name }}</h4>
+            <p class="text-muted mb-3">Explore other tags or browse all active campaigns.</p>
+            <a href="{% url 'projects:project_list' %}" class="btn btn-outline-primary btn-pill">
+                Explore Projects
+            </a>
+        </div>
         {% endfor %}
     </div>
+
     {% include "includes/pagination.html" %}
 </div>
 {% endblock %}

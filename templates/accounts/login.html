@@ -1,34 +1,57 @@
 {% extends "base.html" %}
 {% load widget_tweaks %}
-{% block title %}Login{% endblock %}
+{% block title %}Log In — Crowd-Funding Egypt{% endblock %}
+
 {% block content %}
-<div class="container my-5" style="max-width:420px;">
-    <div class="card shadow-sm p-4">
-        <h3 class="mb-3 text-center">Welcome back</h3>
+<div class="container my-5" style="max-width:440px;">
+    <div class="form-card" data-animate="fade-up">
+        <div class="text-center mb-4">
+            <span class="navbar-brand-icon mx-auto mb-3" style="width:50px; height:50px; font-size:1.5rem;">
+                <i class="fa-solid fa-hand-holding-heart"></i>
+            </span>
+            <h3 class="fw-bold text-dark mb-1">Welcome back</h3>
+            <p class="text-muted small">Log in to manage your campaigns and donations</p>
+        </div>
+
         <form method="post" novalidate>
             {% csrf_token %}
             <div class="mb-3">
-                <label class="form-label">Email</label>
+                <label class="form-label">Email Address</label>
                 {{ form.email|add_class:"form-control" }}
+                {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors|join:", " }}</div>{% endif %}
             </div>
             <div class="mb-3">
                 <label class="form-label">Password</label>
                 {{ form.password|add_class:"form-control" }}
+                {% if form.password.errors %}<div class="text-danger small mt-1">{{ form.password.errors|join:", " }}</div>{% endif %}
             </div>
+
             {% if form.non_field_errors %}
-            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            <div class="alert alert-danger rounded-4 mb-3">{{ form.non_field_errors }}</div>
             {% endif %}
-            <div class="d-flex justify-content-between mb-3">
-                <a href="{% url 'accounts:password_reset' %}" class="small">Forgot password?</a>
-                <a href="{% url 'accounts:resend_activation' %}" class="small">Resend activation email</a>
+
+            <div class="d-flex justify-content-between small mb-4">
+                <a href="{% url 'accounts:password_reset' %}" class="fw-semibold">Forgot password?</a>
+                <a href="{% url 'accounts:resend_activation' %}" class="text-muted">Resend activation</a>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Log In</button>
+
+            <button type="submit" class="btn btn-primary btn-lg w-100 btn-pill shadow-sm mb-3">
+                <i class="bi bi-box-arrow-in-right me-2"></i> Log In
+            </button>
         </form>
-        <hr>
-        <a href="{% url 'facebook_login' %}" class="btn btn-outline-primary w-100">
-            <i class="fa-brands fa-facebook"></i> Continue with Facebook
+
+        <div class="position-relative my-4 text-center">
+            <hr class="text-muted opacity-25">
+            <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">or continue with</span>
+        </div>
+
+        <a href="{% url 'facebook_login' %}" class="btn btn-outline-primary w-100 btn-pill mb-3">
+            <i class="fa-brands fa-facebook me-2"></i> Facebook
         </a>
-        <p class="text-center mt-3 mb-0">Don't have an account? <a href="{% url 'accounts:register' %}">Sign up</a></p>
+
+        <p class="text-center small text-muted mt-4 mb-0">
+            Don't have an account? <a href="{% url 'accounts:register' %}" class="fw-bold">Sign up</a>
+        </p>
     </div>
 </div>
 {% endblock %}

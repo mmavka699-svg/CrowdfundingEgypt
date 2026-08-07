@@ -1,60 +1,97 @@
 {% extends "base.html" %}
 {% load widget_tweaks %}
-{% block title %}{% if project %}Edit Project{% else %}Start a Project{% endif %}{% endblock %}
+{% block title %}{% if project %}Edit Project{% else %}Start a Project{% endif %} — Crowd-Funding Egypt{% endblock %}
+
 {% block content %}
-<div class="container my-5" style="max-width:700px;">
-    <div class="card shadow-sm p-4">
-        <h3 class="mb-4">{% if project %}Edit "{{ project.title }}"{% else %}Start a New Project{% endif %}</h3>
+<div class="container my-5" style="max-width:760px;">
+    <div class="form-card" data-animate="fade-up">
+        <div class="text-center mb-4">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2 mb-2 fw-bold">
+                <i class="bi bi-rocket-takeoff-fill me-1"></i> Campaign Builder
+            </span>
+            <h2 class="fw-bold text-dark mb-1">
+                {% if project %}Edit "{{ project.title }}"{% else %}Start a New Project{% endif %}
+            </h2>
+            <p class="text-muted small">Fill out the campaign details below to publish your project to backers.</p>
+        </div>
+
         <form method="post" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
 
-            <div class="mb-3">
-                <label class="form-label">Title</label>
-                {{ form.title|add_class:"form-control" }}
+            <div class="mb-4">
+                <label class="form-label">Project Title</label>
+                {{ form.title|add_class:"form-control form-control-lg" }}
+                {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors|join:", " }}</div>{% endif %}
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Details</label>
+            <div class="mb-4">
+                <label class="form-label">Project Details & Story</label>
                 {{ form.details|add_class:"form-control" }}
+                <div class="form-text">Describe your cause, objectives, and how the funds will be utilized.</div>
+                {% if form.details.errors %}<div class="text-danger small mt-1">{{ form.details.errors|join:", " }}</div>{% endif %}
             </div>
 
             <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-md-6 mb-4">
                     <label class="form-label">Category</label>
                     {{ form.category|add_class:"form-select" }}
+                    {% if form.category.errors %}<div class="text-danger small mt-1">{{ form.category.errors|join:", " }}</div>{% endif %}
                 </div>
-                <div class="col-md-6 mb-3">
+                <div class="col-md-6 mb-4">
                     <label class="form-label">Tags (comma-separated)</label>
                     {{ form.tags|add_class:"form-control" }}
+                    {% if form.tags.errors %}<div class="text-danger small mt-1">{{ form.tags.errors|join:", " }}</div>{% endif %}
                 </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Total Financial Target (EGP)</label>
-                {{ form.total_target|add_class:"form-control" }}
+            <div class="mb-4">
+                <label class="form-label fw-bold d-flex align-items-center justify-content-between">
+                    <span>Total Financial Target (EGP)</span>
+                    {% if form.instance.pk %}
+                    <span class="badge bg-secondary-subtle text-secondary border rounded-pill px-2.5 py-1 fs-7">
+                        <i class="bi bi-lock-fill me-1"></i> Non-editable
+                    </span>
+                    {% endif %}
+                </label>
+                <div class="input-group donate-input-group">
+                    <span class="input-group-text donate-input-prefix">EGP</span>
+                    {{ form.total_target|add_class:"form-control donate-input-field number-format-input" }}
+                </div>
+                <div class="form-text text-muted mt-1">
+                    {% if form.instance.pk %}
+                    <i class="bi bi-info-circle me-1"></i> Campaign financial target cannot be changed once the project has been created.
+                    {% else %}
+                    Enter your campaign target in Egyptian Pounds (EGP).
+                    {% endif %}
+                </div>
+                {% if form.total_target.errors %}<div class="text-danger small mt-1">{{ form.total_target.errors|join:", " }}</div>{% endif %}
             </div>
 
             <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-md-6 mb-4">
                     <label class="form-label">Start Date</label>
                     {{ form.start_date|add_class:"form-control" }}
+                    {% if form.start_date.errors %}<div class="text-danger small mt-1">{{ form.start_date.errors|join:", " }}</div>{% endif %}
                 </div>
-                <div class="col-md-6 mb-3">
+                <div class="col-md-6 mb-4">
                     <label class="form-label">End Date</label>
                     {{ form.end_date|add_class:"form-control" }}
+                    {% if form.end_date.errors %}<div class="text-danger small mt-1">{{ form.end_date.errors|join:", " }}</div>{% endif %}
                 </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Project Images (you can select multiple)</label>
+            <div class="mb-4 p-3 bg-light rounded-3 border">
+                <label class="form-label fw-bold mb-2">Project Images</label>
+                <div class="form-text mb-2">Upload high-resolution images to showcase your campaign (multiple images will display as a slider).</div>
                 {{ image_form.images }}
             </div>
 
             {% if form.non_field_errors %}
-            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            <div class="alert alert-danger rounded-4">{{ form.non_field_errors }}</div>
             {% endif %}
 
-            <button type="submit" class="btn btn-primary w-100">
+            <button type="submit" class="btn btn-primary btn-lg w-100 btn-pill shadow-sm">
+                <i class="bi bi-send-fill me-2"></i>
                 {% if project %}Save Changes{% else %}Launch Project{% endif %}
             </button>
         </form>

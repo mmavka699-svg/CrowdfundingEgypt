@@ -103,15 +103,50 @@ def project_edit_view(request, slug):
         return HttpResponseForbidden("You may not edit this project.")
 
     if request.method == "POST":
+        # Snapshot old values before binding form
+        old_values = {
+            "title": project.title,
+            "details": project.details,
+            "category": project.category_id,
+            "start_date": project.start_date,
+            "end_date": project.end_date,
+        }
+        old_tag_ids = set(project.tags.values_list("id", flat=True))
+
         form = ProjectForm(request.POST, instance=project)
         image_form = ProjectImageUploadForm(request.POST, request.FILES)
         if form.is_valid() and image_form.is_valid():
-            form.save()
+            saved_project = form.save()
             images = request.FILES.getlist("images")
-            for img in images:
-                ProjectImage.objects.create(project=project, image=img)
+
+            # Detect which fields changed
+            edited = set(saved_project.edited_fields or [])
+
+            if old_values["title"] != saved_project.title:
+                edited.add("title")
+            if old_values["details"] != saved_project.details:
+                edited.add("details")
+            if old_values["category"] != saved_project.category_id:
+                edited.add("category")
+            if old_values["start_date"] != saved_project.start_date:
+                edited.add("dates")
+            if old_values["end_date"] != saved_project.end_date:
+                edited.add("dates")
+
+            new_tag_ids = set(saved_project.tags.values_list("id", flat=True))
+            if old_tag_ids != new_tag_ids:
+                edited.add("tags")
+
+            if images:
+                edited.add("images")
+                for img in images:
+                    ProjectImage.objects.create(project=saved_project, image=img)
+
+            saved_project.edited_fields = sorted(edited)
+            saved_project.save(update_fields=["edited_fields"])
+
             messages.success(request, "Project updated.")
-            return redirect(project.get_absolute_url())
+            return redirect(saved_project.get_absolute_url())
     else:
         form = ProjectForm(instance=project)
         image_form = ProjectImageUploadForm()
@@ -145,6 +180,23 @@ def project_cancel_view(request, slug):
     project.cancel()
     messages.success(request, "Your project has been cancelled.")
     return redirect(project.get_absolute_url())
+
+
+# ---------------------------------------------------------------------------
+# DELETE PROJECT  (creator only)
+# ---------------------------------------------------------------------------
+@login_required
+@require_POST
+def project_delete_view(request, slug):
+    project = get_object_or_404(Project, slug=slug)
+
+    if project.creator_id != request.user.id:
+        return HttpResponseForbidden("Only the project creator can delete this project.")
+
+    project_title = project.title
+    project.delete()
+    messages.success(request, f'Project "{project_title}" has been deleted successfully.')
+    return redirect("accounts:profile")
 
 
 # ---------------------------------------------------------------------------

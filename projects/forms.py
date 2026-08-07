@@ -20,13 +20,20 @@ class ProjectForm(forms.ModelForm):
             "end_date": forms.DateInput(attrs={"type": "date"}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields["total_target"].disabled = True
+            self.fields["total_target"].help_text = "Target amount cannot be changed after project creation."
+
     def clean(self):
         cleaned_data = super().clean()
         start_date = cleaned_data.get("start_date")
         end_date = cleaned_data.get("end_date")
 
         if start_date and end_date:
-            if start_date < timezone.localdate():
+            # Only validate start_date not being in the past when creating new project
+            if not (self.instance and self.instance.pk) and start_date < timezone.localdate():
                 raise ValidationError("Start date cannot be in the past.")
             if end_date <= start_date:
                 raise ValidationError("End date must be after the start date.")

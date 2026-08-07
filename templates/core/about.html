@@ -1,8 +1,63 @@
 {% extends "base.html" %}
-{% block title %}About Us{% endblock %}
+{% block title %}About Us — Crowd-Funding Egypt{% endblock %}
 {% block content %}
 <div class="container my-5">
-    <h2>About Crowd-Funding Egypt</h2>
-    <p class="lead">A platform connecting Egyptian creators with backers who want to help great ideas come to life.</p>
+    <!-- Hero Banner -->
+    <div class="p-5 rounded-4 bg-white shadow-sm border mb-5 text-center position-relative overflow-hidden" data-animate="fade-up">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2 mb-3 fw-bold">Our Mission</span>
+        <h1 class="display-5 fw-extrabold text-dark mb-3">Connecting Egyptian Creators with the World</h1>
+        <p class="lead text-muted mx-auto" style="max-width: 720px;">
+            Crowd-Funding Egypt is a community-first platform designed to empower Egyptian innovators, artists, entrepreneurs, and charitable organizers to bring ambitious projects to life.
+        </p>
+    </div>
+
+    <!-- 3 Value Columns -->
+    <div class="row g-4 mb-5" data-animate="fade-up">
+        <div class="col-md-4">
+            <div class="form-card h-100 text-center p-4">
+                <div class="stat-icon bg-primary text-white mx-auto mb-3" style="width:54px; height:54px; font-size:1.5rem;">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-2">Transparency & Safety</h5>
+                <p class="text-muted small mb-0">Every project undergoes admin verification and strict cancellation safeguards to protect backer funds.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-card h-100 text-center p-4">
+                <div class="stat-icon bg-success text-white mx-auto mb-3" style="width:54px; height:54px; font-size:1.5rem;">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-2">Community Driven</h5>
+                <p class="text-muted small mb-0">Ratings, interactive star reviews, nested comment threads, and direct creator updates ensure total engagement.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-card h-100 text-center p-4">
+                <div class="stat-icon bg-warning text-white mx-auto mb-3" style="width:54px; height:54px; font-size:1.5rem;">
+                    <i class="bi bi-rocket-takeoff-fill"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-2">Empowerment</h5>
+                <p class="text-muted small mb-0">From tech startups to local community initiatives, we provide Egyptian visionaries with the launchpad they deserve.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Banner -->
+    <div class="p-5 rounded-4 bg-primary text-white text-center shadow-lg" data-animate="fade-up" style="background: var(--primary-gradient) !important;">
+        <h2 class="text-white fw-bold mb-3">Ready to Make an Impact?</h2>
+        <p class="text-white-50 mx-auto mb-4" style="max-width: 600px;">
+            Join thousands of active backers supporting the future of Egypt or launch your campaign today.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'projects:project_list' %}" class="btn btn-light btn-lg btn-pill text-primary fw-bold">
+                Explore Projects
+            </a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'projects:project_create' %}" class="btn btn-outline-light btn-lg btn-pill">
+                Start a Project
+            </a>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}
