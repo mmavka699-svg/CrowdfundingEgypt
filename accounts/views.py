@@ -192,7 +192,11 @@ def profile_edit_view(request):
     if request.method == "POST":
         form = ProfileEditForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
-            form.save()
+            user = form.save(commit=False)
+            if not user.profile_picture or request.POST.get("profile_picture-clear"):
+                user.profile_picture = "profile_pics/default.png"
+            user.save()
+            form.save_m2m()
             messages.success(request, "Your profile has been updated.")
             return redirect("accounts:profile")
     else:

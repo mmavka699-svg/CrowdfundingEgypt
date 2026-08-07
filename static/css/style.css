@@ -3,7 +3,8 @@
 /* ==========================================================================
    DESIGN SYSTEM TOKENS & CSS VARIABLES
    ========================================================================== */
-:root, [data-theme="light"] {
+:root,
+[data-theme="light"] {
     /* Brand Colors */
     --primary: #4f46e5;
     --primary-hover: #4338ca;
@@ -135,7 +136,9 @@
 /* ==========================================================================
    GLOBAL BASE STYLES & TYPOGRAPHY
    ========================================================================== */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
@@ -153,7 +156,12 @@ body {
     overflow-x: hidden;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 700;
     color: var(--dark-text);
@@ -174,13 +182,16 @@ a:hover {
 ::-webkit-scrollbar {
     width: 8px;
 }
+
 ::-webkit-scrollbar-track {
     background: #f1f5f9;
 }
+
 ::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: var(--radius-pill);
 }
+
 ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
@@ -274,7 +285,8 @@ a:hover {
     position: relative;
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
     color: var(--primary) !important;
 }
 
@@ -386,8 +398,15 @@ a:hover {
 }
 
 @keyframes dropdownFade {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dropdown-item {
@@ -485,7 +504,7 @@ a:hover {
     line-height: 1.15;
     color: #ffffff;
     margin-bottom: 0.75rem;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .hero-overlay p {
@@ -522,8 +541,13 @@ a:hover {
     transition: all var(--transition-fast);
 }
 
-.hero-slider .carousel-control-prev { left: 1.5rem; }
-.hero-slider .carousel-control-next { right: 1.5rem; }
+.hero-slider .carousel-control-prev {
+    left: 1.5rem;
+}
+
+.hero-slider .carousel-control-next {
+    right: 1.5rem;
+}
 
 .hero-slider .carousel-control-prev:hover,
 .hero-slider .carousel-control-next:hover {
@@ -535,7 +559,7 @@ a:hover {
 
 .hero-slider .carousel-control-prev-icon,
 .hero-slider .carousel-control-next-icon {
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .hero-slider .carousel-indicators [data-bs-target] {
@@ -662,8 +686,13 @@ a:hover {
     opacity: 0.9;
 }
 
-.card-carousel .carousel-control-prev { left: 0.5rem; }
-.card-carousel .carousel-control-next { right: 0.5rem; }
+.card-carousel .carousel-control-prev {
+    left: 0.5rem;
+}
+
+.card-carousel .carousel-control-next {
+    right: 0.5rem;
+}
 
 .card-carousel .carousel-indicators [data-bs-target] {
     width: 6px;
@@ -684,7 +713,7 @@ a:hover {
     font-weight: 700;
     padding: 0.3rem 0.75rem;
     border-radius: var(--radius-pill);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .project-card-body {
@@ -741,14 +770,22 @@ a:hover {
 .progress-bar-custom::after {
     content: '';
     position: absolute;
-    top: 0; right: 0; bottom: 0; left: 0;
-    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
     animation: shimmer 2s infinite;
 }
 
 @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
 }
 
 /* Category Cards */
@@ -769,7 +806,8 @@ a:hover {
 }
 
 .category-card:hover {
-    transform: translateY(-50%) scale(1.02); /* Adjusted to look clean */
+    transform: translateY(-50%) scale(1.02);
+    /* Adjusted to look clean */
     transform: translateY(-6px);
     box-shadow: var(--shadow-md);
     border-color: var(--primary-border);
@@ -833,7 +871,8 @@ a:hover {
     box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
 }
 
-.btn-primary:hover, .btn-primary:focus {
+.btn-primary:hover,
+.btn-primary:focus {
     background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
     color: #ffffff;
     box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
@@ -930,7 +969,8 @@ a:hover {
     margin-bottom: 0.4rem;
 }
 
-.form-control, .form-select {
+.form-control,
+.form-select {
     border-radius: var(--radius-md);
     border: 1.5px solid var(--border-color);
     padding: 0.7rem 1rem;
@@ -940,7 +980,8 @@ a:hover {
     transition: all var(--transition-fast);
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus,
+.form-select:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
     background-color: #ffffff;
@@ -967,8 +1008,8 @@ input[type="file"].form-control::file-selector-button:hover {
 }
 
 /* Floating labels tweak */
-.form-floating > .form-control:focus ~ label,
-.form-floating > .form-control:not(:placeholder-shown) ~ label {
+.form-floating>.form-control:focus~label,
+.form-floating>.form-control:not(:placeholder-shown)~label {
     color: var(--primary);
 }
 
@@ -1098,7 +1139,7 @@ input[type="file"].form-control::file-selector-button:hover {
     color: #f8fafc !important;
     padding-top: 4.5rem;
     padding-bottom: 2.5rem;
-    border-top: 1px solid rgba(255,255,255,0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .footer-dark h5 {
@@ -1202,16 +1243,20 @@ input[type="file"].form-control::file-selector-button:hover {
 
 /* Responsive Overrides */
 @media (max-width: 991.98px) {
+
     .hero-slider .carousel-item,
     .hero-slide {
         height: 420px;
     }
+
     .hero-overlay h1 {
         font-size: 2rem;
     }
+
     .stats-card-group {
         margin-top: 1.5rem;
     }
+
     .sticky-donation-card {
         position: static;
         margin-top: 2rem;
@@ -1219,13 +1264,16 @@ input[type="file"].form-control::file-selector-button:hover {
 }
 
 @media (max-width: 575.98px) {
+
     .hero-slider .carousel-item,
     .hero-slide {
         height: 360px;
     }
+
     .hero-overlay h1 {
         font-size: 1.6rem;
     }
+
     .btn-lg {
         padding: 0.75rem 1.25rem;
         font-size: 0.925rem;

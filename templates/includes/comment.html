@@ -1,7 +1,8 @@
 {% load static %}
 <div class="comment-card mb-3 {% if comment.is_reply %}ms-4 ms-md-5{% endif %}">
     <div class="d-flex align-items-start gap-3">
-        <img src="{{ comment.author.profile_picture.url }}" class="rounded-circle flex-shrink-0" width="40" height="40" style="object-fit:cover;" alt="{{ comment.author.get_full_name }}">
+        <img src="{{ comment.author.avatar_url }}" class="rounded-circle flex-shrink-0" width="40" height="40"
+            style="object-fit:cover;" alt="{{ comment.author.get_full_name }}">
         <div class="flex-grow-1">
             <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="fw-bold text-dark fs-6">{{ comment.author.get_full_name }}</span>
@@ -9,37 +10,44 @@
                     <i class="bi bi-clock me-1"></i>{{ comment.created_at|timesince }} ago
                 </small>
             </div>
-            
+
             <p class="text-dark mb-2" style="font-size: 0.935rem; line-height: 1.5;">{{ comment.body }}</p>
-            
+
             <!-- Comment Actions -->
             <div class="d-flex align-items-center gap-3 small">
                 {% if user.is_authenticated %}
-                <a href="#" class="text-muted fw-semibold text-decoration-none reply-toggle" data-comment-id="{{ comment.id }}">
+                <a href="#" class="text-muted fw-semibold text-decoration-none reply-toggle"
+                    data-comment-id="{{ comment.id }}">
                     <i class="bi bi-reply-fill me-1"></i>Reply
                 </a>
                 <span class="text-muted">&middot;</span>
-                <a href="#" class="text-muted fw-semibold text-decoration-none" data-bs-toggle="modal" data-bs-target="#reportCommentModal{{ comment.id }}">
+                <a href="#" class="text-muted fw-semibold text-decoration-none" data-bs-toggle="modal"
+                    data-bs-target="#reportCommentModal{{ comment.id }}">
                     <i class="bi bi-flag me-1"></i>Report
                 </a>
                 {% endif %}
 
                 {% if comment.replies.all %}
                 {% if user.is_authenticated %}<span class="text-muted">&middot;</span>{% endif %}
-                <a href="#replies-collapse-{{ comment.id }}" class="text-primary fw-semibold text-decoration-none" data-bs-toggle="collapse" role="button" aria-expanded="true" aria-controls="replies-collapse-{{ comment.id }}" id="toggle-replies-btn-{{ comment.id }}">
+                <a href="#replies-collapse-{{ comment.id }}" class="text-primary fw-semibold text-decoration-none"
+                    data-bs-toggle="collapse" role="button" aria-expanded="true"
+                    aria-controls="replies-collapse-{{ comment.id }}" id="toggle-replies-btn-{{ comment.id }}">
                     <i class="bi bi-chevron-up me-1" id="toggle-replies-icon-{{ comment.id }}"></i>
-                    <span id="toggle-replies-text-{{ comment.id }}">Hide {{ comment.replies.all|length }} repl{{ comment.replies.all|length|pluralize:"y,ies" }}</span>
+                    <span id="toggle-replies-text-{{ comment.id }}">Hide {{ comment.replies.all|length }} repl{{
+                        comment.replies.all|length|pluralize:"y,ies" }}</span>
                 </a>
                 {% endif %}
             </div>
 
             <!-- Nested Reply Input Form -->
             {% if user.is_authenticated %}
-            <form method="post" action="{% url 'projects:comment_create' comment.project.slug %}" class="reply-form d-none mt-3 p-3 bg-light rounded-3" id="reply-form-{{ comment.id }}">
+            <form method="post" action="{% url 'projects:comment_create' comment.project.slug %}"
+                class="reply-form d-none mt-3 p-3 bg-light rounded-3" id="reply-form-{{ comment.id }}">
                 {% csrf_token %}
                 <input type="hidden" name="parent_id" value="{{ comment.id }}">
                 <div class="mb-2">
-                    <textarea name="body" class="form-control form-control-sm" rows="2" placeholder="Write a reply..." required></textarea>
+                    <textarea name="body" class="form-control form-control-sm" rows="2" placeholder="Write a reply..."
+                        required></textarea>
                 </div>
                 <button type="submit" class="btn btn-sm btn-primary btn-pill">Submit Reply</button>
             </form>
@@ -49,7 +57,7 @@
             {% if comment.replies.all %}
             <div class="collapse show mt-3" id="replies-collapse-{{ comment.id }}">
                 {% for reply in comment.replies.all %}
-                    {% include "includes/comment.html" with comment=reply %}
+                {% include "includes/comment.html" with comment=reply %}
                 {% endfor %}
             </div>
             {% endif %}
@@ -60,7 +68,8 @@
 <!-- Report Comment Modal -->
 <div class="modal fade" id="reportCommentModal{{ comment.id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <form method="post" action="{% url 'projects:report_comment' comment.id %}" class="modal-content rounded-4 border-0 shadow-lg">
+        <form method="post" action="{% url 'projects:report_comment' comment.id %}"
+            class="modal-content rounded-4 border-0 shadow-lg">
             {% csrf_token %}
             <div class="modal-header border-bottom-0 pb-0">
                 <h5 class="modal-title fw-bold">Report Comment</h5>
@@ -74,7 +83,8 @@
                     <option value="fraud">Fraud / Scam</option>
                     <option value="other">Other</option>
                 </select>
-                <textarea name="details" class="form-control" rows="3" placeholder="Provide additional context (optional)..."></textarea>
+                <textarea name="details" class="form-control" rows="3"
+                    placeholder="Provide additional context (optional)..."></textarea>
             </div>
             <div class="modal-footer border-top-0 pt-0">
                 <button type="button" class="btn btn-light btn-pill" data-bs-dismiss="modal">Cancel</button>

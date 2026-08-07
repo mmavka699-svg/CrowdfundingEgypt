@@ -116,6 +116,21 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def get_short_name(self):
         return self.first_name
 
+    def save(self, *args, **kwargs):
+        if not self.profile_picture:
+            self.profile_picture = "profile_pics/default.png"
+        super().save(*args, **kwargs)
+
+    @property
+    def avatar_url(self):
+        """Safe profile picture URL getter. Falls back to default.png if picture is empty/cleared."""
+        if self.profile_picture and hasattr(self.profile_picture, "name") and self.profile_picture.name:
+            try:
+                return self.profile_picture.url
+            except ValueError:
+                pass
+        return f"{settings.MEDIA_URL}profile_pics/default.png"
+
     @property
     def total_donations_amount(self):
         """Sum of all donations made by this user (used on profile page)."""
