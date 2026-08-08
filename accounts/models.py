@@ -71,7 +71,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         _("mobile phone"),
         max_length=20,
         validators=[validate_egyptian_phone],
-        help_text=_("Egyptian mobile number, e.g. 01012345678"),
+        help_text=_("Must be a valid 11-digit Egyptian mobile number."),
     )
 
     profile_picture = models.ImageField(

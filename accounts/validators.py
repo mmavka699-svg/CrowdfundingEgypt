@@ -24,9 +24,6 @@ def validate_egyptian_phone(value: str) -> None:
     cleaned = value.strip().replace(" ", "").replace("-", "")
     if not EGYPT_PHONE_REGEX.match(cleaned):
         raise ValidationError(
-            _(
-                "Enter a valid Egyptian mobile number "
-                "(e.g. 01012345678 or +201012345678)."
-            ),
+            _("Please enter a valid 11-digit Egyptian mobile number."),
             code="invalid_egyptian_phone",
         )
