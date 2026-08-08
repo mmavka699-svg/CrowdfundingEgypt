@@ -19,9 +19,9 @@ from .models import Project, ProjectImage, Category, Donation, Comment, Rating, 
 # LIST / SEARCH / CATEGORY BROWSE
 # ---------------------------------------------------------------------------
 def project_list_view(request):
-    projects = Project.objects.filter(status=Project.Status.RUNNING).select_related(
-        "category", "creator"
-    )
+    projects = Project.objects.filter(
+        status__in=[Project.Status.RUNNING, Project.Status.COMING_SOON]
+    ).select_related("category", "creator")
     paginator = Paginator(projects, 12)
     page_obj = paginator.get_page(request.GET.get("page"))
     return render(request, "projects/project_list.html", {"page_obj": page_obj})
@@ -35,7 +35,7 @@ def search_projects_view(request):
         results = (
             Project.objects.filter(
                 Q(title__icontains=query) | Q(tags__name__icontains=query),
-                status=Project.Status.RUNNING,
+                status__in=[Project.Status.RUNNING, Project.Status.COMING_SOON],
             )
             .distinct()
             .select_related("category", "creator")
@@ -89,7 +89,8 @@ def search_autocomplete_view(request):
 def category_detail_view(request, slug):
     category = get_object_or_404(Category, slug=slug)
     projects = Project.objects.filter(
-        category=category, status=Project.Status.RUNNING
+        category=category,
+        status__in=[Project.Status.RUNNING, Project.Status.COMING_SOON],
     ).select_related("creator")
     paginator = Paginator(projects, 12)
     page_obj = paginator.get_page(request.GET.get("page"))
@@ -100,7 +101,10 @@ def category_detail_view(request, slug):
 
 def tag_detail_view(request, slug):
     tag = get_object_or_404(Tag, slug=slug)
-    projects = Project.objects.filter(tags__slug=slug, status=Project.Status.RUNNING)
+    projects = Project.objects.filter(
+        tags__slug=slug,
+        status__in=[Project.Status.RUNNING, Project.Status.COMING_SOON],
+    )
     paginator = Paginator(projects, 12)
     page_obj = paginator.get_page(request.GET.get("page"))
     return render(request, "projects/tag_detail.html", {"tag": tag, "page_obj": page_obj})

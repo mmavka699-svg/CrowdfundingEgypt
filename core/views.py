@@ -21,8 +21,7 @@ def _active_qs(today):
             total_donated_sum=Coalesce(Sum("donations__amount"), Decimal("0.00"))
         )
         .filter(
-            status=Project.Status.RUNNING,
-            start_date__lte=today,
+            status__in=[Project.Status.RUNNING, Project.Status.COMING_SOON],
             end_date__gte=today,
         )
         .filter(total_donated_sum__lt=F("total_target"))
@@ -33,21 +32,16 @@ def home_view(request):
     today = timezone.localdate()
     active_qs = _active_qs(today)
 
-    # Top Slider: Top 5 highest-rated currently active, unfunded projects.
+    # Top Slider: Top 5 highest-rated currently active, unfunded projects (must have rating > 0).
     top_rated_projects = (
         active_qs.annotate(avg_rating=Avg("ratings__stars"), rating_count=Count("ratings"))
         .filter(rating_count__gt=0 , avg_rating__gt=0)
+        .filter(rating_count__gt=0, avg_rating__gt=0)
         .order_by("-avg_rating", "-rating_count")[:5]
     )
-    # Fallback: if not enough rated projects yet, pad with newest active ones.
-    if top_rated_projects.count() < 5:
-        extra_needed = 5 - top_rated_projects.count()
-        existing_ids = list(top_rated_projects.values_list("id", flat=True))
-        fallback = active_qs.exclude(id__in=existing_ids).order_by("-created_at")[:extra_needed]
-        top_rated_projects = list(top_rated_projects) + list(fallback)
 
     # Latest Projects: 8 most recently created (still active & not fully funded).
-    latest_projects = active_qs.order_by("-created_at")[:8]
+    latest_projects = active_qs.order_by("-created_at")[:5]
 
     # Featured Projects: hand-picked by Admin (still active & not fully funded).
     featured_projects = active_qs.filter(is_featured=True).order_by("-created_at")[:5]
