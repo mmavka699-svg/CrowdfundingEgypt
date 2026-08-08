@@ -227,6 +227,7 @@ a:hover {
 .gradient-text {
     background: var(--primary-gradient);
     -webkit-background-clip: text;
+    background-clip:text ;
     -webkit-text-fill-color: transparent;
 }
 
@@ -867,6 +868,7 @@ a:hover {
     height: 2.7rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
