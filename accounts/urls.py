@@ -6,6 +6,8 @@ app_name = "accounts"
 urlpatterns = [
     # Registration & activation
     path("register/", views.register_view, name="register"),
+    path("check-email/", views.check_email_view, name="check_email"),
+    path("verification-sent/", views.check_email_view, name="verification_sent"),
     path("activate/<uidb64>/<token>/", views.activate_account_view, name="activate"),
     path("activate/resend/", views.resend_activation_view, name="resend_activation"),
 

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Check Your Email — Crowd-Funding Egypt{% endblock %}
+
+{% block content %}
+<div class="container my-5 d-flex justify-content-center" style="min-height: 70vh; align-items: center;">
+    <div class="form-card text-center p-5" style="max-width: 520px; width: 100%;" data-animate="fade-up">
+
+        <!-- Animated envelope icon -->
+        <div class="mx-auto mb-4 position-relative d-inline-flex align-items-center justify-content-center rounded-circle"
+             style="width: 90px; height: 90px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); box-shadow: 0 8px 32px rgba(99,102,241,0.35);">
+            <i class="bi bi-envelope-open-fill text-white" style="font-size: 2.4rem;"></i>
+        </div>
+
+        <h2 class="fw-extrabold text-dark mb-2" style="font-size: 1.75rem;">Check Your Inbox</h2>
+        <p class="text-muted mb-1" style="font-size: 1rem;">
+            A verification link has been sent to
+        </p>
+        {% if email %}
+        <p class="fw-bold text-primary mb-4" style="font-size: 1.05rem;">
+            <i class="bi bi-envelope me-1"></i>{{ email }}
+        </p>
+        {% else %}
+        <p class="fw-bold text-primary mb-4">your email address</p>
+        {% endif %}
+
+        <!-- Steps -->
+        <div class="d-flex flex-column gap-3 text-start mb-5">
+            <div class="d-flex align-items-start gap-3 p-3 rounded-3 bg-primary-subtle border border-primary-subtle">
+                <div class="fw-bold text-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                     style="width: 30px; height: 30px; background: rgba(99,102,241,0.15); font-size: 0.85rem;">1</div>
+                <div>
+                    <p class="fw-semibold mb-0 text-dark">Open the email</p>
+                    <small class="text-muted">Look for an email from <strong>Crowd-Funding Egypt</strong> in your inbox.</small>
+                </div>
+            </div>
+            <div class="d-flex align-items-start gap-3 p-3 rounded-3 bg-success-subtle border border-success-subtle">
+                <div class="fw-bold text-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                     style="width: 30px; height: 30px; background: rgba(34,197,94,0.15); font-size: 0.85rem;">2</div>
+                <div>
+                    <p class="fw-semibold mb-0 text-dark">Click the activation link</p>
+                    <small class="text-muted">The link expires in <strong>24 hours</strong>. No password needed.</small>
+                </div>
+            </div>
+            <div class="d-flex align-items-start gap-3 p-3 rounded-3 bg-warning-subtle border border-warning-subtle">
+                <div class="fw-bold text-warning-emphasis rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                     style="width: 30px; height: 30px; background: rgba(234,179,8,0.15); font-size: 0.85rem;">3</div>
+                <div>
+                    <p class="fw-semibold mb-0 text-dark">You're in!</p>
+                    <small class="text-muted">You'll be automatically logged in and taken to the homepage.</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spam tip -->
+        <div class="alert alert-secondary rounded-3 text-start small mb-4 py-2 px-3" role="alert">
+            <i class="bi bi-info-circle me-1"></i>
+            <strong>Didn't receive the email?</strong> Check your <strong>Spam</strong> or <strong>Junk</strong> folder, or request a resend below.
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex flex-column gap-2">
+            <a href="{% url 'accounts:resend_activation' %}" class="btn btn-outline-primary btn-pill w-100">
+                <i class="bi bi-arrow-clockwise me-1"></i> Resend Activation Email
+            </a>
+            <a href="{% url 'core:home' %}" class="btn btn-light btn-pill w-100 text-muted">
+                <i class="bi bi-house me-1"></i> Back to Home
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
