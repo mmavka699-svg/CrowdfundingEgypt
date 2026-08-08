@@ -47,6 +47,45 @@ def search_projects_view(request):
     )
 
 
+def search_autocomplete_view(request):
+    """AJAX endpoint providing live autocomplete suggestions for projects and tags as user types."""
+    query = request.GET.get("q", "").strip()
+    if not query:
+        return JsonResponse({"results": [], "tags": []})
+
+    projects = (
+        Project.objects.filter(
+            Q(title__icontains=query) | Q(tags__name__icontains=query),
+            status=Project.Status.RUNNING,
+        )
+        .distinct()
+        .prefetch_related("images")
+        .select_related("category")[:5]
+    )
+
+    results_data = []
+    for p in projects:
+        cover = p.images.first()
+        image_url = cover.image.url if (cover and cover.image) else ""
+        results_data.append({
+            "id": p.id,
+            "title": p.title,
+            "url": p.get_absolute_url(),
+            "category": p.category.name if p.category else "",
+            "image": image_url,
+            "percentage": float(p.progress_percentage),
+            "target": f"{p.total_target:,.0f} EGP",
+        })
+
+    tags = Tag.objects.filter(name__icontains=query)[:4]
+    tags_data = [
+        {"name": t.name, "url": f"/projects/tag/{t.slug}/"}
+        for t in tags
+    ]
+
+    return JsonResponse({"results": results_data, "tags": tags_data, "query": query})
+
+
 def category_detail_view(request, slug):
     category = get_object_or_404(Category, slug=slug)
     projects = Project.objects.filter(
