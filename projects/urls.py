@@ -6,6 +6,7 @@ app_name = "projects"
 urlpatterns = [
     path("", views.project_list_view, name="project_list"),
     path("search/", views.search_projects_view, name="search"),
+    path("autocomplete/", views.search_autocomplete_view, name="autocomplete"),
     path("new/", views.project_create_view, name="project_create"),
 
     path("category/<slug:slug>/", views.category_detail_view, name="category_detail"),

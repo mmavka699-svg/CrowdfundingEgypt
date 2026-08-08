@@ -101,6 +101,26 @@ class Project(models.Model):
 
     # ---- Derived / computed properties used across templates & views -----
     @property
+    def formatted_target(self):
+        """Returns total_target formatted in M notation if >= 1,000,000 (e.g., 2.5M EGP) or standard comma format."""
+        val = float(self.total_target)
+        if val >= 1_000_000:
+            val_m = val / 1_000_000
+            formatted = f"{val_m:.2f}".rstrip("0").rstrip(".")
+            return f"{formatted}M EGP"
+        return f"{self.total_target:,.0f} EGP"
+
+    @property
+    def formatted_total_donated(self):
+        """Returns total_donated formatted in M notation if >= 1,000,000 (e.g., 1.5M EGP) or standard comma format."""
+        val = float(self.total_donated)
+        if val >= 1_000_000:
+            val_m = val / 1_000_000
+            formatted = f"{val_m:.2f}".rstrip("0").rstrip(".")
+            return f"{formatted}M EGP"
+        return f"{self.total_donated:,.0f} EGP"
+
+    @property
     def total_donated(self):
         agg = self.donations.aggregate(total=models.Sum("amount"))
         return agg["total"] or Decimal("0.00")

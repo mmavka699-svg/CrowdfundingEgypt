@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static humanize %}
 {% block title %}Crowd-Funding Egypt — Fund the Future of Egypt{% endblock %}
 
 {% block content %}
@@ -153,8 +153,8 @@
                             <i class="bi bi-currency-exchange"></i>
                         </div>
                         <div>
-                            <div class="stat-value" data-count="1500000" data-suffix="+">1,500,000+</div>
-                            <div class="stat-label">EGP Raised</div>
+                            <div class="stat-value" data-count="{{ stats.total_raised }}" data-suffix=" EGP">{{ stats.total_raised_display }}</div>
+                            <div class="stat-label">Total EGP Raised</div>
                         </div>
                     </div>
                 </div>
@@ -164,8 +164,8 @@
                             <i class="bi bi-rocket-takeoff-fill"></i>
                         </div>
                         <div>
-                            <div class="stat-value" data-count="350" data-suffix="+">350+</div>
-                            <div class="stat-label">Successful Projects</div>
+                            <div class="stat-value" data-count="{{ stats.total_projects }}">{{ stats.total_projects|intcomma }}</div>
+                            <div class="stat-label">Total Projects</div>
                         </div>
                     </div>
                 </div>
@@ -175,7 +175,7 @@
                             <i class="bi bi-people-fill"></i>
                         </div>
                         <div>
-                            <div class="stat-value" data-count="12000" data-suffix="+">12,000+</div>
+                            <div class="stat-value" data-count="{{ stats.active_backers }}">{{ stats.active_backers|intcomma }}</div>
                             <div class="stat-label">Active Backers</div>
                         </div>
                     </div>
@@ -186,7 +186,7 @@
                             <i class="bi bi-award-fill"></i>
                         </div>
                         <div>
-                            <div class="stat-value" data-count="98" data-suffix="%">98%</div>
+                            <div class="stat-value" data-count="{{ stats.satisfaction_rate }}" data-suffix="%">{{ stats.satisfaction_rate }}%</div>
                             <div class="stat-label">Community Satisfaction</div>
                         </div>
                     </div>

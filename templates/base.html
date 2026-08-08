@@ -83,12 +83,17 @@
                 </ul>
 
                 <!-- Search Bar -->
-                <form class="d-flex me-lg-3 mb-2 mb-lg-0" role="search" action="{% url 'projects:search' %}"
+                <form class="d-flex me-lg-3 mb-2 mb-lg-0 nav-search-form" role="search" action="{% url 'projects:search' %}"
                     method="get">
                     <div class="nav-search-wrapper">
                         <i class="bi bi-search nav-search-icon"></i>
-                        <input class="nav-search-input" type="search" name="q" placeholder="Search projects, tags..."
-                            value="{{ request.GET.q|default:'' }}" aria-label="Search">
+                        <input class="nav-search-input" type="search" name="q" list="navSearchDatalist" placeholder="Search projects, tags..."
+                            value="{{ request.GET.q|default:'' }}" aria-label="Search" id="navSearchInput">
+                        <datalist id="navSearchDatalist">
+                            {% for suggestion in nav_search_suggestions %}
+                            <option value="{{ suggestion }}"></option>
+                            {% endfor %}
+                        </datalist>
                         <button class="nav-search-btn" type="submit" aria-label="Submit search">
                             <i class="bi bi-arrow-right-short"></i>
                         </button>
@@ -117,7 +122,7 @@
                             </li>
                             <li>
                                 <a class="dropdown-item" href="{% url 'projects:project_create' %}">
-                                    <i class="bi bi-rocket-takeoff me-2 text-primary"></i> Start a Campaign
+                                    <i class="bi bi-rocket-takeoff me-2 text-primary"></i> Start a project
                                 </a>
                             </li>
                             <li>

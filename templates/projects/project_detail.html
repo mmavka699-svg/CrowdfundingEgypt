@@ -186,9 +186,9 @@
                 <!-- Raised vs Goal Display -->
                 <div class="mb-3">
                     <div class="display-6 fw-extrabold {% if project.progress_percentage >= 100 %}text-success{% else %}text-primary{% endif %} mb-1">
-                        {{ project.total_donated|intcomma }} EGP
+                        {{ project.formatted_total_donated }}
                     </div>
-                    <span class="text-muted small">raised of <strong class="text-dark">{{ project.total_target|intcomma }} EGP</strong> goal</span>
+                    <span class="text-muted small">raised of <strong class="text-dark">{{ project.formatted_target }}</strong> goal</span>
                 </div>
 
                 <!-- Remaining Target Display -->

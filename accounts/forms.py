@@ -15,7 +15,7 @@ class RegistrationForm(UserCreationForm):
     mobile_phone = forms.CharField(
         max_length=20,
         required=True,
-        help_text=_("Egyptian number, e.g. 01012345678 or +201012345678"),
+        help_text=_("Must be a valid 11-digit Egyptian mobile number."),
     )
     profile_picture = forms.ImageField(required=False)
 
