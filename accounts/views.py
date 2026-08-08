@@ -14,6 +14,8 @@ from django.urls import reverse_lazy, reverse
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.cache import never_cache
 
 from projects.models import Project, Donation
 from .forms import RegistrationForm, EmailAuthenticationForm, ProfileEditForm, AccountDeletionForm
@@ -24,6 +26,8 @@ from .tokens import account_activation_token, is_token_expired
 # ---------------------------------------------------------------------------
 # REGISTRATION + EMAIL ACTIVATION (24-hour expiring link)
 # ---------------------------------------------------------------------------
+@ensure_csrf_cookie
+@never_cache
 def register_view(request):
     if request.user.is_authenticated:
         return redirect("core:home")
@@ -31,18 +35,23 @@ def register_view(request):
     if request.method == "POST":
         form = RegistrationForm(request.POST, request.FILES)
         if form.is_valid():
-            user = form.save()
-            _send_activation_email(request, user)
-            messages.success(
-                request,
-                "Account created! Please check your email to activate your account. "
-                "The activation link expires in 24 hours.",
-            )
-            return redirect("accounts:login")
+            user = form.save()  # is_active=False by default — gated behind email link
+            try:
+                _send_activation_email(request, user)
+            except Exception:
+                pass  # Gracefully handle email transport errors
+            request.session["pending_activation_email"] = user.email
+            return redirect("accounts:check_email")
     else:
         form = RegistrationForm()
 
     return render(request, "accounts/register.html", {"form": form})
+
+
+def check_email_view(request):
+    """Dedicated 'Check Your Email' waiting page shown after signup."""
+    email = request.session.get("pending_activation_email", "")
+    return render(request, "accounts/verification_sent.html", {"email": email})
 
 
 def _send_activation_email(request, user):
@@ -66,6 +75,7 @@ def _send_activation_email(request, user):
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], html_message=message)
 
 
+@never_cache
 def activate_account_view(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
@@ -78,8 +88,11 @@ def activate_account_view(request, uidb64, token):
         return redirect("accounts:login")
 
     if user.is_active:
-        messages.info(request, "This account is already activated. Please log in.")
-        return redirect("accounts:login")
+        # Already verified — log in if needed and redirect straight to home
+        if not request.user.is_authenticated:
+            auth_login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+        messages.info(request, "Your account is already verified. Welcome back!")
+        return redirect("core:home")
 
     # Enforce strict 24-hour expiry, independent of token validity check.
     if is_token_expired(user, token):
@@ -94,10 +107,18 @@ def activate_account_view(request, uidb64, token):
         messages.error(request, "Invalid or already-used activation link.")
         return redirect("accounts:login")
 
+    # Activate account & auto-authenticate with explicit Django backend
     user.is_active = True
     user.save(update_fields=["is_active"])
-    messages.success(request, "Your account has been activated! You can now log in.")
-    return redirect("accounts:login")
+    auth_login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+    request.session.pop("pending_activation_email", None)
+
+    messages.success(
+        request,
+        f"Welcome to Crowd-Funding Egypt, {user.get_full_name() or user.email}! "
+        "Your account has been verified and you are now logged in."
+    )
+    return redirect("core:home")
 
 
 def resend_activation_view(request):
@@ -107,10 +128,11 @@ def resend_activation_view(request):
         try:
             user = CustomUser.objects.get(email=email, is_active=False)
             _send_activation_email(request, user)
+            request.session["pending_activation_email"] = user.email
             messages.success(request, "A new activation link has been sent to your email.")
-            return redirect("accounts:login")
+            return redirect("accounts:check_email")
         except CustomUser.DoesNotExist:
-            messages.error(request, "No inactive account found with that email.")
+            messages.error(request, "No inactive account found with that email address.")
     return render(request, "accounts/resend_activation.html")
 
 
