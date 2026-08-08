@@ -34,26 +34,43 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         today = timezone.localdate()
 
-        # Only touch RUNNING projects — cancelled ones are permanent.
-        running = Project.objects.filter(status=Project.Status.RUNNING).annotate(
+        # 1. Mark COMING_SOON: start_date is in the future
+        coming_soon_count = Project.objects.filter(
+            status=Project.Status.RUNNING,
+            start_date__gt=today,
+        ).update(status=Project.Status.COMING_SOON)
+
+        # 2. Mark RUNNING: start_date reached for coming_soon projects
+        started_count = Project.objects.filter(
+            status=Project.Status.COMING_SOON,
+            start_date__lte=today,
+            end_date__gte=today,
+        ).update(status=Project.Status.RUNNING)
+
+        # Re-evaluate target status for active candidates
+        candidates = Project.objects.filter(
+            status__in=[Project.Status.RUNNING, Project.Status.COMING_SOON]
+        ).annotate(
             total_donated_sum=Coalesce(Sum("donations__amount"), Decimal("0.00"))
         )
 
-        # 1. Mark FUNDED: donations have reached the target
+        # 3. Mark FUNDED: donations have reached the target
         funded_ids = list(
-            running.filter(total_donated_sum__gte=F("total_target")).values_list("pk", flat=True)
+            candidates.filter(total_donated_sum__gte=F("total_target")).values_list("pk", flat=True)
         )
         funded_count = Project.objects.filter(pk__in=funded_ids).update(status=Project.Status.FUNDED)
 
-        # 2. Mark ENDED: end_date has passed but not fully funded
+        # 4. Mark ENDED: end_date has passed but not fully funded
         ended_count = Project.objects.filter(
-            status=Project.Status.RUNNING,
+            status__in=[Project.Status.RUNNING, Project.Status.COMING_SOON],
             end_date__lt=today,
         ).update(status=Project.Status.ENDED)
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"sync_project_statuses: {funded_count} project(s) marked FUNDED, "
+                f"sync_project_statuses: {coming_soon_count} project(s) marked COMING_SOON, "
+                f"{started_count} project(s) activated to RUNNING, "
+                f"{funded_count} project(s) marked FUNDED, "
                 f"{ended_count} project(s) marked ENDED."
             )
         )

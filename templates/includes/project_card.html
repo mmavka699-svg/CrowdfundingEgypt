@@ -6,6 +6,11 @@
         <span class="project-card-badge">
             <i class="bi bi-folder2 me-1 text-primary"></i> {{ project.category.name }}
         </span>
+        {% if project.status == 'coming_soon' or project.campaign_state == 'future' %}
+        <span class="badge bg-info text-white position-absolute top-0 end-0 m-3 rounded-pill shadow-sm px-2.5 py-1.5 fw-semibold" style="z-index: 5; font-size: 0.75rem;">
+            <i class="bi bi-hourglass-split me-1"></i> Coming Soon
+        </span>
+        {% endif %}
 
         <!-- Card Image Header: Multiple Images -> Carousel, Single Image -> Standard Zoom Image -->
         <div class="project-card-img-wrapper">
@@ -60,9 +65,15 @@
                         <span class="fw-bold text-dark fs-6">{{ project.total_donated|intcomma }} EGP</span>
                         <span class="text-muted" style="font-size: 0.775rem;"> raised</span>
                     </div>
+                    {% if project.status == 'coming_soon' or project.campaign_state == 'future' %}
+                    <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill fw-bold">
+                        Coming Soon
+                    </span>
+                    {% else %}
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill fw-bold">
                         {{ project.progress_percentage }}%
                     </span>
+                    {% endif %}
                 </div>
 
                 <!-- Footer Metadata Strip -->
@@ -70,9 +81,15 @@
                     <span class="text-warning fw-semibold">
                         <i class="fa-solid fa-star me-1"></i>{{ project.average_rating }}
                     </span>
+                    {% if project.status == 'coming_soon' or project.campaign_state == 'future' %}
+                    <span class="text-info fw-semibold">
+                        <i class="bi bi-calendar-event me-1"></i>Starts {{ project.start_date|date:"M d" }}
+                    </span>
+                    {% else %}
                     <span>
                         <i class="bi bi-clock me-1 text-primary"></i>{{ project.days_left }} days left
                     </span>
+                    {% endif %}
                 </div>
 
                 <!-- Action Button -->
