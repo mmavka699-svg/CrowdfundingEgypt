@@ -59,10 +59,12 @@
                                     <span class="badge
                                         {% if p.status == 'running' %}bg-success-subtle text-success border-success-subtle
                                         {% elif p.status == 'funded' %}bg-primary-subtle text-primary border-primary-subtle
+                                        {% elif p.status == 'coming_soon' %}bg-info-subtle text-info border-info-subtle
                                         {% elif p.status == 'cancelled' %}bg-danger-subtle text-danger border-danger-subtle
                                         {% else %}bg-secondary-subtle text-secondary border-secondary-subtle
                                         {% endif %} border rounded-pill px-3 py-1">
-                                        {% if p.status == 'funded' %}<i class="bi bi-trophy-fill me-1"></i>{% endif %}
+                                        {% if p.status == 'funded' %}<i class="bi bi-trophy-fill me-1"></i>
+                                        {% elif p.status == 'coming_soon' %}<i class="bi bi-hourglass-split me-1"></i>{% endif %}
                                         {{ p.get_status_display }}</span>
                                     <a href="{% url 'projects:project_edit' p.slug %}"
                                         class="btn btn-sm btn-outline-primary btn-pill" title="Edit Project">

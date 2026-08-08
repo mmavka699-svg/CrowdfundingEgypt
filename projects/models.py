@@ -39,6 +39,7 @@ class Project(models.Model):
         CANCELLED = "cancelled", _("Cancelled")
         ENDED = "ended", _("Ended")
         FUNDED = "funded", _("Fully Funded")
+        COMING_SOON = "coming_soon", _("Coming Soon")
 
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="projects"
@@ -60,7 +61,7 @@ class Project(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
 
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.RUNNING)
+    status = models.CharField(max_length=15, choices=Status.choices, default=Status.RUNNING)
     is_featured = models.BooleanField(
         default=False, help_text=_("Hand-picked by Admin to appear in the Featured section")
     )
@@ -126,7 +127,7 @@ class Project(models.Model):
     def campaign_state(self):
         """
         Three-state model based on current date:
-        - 'future'  : now < start_date
+        - 'future'  : now < start_date or status == coming_soon
         - 'active'  : start_date <= now <= end_date  (and not cancelled / fully funded)
         - 'ended'   : now > end_date OR fully funded OR cancelled
         """
@@ -135,7 +136,7 @@ class Project(models.Model):
             return "ended"
         if self.status == self.Status.FUNDED:
             return "ended"
-        if today < self.start_date:
+        if self.status == self.Status.COMING_SOON or today < self.start_date:
             return "future"
         if today > self.end_date or self.is_fully_funded:
             return "ended"
@@ -170,7 +171,8 @@ class Project(models.Model):
           1. CANCELLED — never auto-overridden; already set explicitly by cancel().
           2. FUNDED     — total_donated >= total_target (still within or past end_date).
           3. ENDED      — end_date has passed and not fully funded.
-          4. RUNNING    — campaign is still active (no change needed).
+          4. COMING_SOON— start_date is in the future.
+          5. RUNNING    — campaign is still active (no change needed).
         """
         if self.status == self.Status.CANCELLED:
             return  # cancellation is permanent
@@ -180,6 +182,8 @@ class Project(models.Model):
             new_status = self.Status.FUNDED
         elif today > self.end_date:
             new_status = self.Status.ENDED
+        elif today < self.start_date:
+            new_status = self.Status.COMING_SOON
         else:
             new_status = self.Status.RUNNING
 
