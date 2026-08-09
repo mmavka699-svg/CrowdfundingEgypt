@@ -8,17 +8,25 @@ from projects.models import Project, Category, Donation, Rating
 
 class HomeViewDynamicStatsTest(TestCase):
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            email="donor@example.com",
+        self.creator = CustomUser.objects.create_user(
+            email="creator@example.com",
             password="Password123!",
-            first_name="Donor",
+            first_name="Creator",
             last_name="User",
             mobile_phone="01012345678",
             is_active=True,
         )
+        self.donor = CustomUser.objects.create_user(
+            email="donor@example.com",
+            password="Password123!",
+            first_name="Donor",
+            last_name="User",
+            mobile_phone="01087654321",
+            is_active=True,
+        )
         self.category = Category.objects.create(name="Community", slug="community")
         self.project = Project.objects.create(
-            creator=self.user,
+            creator=self.creator,
             title="Clean Water Initiative",
             details="Providing clean water to villages.",
             category=self.category,
@@ -27,8 +35,8 @@ class HomeViewDynamicStatsTest(TestCase):
             end_date=timezone.localdate() + timezone.timedelta(days=30),
             status=Project.Status.RUNNING,
         )
-        Donation.objects.create(project=self.project, donor=self.user, amount=Decimal("5000.00"))
-        Rating.objects.create(project=self.project, user=self.user, stars=4)
+        Donation.objects.create(project=self.project, donor=self.donor, amount=Decimal("5000.00"))
+        Rating.objects.create(project=self.project, user=self.donor, stars=4)
 
     def test_home_view_calculates_dynamic_stats(self):
         response = self.client.get(reverse("core:home"))

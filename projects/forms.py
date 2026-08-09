@@ -71,9 +71,16 @@ class DonationForm(forms.ModelForm):
         model = Donation
         fields = ["amount"]
 
-    def __init__(self, *args, project=None, **kwargs):
+    def __init__(self, *args, user=None, project=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.user = user
         self.project = project
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.project and self.user and self.project.creator_id == self.user.id:
+            raise ValidationError("You cannot donate to your own project.")
+        return cleaned_data
 
     def clean_amount(self):
         amount = self.cleaned_data["amount"]

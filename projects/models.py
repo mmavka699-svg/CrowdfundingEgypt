@@ -3,6 +3,7 @@ import uuid
 from decimal import Decimal
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.urls import reverse
@@ -272,6 +273,15 @@ class Donation(models.Model):
     def __str__(self):
         return f"{self.donor} donated {self.amount} EGP to {self.project}"
 
+    def clean(self):
+        super().clean()
+        if self.project_id and self.donor_id and self.project.creator_id == self.donor_id:
+            raise ValidationError("You cannot donate to your own project.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
 
 # ---------------------------------------------------------------------------
 # COMMENT  (with bonus nested replies)
@@ -320,6 +330,15 @@ class Rating(models.Model):
 
     def __str__(self):
         return f"{self.user} rated {self.project} {self.stars}/5"
+
+    def clean(self):
+        super().clean()
+        if self.project_id and self.user_id and self.project.creator_id == self.user_id:
+            raise ValidationError("You cannot rate your own project.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
 
 # ---------------------------------------------------------------------------
