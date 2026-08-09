@@ -83,12 +83,13 @@
                 </ul>
 
                 <!-- Search Bar -->
-                <form class="d-flex me-lg-3 mb-2 mb-lg-0 nav-search-form" role="search" action="{% url 'projects:search' %}"
-                    method="get">
+                <form class="d-flex me-lg-3 mb-2 mb-lg-0 nav-search-form" role="search"
+                    action="{% url 'projects:search' %}" method="get">
                     <div class="nav-search-wrapper">
                         <i class="bi bi-search nav-search-icon"></i>
-                        <input class="nav-search-input" type="search" name="q" list="navSearchDatalist" placeholder="Search projects, tags..."
-                            value="{{ request.GET.q|default:'' }}" aria-label="Search" id="navSearchInput">
+                        <input class="nav-search-input" type="search" name="q" list="navSearchDatalist"
+                            placeholder="Search projects, tags..." value="{{ request.GET.q|default:'' }}"
+                            aria-label="Search" id="navSearchInput">
                         <datalist id="navSearchDatalist">
                             {% for suggestion in nav_search_suggestions %}
                             <option value="{{ suggestion }}"></option>
@@ -106,8 +107,7 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#"
                             data-bs-toggle="dropdown">
-                            <img src="{{ user.avatar_url }}" class="nav-profile-avatar"
-                                alt="{{ user.get_full_name }}">
+                            <img src="{{ user.avatar_url }}" class="nav-profile-avatar" alt="{{ user.get_full_name }}">
                             <span class="fw-semibold text-dark">{{ user.first_name }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0">

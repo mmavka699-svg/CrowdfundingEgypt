@@ -84,3 +84,20 @@ def home_view(request):
 
 def about_view(request):
     return render(request, "core/about.html")
+
+
+def csrf_failure_view(request, reason=""):
+    """
+    Custom CSRF failure handler. Instead of showing Django's raw 403 page,
+    render a styled template that explains the issue and offers a retry link.
+    This keeps CSRF protection fully enabled — no tokens are bypassed.
+    """
+    from django.http import HttpResponseForbidden
+    from django.template.loader import render_to_string
+
+    html = render_to_string(
+        "core/csrf_failure.html",
+        {"reason": reason, "referrer": request.META.get("HTTP_REFERER", "/")},
+        request=request,
+    )
+    return HttpResponseForbidden(html)

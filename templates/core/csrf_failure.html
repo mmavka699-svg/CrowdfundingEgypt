@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Session Expired — Crowd-Funding Egypt{% endblock %}
+
+{% block content %}
+<div class="container my-5" style="max-width:520px;">
+    <div class="form-card text-center" data-animate="fade-up">
+        <div class="mb-4">
+            <span class="navbar-brand-icon mx-auto mb-3" style="width:60px; height:60px; font-size:1.75rem; background:var(--danger-subtle,#fde8e8); color:var(--danger,#dc3545);">
+                <i class="bi bi-shield-exclamation"></i>
+            </span>
+            <h3 class="fw-bold text-dark mb-2">Form Session Expired</h3>
+            <p class="text-muted mb-0">
+                Your form's security token has expired. This usually happens when you logged in or out in another tab,
+                or the page was open for a long time.
+            </p>
+        </div>
+
+        <div class="alert alert-warning rounded-4 border-0 text-start small mb-4">
+            <i class="bi bi-info-circle-fill me-1"></i>
+            <strong>No action was taken.</strong> Your data was not submitted.
+            Simply reload the page and try again.
+        </div>
+
+        <a href="{{ referrer|default:'/' }}" class="btn btn-primary btn-lg w-100 btn-pill shadow-sm mb-3">
+            <i class="bi bi-arrow-clockwise me-2"></i> Go Back &amp; Retry
+        </a>
+        <a href="/" class="btn btn-outline-secondary w-100 btn-pill">
+            <i class="bi bi-house me-2"></i> Return to Home
+        </a>
+    </div>
+</div>
+{% endblock %}
