@@ -260,7 +260,10 @@ def project_detail_view(request, slug):
         .order_by("-created_at")
     )
 
-    donation_form = DonationForm(project=project)
+    donation_form = DonationForm(
+        user=request.user if request.user.is_authenticated else None,
+        project=project,
+    )
     comment_form = CommentForm()
     rating_form = RatingForm()
     report_form = ReportForm()
@@ -306,6 +309,11 @@ def project_detail_view(request, slug):
 def donate_view(request, slug):
     project = get_object_or_404(Project, slug=slug)
 
+    # Creator restriction: project creators can never donate to their own project
+    if project.creator_id == request.user.id:
+        messages.error(request, "You cannot donate to your own project.")
+        return redirect(project.get_absolute_url())
+
     state = project.campaign_state
     if state == "future":
         messages.error(
@@ -326,7 +334,7 @@ def donate_view(request, slug):
         messages.error(request, "This project is not currently accepting donations.")
         return redirect(project.get_absolute_url())
 
-    form = DonationForm(request.POST, project=project)
+    form = DonationForm(request.POST, user=request.user, project=project)
     if form.is_valid():
         donation = form.save(commit=False)
         donation.project = project
@@ -375,9 +383,18 @@ def comment_create_view(request, slug):
 @require_POST
 def rate_project_view(request, slug):
     project = get_object_or_404(Project, slug=slug)
+
+    # Creator restriction: project creators can never rate their own project
+    if project.creator_id == request.user.id:
+        return JsonResponse(
+            {"success": False, "error": "You cannot rate your own project."},
+            status=403,
+        )
+
     try:
         stars = int(request.POST.get("stars", 0))
     except ValueError:
+        stars = 0
         stars = 0
 
     if stars < 1 or stars > 5:

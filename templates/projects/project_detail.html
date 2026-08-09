@@ -118,15 +118,22 @@
 
             <!-- Interactive Star Rating Widget (AJAX Powered) -->
             {% if user.is_authenticated %}
-            <div class="p-4 rounded-4 bg-white shadow-sm border mb-5">
-                <h6 class="fw-bold mb-2">Rate this Project</h6>
-                <p class="small text-muted mb-3">Share your feedback with the campaign creator and backer community.</p>
-                <div class="star-rating" data-project-slug="{{ project.slug }}" data-current="{{ user_rating.stars|default:0 }}">
-                    {% for i in "12345" %}
-                    <i class="fa-star star-icon {% if user_rating and user_rating.stars >= i|add:'0' %}fa-solid{% else %}fa-regular{% endif %}" data-value="{{ i }}"></i>
-                    {% endfor %}
+                {% if user.id == project.creator.id %}
+                <div class="p-4 rounded-4 bg-light shadow-sm border mb-5">
+                    <h6 class="fw-bold mb-2">Rate this Project</h6>
+                    <p class="small text-muted mb-0"><i class="bi bi-info-circle me-1"></i> You cannot rate your own project.</p>
                 </div>
-            </div>
+                {% else %}
+                <div class="p-4 rounded-4 bg-white shadow-sm border mb-5">
+                    <h6 class="fw-bold mb-2">Rate this Project</h6>
+                    <p class="small text-muted mb-3">Share your feedback with the campaign creator and backer community.</p>
+                    <div class="star-rating" data-project-slug="{{ project.slug }}" data-current="{{ user_rating.stars|default:0 }}">
+                        {% for i in "12345" %}
+                        <i class="fa-star star-icon {% if user_rating and user_rating.stars >= i|add:'0' %}fa-solid{% else %}fa-regular{% endif %}" data-value="{{ i }}"></i>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
             {% endif %}
 
             <!-- ==========================================================================
@@ -247,30 +254,41 @@
 
                 {% else %}
                     {% if user.is_authenticated %}
-                    <form method="post" action="{% url 'projects:donate' project.slug %}">
-                        {% csrf_token %}
-
-                        <!-- Quick Preset Chips -->
-                        <div class="mb-3">
-                            <label class="form-label small text-muted">Quick Amount (EGP)</label>
-                            <div class="d-flex flex-wrap gap-2">
-                                <span class="preset-chip flex-fill text-center" data-amount="50">50</span>
-                                <span class="preset-chip flex-fill text-center" data-amount="100">100</span>
-                                <span class="preset-chip flex-fill text-center" data-amount="250">250</span>
-                                <span class="preset-chip flex-fill text-center" data-amount="500">500</span>
-                                <span class="preset-chip flex-fill text-center" data-amount="1000">1,000</span>
-                            </div>
+                        {% if user.id == project.creator.id %}
+                        <div class="alert alert-info text-center rounded-4 mb-3">
+                            <i class="bi bi-info-circle fs-4 d-block mb-1 text-info"></i>
+                            <span class="fw-bold d-block">Project Creator</span>
+                            <small class="text-muted">You cannot donate to your own project.</small>
                         </div>
-
-                        <div class="input-group donate-input-group mb-3">
-                            <span class="input-group-text donate-input-prefix">EGP</span>
-                            {{ donation_form.amount|add_class:"form-control donate-input-field number-format-input" }}
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-lg w-100 btn-pill shadow-sm mb-3">
-                            <i class="bi bi-heart-fill me-2"></i> Donate Now
+                        <button class="btn btn-secondary btn-lg w-100 btn-pill mb-3" disabled>
+                            <i class="bi bi-heart me-2"></i> Creator Cannot Donate
                         </button>
-                    </form>
+                        {% else %}
+                        <form method="post" action="{% url 'projects:donate' project.slug %}">
+                            {% csrf_token %}
+
+                            <!-- Quick Preset Chips -->
+                            <div class="mb-3">
+                                <label class="form-label small text-muted">Quick Amount (EGP)</label>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span class="preset-chip flex-fill text-center" data-amount="50">50</span>
+                                    <span class="preset-chip flex-fill text-center" data-amount="100">100</span>
+                                    <span class="preset-chip flex-fill text-center" data-amount="250">250</span>
+                                    <span class="preset-chip flex-fill text-center" data-amount="500">500</span>
+                                    <span class="preset-chip flex-fill text-center" data-amount="1000">1,000</span>
+                                </div>
+                            </div>
+
+                            <div class="input-group donate-input-group mb-3">
+                                <span class="input-group-text donate-input-prefix">EGP</span>
+                                {{ donation_form.amount|add_class:"form-control donate-input-field number-format-input" }}
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg w-100 btn-pill shadow-sm mb-3">
+                                <i class="bi bi-heart-fill me-2"></i> Donate Now
+                            </button>
+                        </form>
+                        {% endif %}
                     {% else %}
                     <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary btn-lg w-100 btn-pill mb-3">
                         Log in to Donate
