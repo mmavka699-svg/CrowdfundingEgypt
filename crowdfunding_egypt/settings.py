@@ -176,3 +176,8 @@ ACCOUNT_ACTIVATION_TIMEOUT_HOURS = 24
 MESSAGE_TAGS = {
     10: "info", 20: "info", 25: "success", 30: "warning", 40: "danger",
 }
+
+# ---------------------------------------------------------------------------
+# CSRF — Custom failure view (user-friendly on stale tokens, no security bypass)
+# ---------------------------------------------------------------------------
+CSRF_FAILURE_VIEW = "core.views.csrf_failure_view"
