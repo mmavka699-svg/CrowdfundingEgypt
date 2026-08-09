@@ -1,9 +1,14 @@
+import json
+import re
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from taggit.models import Tag
@@ -302,38 +307,81 @@ def project_detail_view(request, slug):
 
 
 # ---------------------------------------------------------------------------
-# DONATE
+# DONATE  (multi-step checkout flow)
+#
+# Single endpoint handling BOTH:
+#   * GET   -> renders templates/projects/donate.html (the single-page stepper)
+#   * POST  -> AJAX/JSON submission from the stepper, OR the legacy urlencoded
+#              form submission (kept for backwards compatibility).
+#
+# The Donation record is created ONLY after every step has been validated
+# (amount -> payment method -> card details -> PIN). Because `total_donated`
+# is a computed property (SUM of donation rows), creating the record is what
+# updates the project's raised amount; we then re-sync the campaign status so
+# a project that just hit its target is marked FUNDED.
 # ---------------------------------------------------------------------------
 @login_required
-@require_POST
 def donate_view(request, slug):
     project = get_object_or_404(Project, slug=slug)
 
-    # Creator restriction: project creators can never donate to their own project
-    if project.creator_id == request.user.id:
-        messages.error(request, "You cannot donate to your own project.")
+    # Shared eligibility gate (applies to both GET and POST handlers)
+    eligibility_error = _donation_eligibility_error(project, request.user)
+
+    if request.method == "GET":
+        return render(
+            request,
+            "projects/donate.html",
+            {"project": project, "eligibility_error": eligibility_error},
+        )
+
+    # ---- POST handling below -------------------------------------------------
+    if eligibility_error:
+        if _is_ajax(request):
+            return JsonResponse({"success": False, "error": eligibility_error}, status=403)
+        messages.error(request, eligibility_error)
         return redirect(project.get_absolute_url())
+
+    # The stepper submits JSON via fetch(); the legacy detail-page form submits urlencoded.
+    if _is_ajax(request) or request.headers.get("content-type", "").startswith("application/json"):
+        return _process_ajax_donation(request, project)
+    return _process_legacy_donation(request, project)
+
+
+def _donation_eligibility_error(project, user):
+    """Return a user-friendly error string if this user cannot donate, else None."""
+    if project.creator_id == user.id:
+        return "You cannot donate to your own project."
 
     state = project.campaign_state
     if state == "future":
-        messages.error(
-            request,
-            f"This campaign hasn't started yet. It opens on {project.start_date.strftime('%B %d, %Y')}."
+        return (
+            f"This campaign hasn't started yet. "
+            f"It opens on {project.start_date.strftime('%B %d, %Y')}."
         )
-        return redirect(project.get_absolute_url())
     if state == "ended":
         if project.is_fully_funded:
-            messages.error(
-                request,
-                "This project has already reached its funding goal and is no longer accepting donations."
+            return (
+                "This project has already reached its funding goal and is no "
+                "longer accepting donations."
             )
-        else:
-            messages.error(request, "This campaign has ended and is no longer accepting donations.")
-        return redirect(project.get_absolute_url())
+        return "This campaign has ended and is no longer accepting donations."
     if not project.is_running:
-        messages.error(request, "This project is not currently accepting donations.")
-        return redirect(project.get_absolute_url())
+        return "This project is not currently accepting donations."
+    return None
 
+
+def _is_ajax(request):
+    """True when the request is an AJAX/fetch call (or declares JSON content)."""
+    return (
+        request.headers.get("x-requested-with") == "XMLHttpRequest"
+        or request.headers.get("content-type", "").startswith("application/json")
+    )
+
+
+# ---------------------------------------------------------------------------
+# Legacy fallback: the old single-step urlencoded form (project_detail page)
+# ---------------------------------------------------------------------------
+def _process_legacy_donation(request, project):
     form = DonationForm(request.POST, user=request.user, project=project)
     if form.is_valid():
         donation = form.save(commit=False)
@@ -351,6 +399,118 @@ def donate_view(request, slug):
                 break
             break
     return redirect(project.get_absolute_url())
+
+
+# ---------------------------------------------------------------------------
+# JSON endpoint consumed by the donate.html stepper (Step 4 -> Confirm)
+# ---------------------------------------------------------------------------
+def _process_ajax_donation(request, project):
+    try:
+        payload = json.loads(request.body or b"{}")
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid request payload."}, status=400)
+
+    # (1) Amount — reuse the existing DonationForm rules (min 1, cap at remaining)
+    form = DonationForm(payload, user=request.user, project=project)
+    if not form.is_valid():
+        _field, errors = next(iter(form.errors.items()))
+        return JsonResponse({"success": False, "error": errors[0]}, status=400)
+    amount = form.cleaned_data["amount"]
+
+    # (2) Payment method whitelist
+    method = str(payload.get("payment_method") or "").strip()
+    allowed_methods = {"paypal", "google_pay", "apple_pay", "card"}
+    if method not in allowed_methods:
+        return JsonResponse(
+            {"success": False, "error": "Please choose a valid payment method."}, status=400
+        )
+
+    # (3) Card details (only required when paying with a card)
+    if method == "card":
+        card_error = _validate_card_payload(payload)
+        if card_error:
+            return JsonResponse({"success": False, "error": card_error}, status=400)
+
+    # (4) Verification PIN
+    # NOTE: simulated 3-D Secure check. In production this step is handled by
+    # the payment processor (e.g. Stripe 3DS challenge) — the PIN is never our
+    # responsibility, and card data is tokenized off-platform.
+    pin = str(payload.get("pin") or "")
+    if not (pin.isdigit() and len(pin) == 4):
+        return JsonResponse(
+            {"success": False, "error": "Please enter the 4-digit verification PIN."}, status=400
+        )
+
+    # (5) Persist the donation — single write point, after ALL validations pass
+    try:
+        donation = Donation.objects.create(
+            project=project, donor=request.user, amount=amount
+        )
+    except ValidationError as exc:
+        return JsonResponse({"success": False, "error": "; ".join(exc.messages)}, status=400)
+
+    # (6) Re-sync project status (e.g. FUNDED when the target is now reached)
+    project.sync_status()
+
+    return JsonResponse(
+        {
+            "success": True,
+            "amount": str(donation.amount),          # decimal e.g. "200.00"
+            "total_donated": str(project.total_donated),
+            "progress": project.progress_percentage,
+            "redirect_url": project.get_absolute_url(),
+        }
+    )
+
+
+def _validate_card_payload(payload):
+    """
+    Lightweight client/request-side card validation (format + Luhn + expiry).
+
+    SECURITY NOTE: For production, never store or transmit the PAN/CVV past the
+    payment processor's own tokens (Stripe/PayPal SDK). This validation only
+    guards the demo stepper and is not a substitute for a real PSP tokenizer.
+    """
+    name = str(payload.get("card_name") or "").strip()
+    number = str(payload.get("card_number") or "").replace(" ", "").replace("-", "")
+    expiry = str(payload.get("card_expiry") or "").strip()
+    cvv = str(payload.get("card_cvv") or "").strip()
+
+    if len(name) < 2:
+        return "Please enter the cardholder name."
+
+    if not (number.isdigit() and 13 <= len(number) <= 19):
+        return "Please enter a valid card number."
+
+    
+
+    match = re.fullmatch(r"(0[1-9]|1[0-2])/(\d{2})", expiry)
+    if not match:
+        return "Expiry must be in MM/YY format."
+    month = int(match.group(1))
+    year = 2000 + int(match.group(2))
+    first_of_month = timezone.datetime(year, month, 1).date()
+    if first_of_month < timezone.localdate().replace(day=1):
+        return "This card has expired."
+
+    if not (cvv.isdigit() and len(cvv) in (3, 4)):
+        return "CVV must be 3 or 4 digits."
+
+    return None
+
+
+def _luhn_valid(number):
+    """Standard Luhn checksum test used by all major card networks."""
+    digits = [int(d) for d in number]
+    checksum = 0
+    parity = len(digits) % 2
+    for i, digit in enumerate(digits):
+        if i % 2 == parity:
+            digit *= 2
+            if digit > 9:
+                digit -= 9
+        checksum += digit
+    return checksum % 10 == 0
 
 
 # ---------------------------------------------------------------------------

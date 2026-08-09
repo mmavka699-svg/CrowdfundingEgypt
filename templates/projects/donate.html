@@ -1,0 +1,936 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Donate — {{ project.title }}{% endblock %}
+
+{#
+   ============================================================================ 
+   DONATE — Multi-Step Checkout (Single-Page Stepper)
+   ============================================================================ 
+   Flow:
+     Step 1 Enter the Amount      -> amount field + preset quick-selections
+     Step 2 Select Payment Method -> PayPal / Google Pay / Apple Pay / Card (+ Add New Card)
+     Step 3 Add New Card          -> cardholder/name/number/expiry/CVV + green preview card
+     Step 4 Enter PIN             -> 4-digit verification (simulated 3-D Secure)
+     Step 5 Success               -> green checkmark + "OK" back to the project
+
+   Everything is client-side (no page reloads). The only server round-trip is
+   the final "Confirm" action, which POSTs a JSON payload to
+   `{% url 'projects:donate' project.slug %}` and only then is the Donation
+   record created in the database.
+   ============================================================================ 
+#}
+
+{% block extra_css %}
+<style>
+    /* ------------------------------------------------------------------ 
+       Emerald checkout design system (scoped, inherits base.html tokens)
+       ------------------------------------------------------------------ */
+    :root {
+        --don-green: #10b981;
+        --don-green-dark: #059669;
+        --don-green-deep: #047857;
+        --don-green-light: #ecfdf5;
+        --don-green-border: #a7f3d0;
+        --don-green-grad: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    /* ---- Checkout banner (campaign summary strip) -------------------- */
+    .don-summary {
+        background: var(--don-green-light);
+        border: 1px solid var(--don-green-border);
+        border-radius: var(--radius-lg);
+        padding: 1.1rem 1.4rem;
+    }
+    .don-summary-icon {
+        width: 46px; height: 46px; flex-shrink: 0;
+        border-radius: var(--radius-md);
+        background: var(--don-green-grad); color: #fff;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    }
+
+    /* ---- Stepper card ------------------------------------------------ */
+    .don-card {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+    }
+    @media (max-width: 575.98px) {
+        .don-card { border-radius: var(--radius-lg); }
+    }
+
+    /* ---- Step progress indicator ------------------------------------- */
+    .don-progress {
+        list-style: none; margin: 0; padding: 1.4rem 1.5rem;
+        display: flex; align-items: flex-start;
+        background: #f8fafc; border-bottom: 1px solid var(--border-color);
+    }
+    .don-progress li {
+        position: relative; display: flex; flex-direction: column;
+        align-items: center; gap: 0.35rem; flex: 1; text-align: center;
+    }
+    /* connecting line between circles */
+    .don-progress li:not(:last-child)::after {
+        content: ""; position: absolute; top: 17px; left: calc(50% + 22px);
+        width: calc(100% - 44px); height: 2px;
+        background: #e2e8f0; transition: background var(--transition-fast);
+    }
+    .don-progress li.done:not(:last-child)::after,
+    .don-progress li.active:not(:last-child)::after { background: var(--don-green); }
+    .don-progress .don-step-dot {
+        width: 34px; height: 34px; border-radius: 50%; z-index: 1;
+        background: #ffffff; border: 2px solid #cbd5e1; color: #94a3b8;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 0.85rem; font-weight: 700; transition: all var(--transition-fast);
+    }
+    .don-progress li.active .don-step-dot {
+        background: var(--don-green-grad); border-color: transparent; color: #fff;
+        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4); transform: scale(1.08);
+    }
+    .don-progress li.done .don-step-dot {
+        background: var(--don-green); border-color: transparent; color: #fff;
+    }
+    .don-progress .don-step-label {
+        font-size: 0.72rem; font-weight: 600; color: var(--text-muted);
+        letter-spacing: 0.02em;
+    }
+    .don-progress li.active .don-step-label { color: var(--don-green-deep); font-weight: 700; }
+    .don-progress li.done .don-step-label { color: var(--don-green-dark); }
+    /* the Card step only applies when a card payment method is chosen */
+    .don-progress li.skipped { opacity: 0.35; }
+
+    /* ---- Panels ------------------------------------------------------ */
+    .don-panel { display: none; padding: 2rem 1.75rem 1.75rem; }
+    .don-panel.active { display: block; animation: donFadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes donFadeUp {
+        from { opacity: 0; transform: translateY(14px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .don-panel-title { font-weight: 800; margin-bottom: 0.25rem; }
+    .don-panel-sub  { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+    /* ---- Emerald primary button (main CTA of the flow) --------------- */
+    .btn-donate {
+        background: var(--don-green-grad); border: none; color: #fff;
+        font-weight: 700; border-radius: var(--radius-pill);
+        padding: 0.75rem 1.75rem; font-size: 0.95rem;
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+        transition: all var(--transition-fast);
+    }
+    .btn-donate:hover, .btn-donate:focus {
+        color: #fff; transform: translateY(-2px);
+        box-shadow: 0 10px 22px rgba(16, 185, 129, 0.45);
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    }
+    .btn-donate:disabled { opacity: 0.65; transform: none; box-shadow: none; }
+
+    /* ---- Amount preset quick-select chips ---------------------------- */
+    .don-preset {
+        border: 1.5px solid var(--border-color); background: #fff;
+        border-radius: var(--radius-pill); padding: 0.5rem 0;
+        font-weight: 700; font-size: 0.9rem; color: var(--text-primary);
+        cursor: pointer; transition: all var(--transition-fast); flex: 1 1 0;
+        min-width: 88px;
+    }
+    .don-preset:hover { border-color: var(--don-green); color: var(--don-green-dark); }
+    .don-preset.active {
+        background: var(--don-green); border-color: var(--don-green); color: #fff;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    }
+
+    /* ---- Amount input (reuses donate-input styling, emerald border) -- */
+    .don-amount-input { margin-top: 1.1rem; }
+    .don-amount-input .input-group {
+        border-radius: var(--radius-md); overflow: hidden;
+        border: 2px solid var(--border-color);
+        transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .don-amount-input .input-group:focus-within {
+        border-color: var(--don-green);
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+    }
+    .don-currency {
+        background: var(--don-green-light); color: var(--don-green-deep);
+        font-weight: 800; font-size: 1.1rem; padding: 0.7rem 1.1rem; border: none;
+    }
+    .don-amount-field {
+        border: none !important; font-size: 1.5rem !important; font-weight: 800 !important;
+        color: var(--text-primary) !important; padding: 0.7rem 1rem !important;
+        box-shadow: none !important; background: #fff !important;
+    }
+    .don-amount-field:focus { box-shadow: none !important; }
+
+    /* ---- Payment method tiles ---------------------------------------- */
+    .don-method {
+        display: flex; align-items: center; gap: 0.9rem;
+        border: 1.5px solid var(--border-color); border-radius: var(--radius-md);
+        padding: 1rem 1.1rem; cursor: pointer; background: #fff;
+        transition: all var(--transition-fast); margin-bottom: 0.8rem;
+        position: relative;
+    }
+    .don-method:hover { border-color: var(--don-green); }
+    .don-method.active {
+        border-color: var(--don-green); background: var(--don-green-light);
+        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.15);
+    }
+    .don-method input { position: absolute; opacity: 0; pointer-events: none; }
+    .don-method .don-radio {
+        width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+        border: 2px solid #cbd5e1; display: inline-flex; align-items: center; justify-content: center;
+        transition: all var(--transition-fast);
+    }
+    .don-method.active .don-radio { border-color: var(--don-green); }
+    .don-method.active .don-radio::after {
+        content: ""; width: 10px; height: 10px; border-radius: 50%;
+        background: var(--don-green);
+    }
+    .don-method .don-method-icon {
+        font-size: 1.5rem; color: var(--don-green-dark); width: 32px; text-align: center;
+    }
+    .don-method .don-method-name { font-weight: 700; }
+    .don-method .don-method-desc { font-size: 0.78rem; color: var(--text-muted); }
+    .don-add-card {
+        display: flex; align-items: center; gap: 0.6rem; justify-content: center;
+        border: 1.5px dashed var(--don-green); color: var(--don-green-deep);
+        border-radius: var(--radius-pill); padding: 0.7rem; font-weight: 700;
+        cursor: pointer; background: transparent; width: 100%;
+        transition: all var(--transition-fast);
+    }
+    .don-add-card:hover { background: var(--don-green-light); }
+
+    /* ---- Green gradient credit-card preview (mirrors Figma) ---------- */
+    .don-card-preview {
+        background: var(--don-green-grad);
+        background-image:
+            radial-gradient(circle at 80% 20%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 45%),
+            radial-gradient(circle at 15% 85%, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 40%),
+            var(--don-green-grad);
+        border-radius: var(--radius-lg); color: #fff; padding: 1.5rem;
+        box-shadow: 0 16px 30px rgba(16, 185, 129, 0.35);
+        min-height: 205px; display: flex; flex-direction: column; justify-content: space-between;
+        position: relative; overflow: hidden;
+    }
+    .don-card-preview::after {
+        content: ""; position: absolute; width: 130px; height: 130px; border-radius: 50%;
+        border: 18px solid rgba(255,255,255,0.09); right: -34px; bottom: -34px;
+    }
+    .don-card-num {
+        font-size: 1.35rem; font-weight: 700; letter-spacing: 0.12em;
+        font-family: 'Inter', monospace;
+    }
+    .don-card-top { display: flex; align-items: center; justify-content: space-between; }
+    .don-card-chip {
+        width: 38px; height: 27px; border-radius: 6px;
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        position: relative;
+    }
+    .don-card-chip::after {
+        content: ""; position: absolute; inset: 4px; border-radius: 4px;
+        border: 1px solid rgba(0,0,0,0.2);
+    }
+
+    /* ---- Card form fields --------------------------------------------- */
+    .don-field label { font-weight: 700; font-size: 0.82rem; margin-bottom: 0.35rem; }
+
+    /* ---- PIN entry boxes ---------------------------------------------- */
+    .don-pin-wrap { display: flex; gap: 0.75rem; justify-content: center; margin: 1.5rem 0; }
+    .don-pin-input {
+        width: 58px; height: 66px; text-align: center; font-size: 1.6rem; font-weight: 800;
+        border-radius: var(--radius-md); border: 2px solid var(--border-color);
+        color: var(--text-primary); background: #fff;
+        transition: all var(--transition-fast); outline: none;
+    }
+    .don-pin-input:focus {
+        border-color: var(--don-green); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+    }
+    @media (max-width: 575.98px) { .don-pin-input { width: 50px; height: 58px; } }
+
+    /* ---- Inline error box (inside the stepper) ------------------------ */
+    .don-error {
+        background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c;
+        border-radius: var(--radius-md); padding: 0.75rem 1rem; font-size: 0.9rem;
+        font-weight: 600; display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    /* ---- Step action bar (Back / Continue) ---------------------------- */
+    .don-actions { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1.5rem; }
+    .don-back {
+        background: transparent; border: 1.5px solid var(--border-color);
+        color: var(--text-secondary); border-radius: var(--radius-pill);
+        padding: 0.7rem 1.4rem; font-weight: 600; transition: all var(--transition-fast);
+    }
+    .don-back:hover { border-color: var(--don-green); color: var(--don-green-deep); }
+
+    /* ---- Success panel ------------------------------------------------ */
+    .don-success-icon {
+        width: 96px; height: 96px; margin: 0 auto 1.2rem; border-radius: 50%;
+        background: var(--don-green-grad); color: #fff; font-size: 3rem;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 14px 30px rgba(16, 185, 129, 0.45);
+        animation: donPop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes donPop {
+        0% { transform: scale(0.4); opacity: 0; }
+        70% { transform: scale(1.12); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Dark-mode friendliness: reuse existing base overrides for surfaces  */
+    [data-theme="dark"] .don-card { background: var(--bg-card) !important; }
+    [data-theme="dark"] .don-progress { background: var(--bg-hover) !important; }
+    [data-theme="dark"] .don-summary { background: rgba(16,185,129,0.12) !important; border-color: rgba(16,185,129,0.3) !important; }
+    [data-theme="dark"] .don-method { background: var(--bg-surface) !important; }
+    [data-theme="dark"] .don-preset { background: var(--bg-surface) !important; color: var(--text-primary) !important; }
+    [data-theme="dark"] .don-pin-input,
+    [data-theme="dark"] .don-amount-field { background: var(--bg-surface) !important; color: var(--text-primary) !important; }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-xl-8">
+
+            <!-- ================================================================
+                 CAMPAIGN SUMMARY STRIP (keeps the backer grounded about the
+                 project they are contributing to)
+                 ================================================================ -->
+            <div class="don-summary d-flex align-items-center gap-3 mb-4">
+                <span class="don-summary-icon"><i class="bi bi-heart-fill"></i></span>
+                <div class="min-w-0">
+                    <div class="fw-bold text-dark text-truncate">{{ project.title }}</div>
+                    <small class="text-muted">
+                        <i class="bi bi-bar-chart-line me-1"></i>
+                        {{ project.formatted_total_donated }} raised of
+                        <strong class="text-success">{{ project.formatted_target }}</strong> goal
+                        &middot; {{ project.progress_percentage }}% funded
+                    </small>
+                </div>
+                <a href="{{ project.get_absolute_url }}" class="btn btn-sm btn-outline-secondary btn-pill ms-auto d-none d-sm-inline-flex">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Project
+                </a>
+            </div>
+
+            {% if eligibility_error %}
+            <!-- ================================================================
+                 ELIGIBILITY BLOCK: campaign not open / creator / fully funded
+                 ================================================================ -->
+            <div class="don-card p-5 text-center">
+                <i class="bi bi-info-circle text-warning fs-1 d-block mb-3"></i>
+                <h2 class="fw-bold h5 mb-2">Donations are not available</h2>
+                <p class="text-muted mb-4">{{ eligibility_error }}</p>
+                <a href="{{ project.get_absolute_url }}" class="btn btn-primary btn-pill">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Project
+                </a>
+            </div>
+            {% else %}
+
+            <!-- ================================================================
+                 MAIN STEPPER CARD
+                 ================================================================ -->
+            <div class="don-card"
+                 id="donStepper"
+                 data-donate-url="{% url 'projects:donate' project.slug %}"
+                 data-project-url="{{ project.get_absolute_url }}"
+                 data-profile-url="{% url 'accounts:profile' %}"
+                 data-max-amount="{{ project.remaining_amount }}">
+
+                <!-- CSRF token, re-sent as the X-CSRFToken header on submit -->
+                <input type="hidden" id="donCsrfToken" value="{{ csrf_token }}">
+
+                <!-- Step progress bar -->
+                <ol class="don-progress" id="donProgress">
+                    <li data-step="1" class="active"><span class="don-step-dot">1</span><span class="don-step-label">Amount</span></li>
+                    <li data-step="2"><span class="don-step-dot">2</span><span class="don-step-label">Payment</span></li>
+                    <li data-step="3" class="don-step-card"><span class="don-step-dot">3</span><span class="don-step-label">Card</span></li>
+                    <li data-step="4"><span class="don-step-dot">4</span><span class="don-step-label">Verify</span></li>
+                    <li data-step="5"><span class="don-step-dot">5</span><span class="don-step-label">Done</span></li>
+                </ol>
+
+                <div class="don-body">
+
+                    <!-- ======================================================
+                         STEP 1 — ENTER THE AMOUNT
+                         ====================================================== -->
+                    <section class="don-panel" data-panel="1">
+                        <h2 class="don-panel-title h3">Enter the Amount</h2>
+                        <p class="don-panel-sub">Every contribution counts — choose a quick amount or type your own.</p>
+
+                        <!-- Quick preset selection buttons -->
+                        <div class="d-flex flex-wrap gap-2 mb-2" id="donPresets"></div>
+
+                        <!-- Amount input -->
+                        <div class="don-amount-input">
+                            <div class="input-group">
+                                <span class="input-group-text don-currency">EGP</span>
+                                <input type="text" id="donAmountInput" class="form-control don-amount-field"
+                                       inputmode="decimal" placeholder="0.00" aria-label="Donation amount"
+                                       data-currency="EGP">
+                            </div>
+                        </div>
+
+                        <!-- Step-level error slot (visible while on this panel) -->
+                        <div class="don-error d-none mt-3" id="donAmountError"></div>
+
+                        <div class="don-actions">
+                            <span></span>
+                            <button type="button" class="btn-donate" id="donAmountNext">
+                                Continue <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- ======================================================
+                         STEP 2 — SELECT PAYMENT METHOD
+                         ====================================================== -->
+                    <section class="don-panel" data-panel="2">
+                        <h2 class="don-panel-title h3">Select Payment Method</h2>
+                        <p class="don-panel-sub">How would you like to support this project?</p>
+
+                        <label class="don-method" data-method="paypal">
+                            <input type="radio" name="donMethod" value="paypal">
+                            <span class="don-radio"></span>
+                            <i class="fa-brands fa-paypal don-method-icon"></i>
+                            <span>
+                                <span class="don-method-name d-block">PayPal</span>
+                                <span class="don-method-desc">Pay with your PayPal balance or linked cards</span>
+                            </span>
+                        </label>
+
+                        <label class="don-method" data-method="google_pay">
+                            <input type="radio" name="donMethod" value="google_pay">
+                            <span class="don-radio"></span>
+                            <i class="fa-brands fa-google-pay don-method-icon"></i>
+                            <span>
+                                <span class="don-method-name d-block">Google Pay</span>
+                                <span class="don-method-desc">Fast checkout with your Google account</span>
+                            </span>
+                        </label>
+
+                        <label class="don-method" data-method="apple_pay">
+                            <input type="radio" name="donMethod" value="apple_pay">
+                            <span class="don-radio"></span>
+                            <i class="fa-brands fa-apple-pay don-method-icon"></i>
+                            <span>
+                                <span class="don-method-name d-block">Apple Pay</span>
+                                <span class="don-method-desc">Use Face ID / Touch ID for a secure payment</span>
+                            </span>
+                        </label>
+
+                        <label class="don-method" data-method="card">
+                            <input type="radio" name="donMethod" value="card">
+                            <span class="don-radio"></span>
+                            <i class="bi bi-credit-card-2-front-fill don-method-icon"></i>
+                            <span>
+                                <span class="don-method-name d-block">Credit / Debit Card</span>
+                                <span class="don-method-desc">Visa, Mastercard, or other major networks</span>
+                            </span>
+                        </label>
+
+                        <!-- "+ Add New Card" triggers the same card-details step -->
+                        <button type="button" class="don-add-card mt-2" id="donAddCardBtn">
+                            <i class="bi bi-plus-circle"></i> Add New Card
+                        </button>
+
+                        <div class="don-error d-none my-3" id="donMethodError"></div>
+
+                        <div class="don-actions">
+                            <button type="button" class="don-back" data-back="1">
+                                <i class="bi bi-arrow-left me-1"></i> Back
+                            </button>
+                            <button type="button" class="btn-donate" id="donMethodNext">
+                                Continue <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- ======================================================
+                         STEP 3 — ADD NEW CARD (card method only)
+                         ====================================================== -->
+                    <section class="don-panel" data-panel="3">
+                        <h2 class="don-panel-title h3">Add New Card</h2>
+                        <p class="don-panel-sub">We never store your card details — payment is tokenized securely.</p>
+
+                        <div class="row g-4">
+                            <!-- Live green-gradient card preview (Figma style) -->
+                            <div class="col-md-6 d-flex flex-column">
+                                <div class="don-card-preview" id="donCardPreview">
+                                    <div class="don-card-top">
+                                        <span class="don-card-chip"></span>
+                                        <i class="bi bi-wifi fs-4"></i>
+                                    </div>
+                                    <div class="don-card-num" id="donCardNum">•••• •••• •••• ••••</div>
+                                    <div class="d-flex justify-content-between align-items-end">
+                                        <div>
+                                            <div style="font-size:0.6rem; text-transform:uppercase; opacity:.75;">Cardholder</div>
+                                            <div id="donCardName">YOUR NAME</div>
+                                        </div>
+                                        <div>
+                                            <div style="font-size:0.6rem; text-transform:uppercase; opacity:.75;">Expires</div>
+                                            <div id="donCardExpiry">MM/YY</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card entry form -->
+                            <div class="col-md-6">
+                                <div class="mb-3 don-field">
+                                    <label for="donCardNameInput" class="form-label">Cardholder Name</label>
+                                    <input type="text" id="donCardNameInput" class="form-control"
+                                           placeholder="e.g. Ahmed Hassan" autocomplete="cc-name" maxlength="60">
+                                </div>
+                                <div class="mb-3 don-field">
+                                    <label for="donCardNumberInput" class="form-label">Card Number</label>
+                                    <input type="text" id="donCardNumberInput" class="form-control"
+                                           inputmode="numeric" placeholder="1234 5678 9012 3456"
+                                           autocomplete="cc-number" maxlength="23">
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-6 don-field">
+                                        <label for="donCardExpiryInput" class="form-label">Expiry Date</label>
+                                        <input type="text" id="donCardExpiryInput" class="form-control"
+                                               inputmode="numeric" placeholder="MM/YY" autocomplete="cc-exp" maxlength="5">
+                                    </div>
+                                    <div class="col-6 don-field">
+                                        <label for="donCardCvvInput" class="form-label">CVV</label>
+                                        <input type="password" id="donCardCvvInput" class="form-control"
+                                               inputmode="numeric" placeholder="•••" autocomplete="cc-csc" maxlength="4">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="don-error d-none my-3" id="donCardError"></div>
+
+                        <div class="don-actions">
+                            <button type="button" class="don-back" data-back="2">
+                                <i class="bi bi-arrow-left me-1"></i> Back
+                            </button>
+                            <button type="button" class="btn-donate" id="donCardNext">
+                                <i class="bi bi-credit-card me-1"></i> Add New Card / Pay
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- ======================================================
+                         STEP 4 — ENTER PIN (simulated 3-D Secure)
+                         ====================================================== -->
+                    <section class="don-panel" data-panel="4">
+                        <h2 class="don-panel-title h3">Enter PIN</h2>
+                        <p class="don-panel-sub text-center">
+                            A 4-digit PIN was sent to your phone — enter it to confirm this payment.
+                        </p>
+
+                        <div class="don-pin-wrap" id="donPinWrap">
+                            <input type="password" class="don-pin-input" inputmode="numeric" maxlength="1" autocomplete="one-time-code">
+                            <input type="password" class="don-pin-input" inputmode="numeric" maxlength="1" autocomplete="one-time-code">
+                            <input type="password" class="don-pin-input" inputmode="numeric" maxlength="1" autocomplete="one-time-code">
+                            <input type="password" class="don-pin-input" inputmode="numeric" maxlength="1" autocomplete="one-time-code">
+                        </div>
+
+                        <div class="don-error d-none" id="donError"></div>
+
+                        <div class="don-actions">
+                            <button type="button" class="don-back" id="donPinBack">
+                                <i class="bi bi-arrow-left me-1"></i> Back
+                            </button>
+                            <button type="button" class="btn-donate" id="donConfirm">
+                                <span id="donConfirmText"><i class="bi bi-shield-lock me-1"></i> Confirm</span>
+                                <span class="spinner-border spinner-border-sm d-none" id="donSpinner" role="status"></span>
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- ======================================================
+                         STEP 5 — SUCCESS
+                         ====================================================== -->
+                    <section class="don-panel" data-panel="5">
+                        <div class="text-center py-3">
+                            <div class="don-success-icon"><i class="bi bi-check-lg"></i></div>
+                            <h2 class="don-panel-title h3">Success</h2>
+                            <p class="don-panel-sub mb-4">
+                                Thank you for making a donation of
+                                <strong class="text-success" id="donSuccessAmount"></strong>
+                                to <span class="fw-bold" id="donSuccessTitle"></span>.
+                            </p>
+
+                            <button type="button" class="btn-donate px-5" id="donOkBtn">
+                                <i class="bi bi-check2-circle me-1"></i> OK
+                            </button>
+                            <div class="mt-3">
+                                <a href="{% url 'accounts:profile' %}#donationsTab" id="donProfileLink" class="small fw-semibold">
+                                    <i class="bi bi-person-heart me-1"></i> View my donations
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+    // ==========================================================================
+    // Donate Stepper — Vanilla JS single-page navigation (no page reloads).
+    // The only network call is the final JSON POST that persists the Donation.
+    // ==========================================================================
+    (function () {
+        'use strict';
+
+        var stepper = document.getElementById('donStepper');
+        if (!stepper) return;                 // eligibility block shown instead
+
+        var donateUrl    = stepper.dataset.donateUrl;
+        var projectUrl   = stepper.dataset.projectUrl;
+        var profileUrl   = stepper.dataset.profileUrl;
+        var maxAmount    = stepper.dataset.maxAmount ? Number(stepper.dataset.maxAmount) : null;
+
+        // Preset quick-select amounts (edit freely). Currency is "EGP".
+        var PRESETS = [25, 50, 100, 250, 500, 1000];
+        var CURRENCY = 'EGP';
+
+        var panels = document.querySelectorAll('.don-panel');
+        var steps  = document.querySelectorAll('#donProgress li');
+
+        // Persistent flow state
+        var state = {
+            amount: '',
+            method: null,
+            cardName: '', cardNumber: '', cardExpiry: '', cardCvv: '',
+            redirect: null
+        };
+
+        // ------------------------------------------------------------------
+        // Tiny DOM helpers
+        // ------------------------------------------------------------------
+        function el(id) { return document.getElementById(id); }
+
+        function showError(id, message) {
+            var box = el(id);
+            if (!box) return;
+            box.textContent = message || '';
+            box.classList.toggle('d-none', !message);
+        }
+        function clearError(id) { showError(id, ''); }
+
+        // Number formatter: 1234567.5 -> "1,234,567.5"
+        function formatNumber(value) {
+            var str = String(value).replace(/[^0-9.]/g, '');
+            if (!str) return '';
+            var parts = str.split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            return parts.join('.');
+        }
+        function unformatNumber(value) {
+            return String(value).replace(/[^0-9.]/g, '');
+        }
+
+        // ------------------------------------------------------------------
+        // Step navigation
+        // ------------------------------------------------------------------
+        function goToStep(target) {
+            // Hide every panel, reveal only the target one
+            panels.forEach(function (panel) {
+                panel.classList.toggle('active', panel.dataset.panel === String(target));
+            });
+
+            // Update progress indicator
+            var cardSkipped = state.method !== 'card';   // step 3 only used for cards
+            steps.forEach(function (li) {
+                var n = Number(li.dataset.step);
+                li.classList.remove('active', 'done', 'skipped');
+                if (n === target) {
+                    li.classList.add('active');
+                } else if (n < target) {
+                    li.classList.add('done');
+                } else if (n === 3 && cardSkipped) {
+                    li.classList.add('skipped');
+                }
+            });
+
+            // Focus management per step
+            if (target === 4) focusFirstEmptyPin();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function nextFromPayment() {
+            // Card method -> card-details step; wallet methods -> straight to PIN
+            goToStep(state.method === 'card' ? 3 : 4);
+        }
+
+        // ------------------------------------------------------------------
+        // STEP 1 — Amount (+) presets
+        // ------------------------------------------------------------------
+        var presetsBox = el('donPresets');
+        PRESETS.forEach(function (value) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'don-preset';
+            btn.textContent = CURRENCY + ' ' + value;
+            btn.setAttribute('data-value', value);
+            presetsBox.appendChild(btn);
+        });
+
+        var amountInput = el('donAmountInput');
+        var presetBtns = presetsBox.querySelectorAll('.don-preset');
+
+        function setActivePreset(cleanValue) {
+            presetBtns.forEach(function (btn) {
+                btn.classList.toggle('active', btn.dataset.value === cleanValue);
+            });
+        }
+
+        presetBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                amountInput.value = btn.dataset.value;
+                setActivePreset(btn.dataset.value);
+                amountInput.focus();
+            });
+        });
+
+        amountInput.addEventListener('input', function () {
+            this.value = formatNumber(this.value);
+            setActivePreset(unformatNumber(this.value));
+        });
+
+        el('donAmountNext').addEventListener('click', function () {
+            var raw = unformatNumber(amountInput.value);
+            state.amount = raw;
+
+            var error = '';
+            var val = Number(raw);
+            if (!val || val <= 0) {
+                error = 'Please enter a donation amount greater than zero.';
+            } else if (maxAmount !== null && val > maxAmount) {
+                error = 'This project only needs ' + formatNumber(maxAmount) + ' ' + CURRENCY + ' more to reach its goal.';
+            }
+            if (error) {
+                showError('donAmountError', error);
+                amountInput.focus();
+                return;
+            }
+            clearError('donAmountError');
+            goToStep(2);
+        });
+
+        // ------------------------------------------------------------------
+        // STEP 2 — Payment method
+        // ------------------------------------------------------------------
+        var methodLabels = document.querySelectorAll('.don-method');
+        var addCardBtn = el('donAddCardBtn');
+
+        methodLabels.forEach(function (label) {
+            label.addEventListener('click', function () {
+                methodLabels.forEach(function (l) { l.classList.remove('active'); });
+                label.classList.add('active');
+                state.method = label.dataset.method;
+                clearError('donMethodError');
+            });
+        });
+
+        addCardBtn.addEventListener('click', function () {
+            state.method = 'card';
+            methodLabels.forEach(function (l) { l.classList.remove('active'); });
+            document.querySelector('.don-method[data-method="card"]').classList.add('active');
+            goToStep(3);
+        });
+
+        el('donMethodNext').addEventListener('click', function () {
+            if (!state.method) {
+                showError('donMethodError', 'Please select a payment method to continue.');
+                return;
+            }
+            clearError('donMethodError');
+            nextFromPayment();
+        });
+
+        // ------------------------------------------------------------------
+        // STEP 3 — Card details + live preview
+        // ------------------------------------------------------------------
+        var cardNameInput = el('donCardNameInput');
+        var cardNumberInput = el('donCardNumberInput');
+        var cardExpiryInput = el('donCardExpiryInput');
+        var cardCvvInput = el('donCardCvvInput');
+
+        function formatCardNumber(value) {
+            return value.replace(/\D/g, '').slice(0, 19)
+                        .replace(/(.{4})/g, '$1 ').trim();
+        }
+        function formatExpiry(value) {
+            var digits = value.replace(/\D/g, '').slice(0, 4);
+            return digits.length > 2 ? digits.slice(0, 2) + '/' + digits.slice(2) : digits;
+        }
+
+        cardNameInput.addEventListener('input', function () {
+            state.cardName = this.value.toUpperCase();
+            el('donCardName').textContent = state.cardName || 'YOUR NAME';
+        });
+        cardNumberInput.addEventListener('input', function () {
+            state.cardNumber = this.value.replace(/\D/g, '');
+            this.value = formatCardNumber(state.cardNumber);
+            var display = state.cardNumber.replace(/.(?=.{4})/g, '•').replace(/(.{4})/g, '$1 ').trim();
+            el('donCardNum').textContent = display.length ? display : '•••• •••• •••• ••••';
+        });
+        cardExpiryInput.addEventListener('input', function () {
+            state.cardExpiry = this.value;
+            this.value = formatExpiry(this.value);
+            el('donCardExpiry').textContent = this.value || 'MM/YY';
+        });
+        cardCvvInput.addEventListener('input', function () {
+            this.value = this.value.replace(/\D/g, '').slice(0, 4);
+        });
+
+        el('donCardNext').addEventListener('click', function () {
+            var error = '';
+            if (state.cardName.trim().length < 2) {
+                error = 'Please enter the cardholder name.';
+            } else if (state.cardNumber.length < 13) {
+                error = 'Please enter a valid card number.';
+            } else if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(state.cardExpiry)) {
+                error = 'Expiry date must be in MM/YY format.';
+            } else if (cardCvvInput.value.length < 3) {
+                error = 'CVV must be 3 or 4 digits.';
+            }
+
+            if (error) { showError('donCardError', error); return; }
+            clearError('donCardError');
+            goToStep(4);
+        });
+
+        // Back from PIN: return to the card step if a card was chosen, else to payment
+        el('donPinBack').addEventListener('click', function () {
+            goToStep(state.method === 'card' ? 3 : 2);
+        });
+
+        // ------------------------------------------------------------------
+        // Back buttons (data-back target)
+        // ------------------------------------------------------------------
+        document.querySelectorAll('.don-back[data-back]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                goToStep(Number(btn.dataset.back));
+            });
+        });
+
+        // ------------------------------------------------------------------
+        // STEP 4 — PIN entry (auto-advance focus)
+        // ------------------------------------------------------------------
+        var pinInputs = Array.prototype.slice.call(el('donPinWrap').querySelectorAll('.don-pin-input'));
+
+        function pinValue() {
+            return pinInputs.map(function (i) { return i.value || ''; }).join('');
+        }
+
+        function focusFirstEmptyPin() {
+            var firstEmpty = pinInputs.find(function (i) { return !i.value; });
+            if (firstEmpty) firstEmpty.focus(); else pinInputs[pinInputs.length - 1].focus();
+        }
+
+        pinInputs.forEach(function (input, index) {
+            input.addEventListener('input', function () {
+                this.value = this.value.replace(/\D/g, '').slice(0, 1);
+                if (this.value && index < pinInputs.length - 1) {
+                    pinInputs[index + 1].focus();
+                }
+            });
+            input.addEventListener('keydown', function (e) {
+                // Backspace on an empty box -> move to previous pin slot
+                if (e.key === 'Backspace' && !this.value && index > 0) {
+                    pinInputs[index - 1].focus();
+                }
+            });
+            input.addEventListener('paste', function (e) {
+                e.preventDefault();
+                var digits = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 4);
+                digits.split('').forEach(function (d, i) {
+                    if (pinInputs[i]) pinInputs[i].value = d;
+                });
+                pinInputs[Math.min(digits.length, pinInputs.length - 1)].focus();
+            });
+        });
+
+        // ------------------------------------------------------------------
+        // STEP 4 -> submit the donation (single AJAX POST creates the record)
+        // ------------------------------------------------------------------
+        var confirmBtn = el('donConfirm');
+        var confirmText = el('donConfirmText');
+        var spinner = el('donSpinner');
+
+        function setConfirmLoading(loading) {
+            confirmBtn.disabled = loading;
+            confirmText.classList.toggle('d-none', loading);
+            spinner.classList.toggle('d-none', !loading);
+        }
+
+        el('donConfirm').addEventListener('click', function () {
+            if (pinValue().length !== 4) {
+                showError('donError', 'Please enter the complete 4-digit PIN.');
+                focusFirstEmptyPin();
+                return;
+            }
+            clearError('donError');
+
+            setConfirmLoading(true);
+
+            var payload = {
+                amount: state.amount,
+                payment_method: state.method,
+                pin: pinValue()
+            };
+            // Card details travel only when a card is being used
+            if (state.method === 'card') {
+                payload.card_name = state.cardName;
+                payload.card_number = state.cardNumber;
+                payload.card_expiry = state.cardExpiry;
+                payload.card_cvv = cardCvvInput.value;
+            }
+
+            fetch(donateUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': el('donCsrfToken').value,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(function (response) { return response.json(); })
+                .then(function (result) {
+                    setConfirmLoading(false);
+                    if (result.success) {
+                        state.redirect = result.redirect_url || projectUrl;
+                        el('donSuccessAmount').textContent = result.amount + ' ' + CURRENCY;
+                        el('donSuccessTitle').textContent = result.project_title || '';
+                        goToStep(5);
+                    } else {
+                        showError('donError', result.error || 'Something went wrong. Please try again.');
+                    }
+                })
+                .catch(function () {
+                    setConfirmLoading(false);
+                    showError('donError', 'Network error — please check your connection and try again.');
+                });
+        });
+
+        // ------------------------------------------------------------------
+        // STEP 5 — Success actions
+        // ------------------------------------------------------------------
+        el('donOkBtn').addEventListener('click', function () {
+            window.location.href = state.redirect || projectUrl;
+        });
+        el('donProfileLink').setAttribute('href', profileUrl + '#donationsTab');
+
+        // Kick off the flow on the amount step
+        goToStep(1);
+    })();
+</script>
+{% endblock extra_js %}

@@ -16,6 +16,9 @@ urlpatterns = [
     path("<slug:slug>/edit/", views.project_edit_view, name="project_edit"),
     path("<slug:slug>/cancel/", views.project_cancel_view, name="project_cancel"),
     path("<slug:slug>/delete/", views.project_delete_view, name="project_delete"),
+    # Donate checkout flow (route matches /<project>/donate/):
+    #   GET  -> renders the multi-step donate.html stepper
+    #   POST -> JSON endpoint that validates & creates the Donation on success
     path("<slug:slug>/donate/", views.donate_view, name="donate"),
     path("<slug:slug>/comment/", views.comment_create_view, name="comment_create"),
     path("<slug:slug>/rate/", views.rate_project_view, name="rate_project"),

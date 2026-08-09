@@ -264,30 +264,15 @@
                             <i class="bi bi-heart me-2"></i> Creator Cannot Donate
                         </button>
                         {% else %}
-                        <form method="post" action="{% url 'projects:donate' project.slug %}">
-                            {% csrf_token %}
-
-                            <!-- Quick Preset Chips -->
-                            <div class="mb-3">
-                                <label class="form-label small text-muted">Quick Amount (EGP)</label>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <span class="preset-chip flex-fill text-center" data-amount="50">50</span>
-                                    <span class="preset-chip flex-fill text-center" data-amount="100">100</span>
-                                    <span class="preset-chip flex-fill text-center" data-amount="250">250</span>
-                                    <span class="preset-chip flex-fill text-center" data-amount="500">500</span>
-                                    <span class="preset-chip flex-fill text-center" data-amount="1000">1,000</span>
-                                </div>
-                            </div>
-
-                            <div class="input-group donate-input-group mb-3">
-                                <span class="input-group-text donate-input-prefix">EGP</span>
-                                {{ donation_form.amount|add_class:"form-control donate-input-field number-format-input" }}
-                            </div>
-
-                            <button type="submit" class="btn btn-primary btn-lg w-100 btn-pill shadow-sm mb-3">
-                                <i class="bi bi-heart-fill me-2"></i> Donate Now
-                            </button>
-                        </form>
+                        <!-- Multi-step donation checkout: links to the stepper at /<project>/donate/ -->
+                        <a href="{% url 'projects:donate' project.slug %}"
+                           class="btn btn-success btn-lg w-100 btn-pill shadow-sm mb-3"
+                           role="button">
+                            <i class="bi bi-heart-fill me-2"></i> Donate Now
+                        </a>
+                        <small class="text-muted d-block text-center" style="font-size: 0.78rem;">
+                            <i class="bi bi-shield-lock me-1"></i> Secure multi-step checkout
+                        </small>
                         {% endif %}
                     {% else %}
                     <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary btn-lg w-100 btn-pill mb-3">
