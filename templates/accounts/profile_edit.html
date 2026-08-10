@@ -9,8 +9,11 @@
         <!-- Header Banner & Avatar Quick View -->
         <div class="text-center mb-4 pb-3 border-bottom">
             <div class="position-relative d-inline-block mb-3">
-                <img src="{{ user.avatar_url }}" class="rounded-circle border border-4 border-primary-subtle shadow-sm" width="100" height="100" style="object-fit:cover;" alt="{{ user.get_full_name }}">
-                <span class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-1 px-2 border border-2 border-white shadow-sm" style="font-size: 0.75rem;" title="Account Owner">
+                <img src="{{ user.avatar_url }}" class="rounded-circle border border-4 border-primary-subtle shadow-sm"
+                    width="100" height="100" style="object-fit:cover;" alt="{{ user.get_full_name }}">
+                <span
+                    class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-1 px-2 border border-2 border-white shadow-sm"
+                    style="font-size: 0.75rem;" title="Account Owner">
                     <i class="bi bi-person-fill"></i>
                 </span>
             </div>
@@ -25,7 +28,8 @@
             <div class="mb-4">
                 <label class="form-label d-flex justify-content-between align-items-center">
                     <span><i class="bi bi-envelope me-1 text-primary"></i> Email Address</span>
-                    <span class="badge bg-secondary-subtle text-secondary border rounded-pill px-2 py-0.5" style="font-size: 0.7rem;"><i class="bi bi-lock-fill me-1"></i>Non-editable</span>
+                    <span class="badge bg-secondary-subtle text-secondary border rounded-pill px-2 py-0.5"
+                        style="font-size: 0.7rem;"><i class="bi bi-lock-fill me-1"></i>Non-editable</span>
                 </label>
                 <input type="email" class="form-control bg-light text-muted" value="{{ user.email }}" disabled readonly>
                 <div class="form-text small text-muted">Email address cannot be changed after registration.</div>
@@ -34,22 +38,28 @@
             <!-- First & Last Name Grid -->
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
-                    <label class="form-label"><i class="bi bi-person me-1 text-primary"></i> {{ form.first_name.label }}</label>
+                    <label class="form-label"><i class="bi bi-person me-1 text-primary"></i> {{ form.first_name.label
+                        }}</label>
                     {{ form.first_name|add_class:"form-control" }}
-                    {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors|join:", " }}</div>{% endif %}
+                    {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors|join:",
+                        " }}</div>{% endif %}
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label"><i class="bi bi-person me-1 text-primary"></i> {{ form.last_name.label }}</label>
+                    <label class="form-label"><i class="bi bi-person me-1 text-primary"></i> {{ form.last_name.label
+                        }}</label>
                     {{ form.last_name|add_class:"form-control" }}
-                    {% if form.last_name.errors %}<div class="text-danger small mt-1">{{ form.last_name.errors|join:", " }}</div>{% endif %}
+                    {% if form.last_name.errors %}<div class="text-danger small mt-1">{{ form.last_name.errors|join:", "
+                        }}</div>{% endif %}
                 </div>
             </div>
 
             <!-- Mobile Phone -->
             <div class="mb-3">
-                <label class="form-label"><i class="bi bi-phone me-1 text-primary"></i> {{ form.mobile_phone.label }}</label>
+                <label class="form-label"><i class="bi bi-phone me-1 text-primary"></i> {{ form.mobile_phone.label
+                    }}</label>
                 {{ form.mobile_phone|add_class:"form-control" }}
-                {% if form.mobile_phone.errors %}<div class="text-danger small mt-1">{{ form.mobile_phone.errors|join:", " }}</div>{% endif %}
+                {% if form.mobile_phone.errors %}<div class="text-danger small mt-1">{{ form.mobile_phone.errors|join:",
+                    " }}</div>{% endif %}
             </div>
 
             <!-- Profile Picture Field (Modern Avatar Upload Card) -->
@@ -57,42 +67,54 @@
                 <label class="form-label fw-semibold mb-2" style="color: var(--primary, #056839);">
                     <i class="bi bi-image me-1"></i> {{ form.profile_picture.label }}
                 </label>
-                
+
                 <div class="d-flex align-items-center gap-3 p-3 bg-white rounded-3 border">
-                    <img id="avatarPreview" src="{{ user.avatar_url }}" class="rounded-circle border border-2 border-primary-subtle shadow-xs" width="64" height="64" style="object-fit: cover;" alt="Avatar Preview">
+                    <img id="avatarPreview" src="{{ user.avatar_url }}"
+                        class="rounded-circle border border-2 border-primary-subtle shadow-xs" width="64" height="64"
+                        style="object-fit: cover;" alt="Avatar Preview">
                     <div class="flex-grow-1">
-                        <label for="id_profile_picture" class="btn btn-outline-primary btn-sm rounded-pill fw-bold px-3 py-1.5 cursor-pointer mb-1" style="font-size: 0.825rem;">
+                        <label for="id_profile_picture"
+                            class="btn btn-outline-primary btn-sm rounded-pill fw-bold px-3 py-1.5 cursor-pointer mb-1"
+                            style="font-size: 0.825rem;">
                             <i class="bi bi-upload me-1"></i> Choose New Photo
                         </label>
-                        <div class="text-muted extra-small" style="font-size: 0.75rem;">JPEG, PNG or WEBP (Max 5MB)</div>
+                        <div class="text-muted extra-small" style="font-size: 0.75rem;">JPEG, PNG or WEBP (Max 5MB)
+                        </div>
                     </div>
                     <!-- Hidden Default Django Clearable Input Container to suppress ugly URL display -->
                     <div class="visually-hidden">
                         {{ form.profile_picture }}
                     </div>
                 </div>
-                {% if form.profile_picture.errors %}<div class="text-danger small mt-1">{{ form.profile_picture.errors|join:", " }}</div>{% endif %}
+                {% if form.profile_picture.errors %}<div class="text-danger small mt-1">{{
+                    form.profile_picture.errors|join:", " }}</div>{% endif %}
             </div>
 
             <!-- Additional Details Grid -->
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
-                    <label class="form-label"><i class="bi bi-calendar3 me-1 text-primary"></i> {{ form.birthdate.label }}</label>
+                    <label class="form-label"><i class="bi bi-calendar3 me-1 text-primary"></i> {{ form.birthdate.label
+                        }}</label>
                     {{ form.birthdate|add_class:"form-control" }}
-                    {% if form.birthdate.errors %}<div class="text-danger small mt-1">{{ form.birthdate.errors|join:", " }}</div>{% endif %}
+                    {% if form.birthdate.errors %}<div class="text-danger small mt-1">{{ form.birthdate.errors|join:", "
+                        }}</div>{% endif %}
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label"><i class="bi bi-globe me-1 text-primary"></i> {{ form.country.label }}</label>
+                    <label class="form-label"><i class="bi bi-globe me-1 text-primary"></i> {{ form.country.label
+                        }}</label>
                     {{ form.country|add_class:"form-select" }}
-                    {% if form.country.errors %}<div class="text-danger small mt-1">{{ form.country.errors|join:", " }}</div>{% endif %}
+                    {% if form.country.errors %}<div class="text-danger small mt-1">{{ form.country.errors|join:", " }}
+                    </div>{% endif %}
                 </div>
             </div>
 
             <!-- Facebook URL -->
             <div class="mb-4">
-                <label class="form-label"><i class="bi bi-facebook me-1 text-primary"></i> {{ form.facebook_url.label }}</label>
+                <label class="form-label"><i class="bi bi-facebook me-1 text-primary"></i> {{ form.facebook_url.label
+                    }}</label>
                 {{ form.facebook_url|add_class:"form-control" }}
-                {% if form.facebook_url.errors %}<div class="text-danger small mt-1">{{ form.facebook_url.errors|join:", " }}</div>{% endif %}
+                {% if form.facebook_url.errors %}<div class="text-danger small mt-1">{{ form.facebook_url.errors|join:",
+                    " }}</div>{% endif %}
             </div>
 
             <!-- Action Buttons -->
@@ -103,12 +125,13 @@
                 </button>
             </div>
         </form>
+
         <!-- ─── Change Password Section ─── -->
         <div class="mt-4 pt-4 border-top">
             <h5 class="fw-bold mb-2"><i class="bi bi-shield-lock me-2 text-primary"></i>Password</h5>
             <p class="text-muted small mb-3">Update your account password to keep your account secure.</p>
             <div class="d-flex flex-column flex-sm-row gap-2">
-                <a href="{% url 'accounts:password_change' %}" class="btn btn-outline-primary btn-pill flex-fill">
+                <a href="{% url 'accounts:password_reset' %}" class="btn btn-outline-primary btn-pill flex-fill">
                     <i class="bi bi-key me-1"></i> Change Password
                 </a>
                 <a href="{% url 'accounts:password_reset' %}" class="btn btn-outline-secondary btn-pill flex-fill">
@@ -117,24 +140,23 @@
             </div>
         </div>
     </div>
-</div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const fileInput = document.querySelector('input[type="file"][name="profile_picture"]');
-    const avatarPreview = document.getElementById("avatarPreview");
-    if (fileInput && avatarPreview) {
-        fileInput.addEventListener("change", function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    avatarPreview.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const fileInput = document.querySelector('input[type="file"][name="profile_picture"]');
+            const avatarPreview = document.getElementById("avatarPreview");
+            if (fileInput && avatarPreview) {
+                fileInput.addEventListener("change", function (e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            avatarPreview.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
             }
         });
-    }
-});
-</script>
-{% endblock %}
+    </script>
+    {% endblock %}
