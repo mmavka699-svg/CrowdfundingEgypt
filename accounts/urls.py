@@ -29,6 +29,9 @@ urlpatterns = [
         name="password_reset_complete",
     ),
 
+    # Password change (logged-in)
+    path("password-change/", views.password_change_view, name="password_change"),
+
     # Profile
     path("profile/", views.profile_view, name="profile"),
     path("profile/edit/", views.profile_edit_view, name="profile_edit"),

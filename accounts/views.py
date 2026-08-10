@@ -1,8 +1,9 @@
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.contrib.auth import login as auth_login, logout as auth_logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.views import (
     PasswordResetView, PasswordResetConfirmView, PasswordResetDoneView, PasswordResetCompleteView,
 )
@@ -168,9 +169,25 @@ def logout_view(request):
 # ---------------------------------------------------------------------------
 class CustomPasswordResetView(PasswordResetView):
     template_name = "accounts/password_reset.html"
-    email_template_name = "accounts/emails/password_reset_email.html"
+    email_template_name = "accounts/emails/password_reset_email.txt"
+    html_email_template_name = "accounts/emails/password_reset_email.html"
     subject_template_name = "accounts/emails/password_reset_subject.txt"
     success_url = reverse_lazy("accounts:password_reset_done")
+
+    def form_valid(self, form):
+        opts = {
+            "use_https": self.request.is_secure(),
+            "token_generator": self.token_generator,
+            "from_email": self.from_email,
+            "email_template_name": self.email_template_name,
+            "subject_template_name": self.subject_template_name,
+            "request": self.request,
+            "html_email_template_name": self.html_email_template_name,
+            "extra_email_context": self.extra_email_context,
+            "domain_override": self.request.get_host(),
+        }
+        form.save(**opts)
+        return super(PasswordResetView, self).form_valid(form)
 
 
 class CustomPasswordResetDoneView(PasswordResetDoneView):
@@ -184,6 +201,21 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
 
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = "accounts/password_reset_complete.html"
+
+
+@login_required
+def password_change_view(request):
+    """Logged-in password change using Django's PasswordChangeForm."""
+    if request.method == "POST":
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # keep user logged in
+            messages.success(request, "Your password has been changed successfully.")
+            return redirect("accounts:profile_edit")
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, "accounts/password_change.html", {"form": form})
 
 
 # ---------------------------------------------------------------------------
