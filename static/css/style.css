@@ -56,34 +56,41 @@
 }
 
 [data-theme="dark"] {
-    --primary: #10b981;
-    --primary-hover: #34d399;
-    --primary-light: rgba(16, 185, 129, 0.15);
-    --primary-border: rgba(16, 185, 129, 0.35);
-    --primary-gradient: linear-gradient(135deg, #10b981 0%, #056839 100%);
-    --accent: #f25c05;
+    /* Primary / Brand (Emerald/Mint Palette) */
+    --primary: #1f8a5f;
+    --primary-hover: #7fd6ae;
+    --primary-light: rgba(31, 138, 95, 0.16);
+    --primary-border: rgba(31, 138, 95, 0.35);
+    --primary-gradient: linear-gradient(135deg, #1f8a5f 0%, #101915 100%);
+    
+    /* Accent (Warm Orange/Coral Palette) */
+    --accent: #e05d38;
     --accent-hover: #ff7a28;
-    --accent-gradient: linear-gradient(135deg, #f25c05 0%, #ff7a28 100%);
+    --accent-gradient: linear-gradient(135deg, #e05d38 0%, #ff7a28 100%);
 
-    --bg-body: #0d1117;
-    --bg-surface: #161b22;
-    --bg-card: #1c2128;
-    --bg-hover: #22272e;
-    --bg-glass: rgba(22, 27, 34, 0.88);
-    --bg-footer: #032b18;
+    /* Backgrounds (Dark Emerald/Forest Surfaces) */
+    --bg-body: #101915;       /* من surface-2 */
+    --bg-surface: #16211d;    /* من surface */
+    --bg-card: #1b2a25;       /* من surface-3 */
+    --bg-hover: #22352f;      /* درجـة أفتح قليلاً للتفاعل عند الـ Hover */
+    --bg-glass: rgba(22, 33, 29, 0.88);
+    --bg-footer: #0a100d;
 
-    --text-primary: #f0f6fc;
-    --text-secondary: #adbac7;
-    --text-muted: #768390;
+    /* Typography / Ink */
+    --text-primary: #eef4f1;   /* من ink */
+    --text-secondary: #a6b8b1; /* من ink-soft */
+    --text-muted: #738a81;     /* درجة خافتة متناسقة مع الخُضرة */
 
-    --border-color: rgba(68, 76, 86, 0.6);
-    --border-color-hover: rgba(90, 100, 112, 0.8);
+    /* Borders */
+    --border-color: rgba(255, 255, 255, 0.10); /* من line */
+    --border-color-hover: rgba(255, 255, 255, 0.20);
 
+    /* Shadows */
     --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.35);
-    --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.45);
-    --shadow-lg: 0 20px 35px rgba(0, 0, 0, 0.55);
-    --shadow-glow: 0 0 30px rgba(16, 185, 129, 0.35);
+    --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.35);  /* من shadow-sm */
+    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.45); /* من shadow-md */
+    --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55); /* من shadow-lg */
+    --shadow-glow: 0 0 30px rgba(31, 138, 95, 0.35);
 }
 
 /* Theme Toggle Button */
@@ -148,26 +155,26 @@ html {
     scroll-behavior: smooth;
 }
 
+/* 1. تطبيق الخط على كل النصوص مع تفعيل نعومة الحروف الاحترافية */
 body {
-    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background-color: var(--light-bg);
-    color: var(--dark-text);
-    line-height: 1.6;
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 700;
-    color: var(--dark-text);
-    letter-spacing: -0.02em;
+/* 2. تنسيق العناوين (h1 إلى h6) لتحصل على طابع الـ Modern SaaS */
+h1, h2, h3, h4, h5, h6, .hero-title {
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.025em !important; /* تقريب الحروف بنسبة بسيطة يعطي مظهر فخم جداً */
+}
+
+/* 3. تنسيق البادجات والأزرار الصغيرة لتبدو رقيقة وأنيقة */
+.badge, .btn-sm {
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.01em;
 }
 
 a {
@@ -1896,4 +1903,756 @@ body,
     transform: translateY(-8px) scale(1.02) !important;
     box-shadow: 0 12px 24px rgba(242, 92, 5, 0.18) !important;
     border-color: rgba(242, 92, 5, 0.3) !important;
-}
+}
+
+/* ==========================================================================
+   APPENDED — "COMING SOON" INFO UTILITIES MATCHED TO BRAND PALETTE
+   (light mode) emerald #056839  |  (dark mode) mint #1f8a5f
+   Maps Bootstrap's sky-blue `info` utilities used by Coming Soon badges
+   onto the project palette. Nothing else was edited.
+   ========================================================================== */
+.badge.bg-info {
+    background: var(--primary-gradient) !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(5, 104, 57, 0.3) !important;
+}
+
+.bg-info-subtle { background-color: var(--primary-light) !important; }
+.text-info { color: var(--primary) !important; }
+.border-info-subtle { border-color: var(--primary-border) !important; }
+
+[data-theme="dark"] .badge.bg-info {
+    background: var(--primary-gradient) !important;
+    box-shadow: 0 4px 12px rgba(31, 138, 95, 0.35) !important;
+}
+[data-theme="dark"] .bg-info-subtle { background-color: rgba(31, 138, 95, 0.16) !important; }
+[data-theme="dark"] .text-info { color: #7fd6ae !important; }
+[data-theme="dark"] .border-info-subtle { border-color: rgba(31, 138, 95, 0.35) !important; }
+
+/* ==========================================================================
+   APPENDED — BOOTSTRAP `primary` SEMANTIC UTILITIES MATCHED TO BRAND
+   Maps Bootstrap's default-blue `primary` text/bg/border/badge utilities
+   (used by badges, stat icons, links, form labels across templates) onto
+   the project emerald + orange palette. Appended only.
+   ========================================================================== */
+.text-primary { color: var(--primary) !important; }
+.text-primary:hover { color: var(--primary-hover) !important; }
+.link-primary,
+a.text-primary { color: var(--primary) !important; }
+a.text-primary:hover { color: var(--primary-hover) !important; }
+.text-primary-emphasis { color: var(--primary-hover) !important; }
+
+.bg-primary {
+    background: var(--primary-gradient) !important;
+    color: #ffffff !important;
+}
+.bg-primary-subtle {
+    background-color: var(--primary-light) !important;
+    color: var(--primary) !important;
+}
+.badge.bg-primary {
+    background: var(--primary-gradient) !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+.border-primary { border-color: var(--primary) !important; }
+.border-primary-subtle { border-color: var(--primary-border) !important; }
+.alert-primary {
+    background-color: var(--primary-light) !important;
+    color: var(--primary-hover) !important;
+    border-color: var(--primary-border) !important;
+}
+
+.form-check-input:checked,
+.form-check-input:focus {
+    border-color: var(--primary) !important;
+    background-color: var(--primary) !important;
+    box-shadow: 0 0 0 0.2rem rgba(5, 104, 57, 0.2) !important;
+}
+
+/* --- Dark-mode counterparts ------------------------------------------------ */
+[data-theme="dark"] .text-primary { color: var(--primary) !important; }
+[data-theme="dark"] .link-primary,
+[data-theme="dark"] a.text-primary { color: var(--primary) !important; }
+[data-theme="dark"] a.text-primary:hover { color: var(--primary-hover) !important; }
+[data-theme="dark"] .bg-primary { background: var(--primary-gradient) !important; }
+[data-theme="dark"] .bg-primary-subtle {
+    background-color: rgba(31, 138, 95, 0.16) !important;
+    color: var(--primary) !important;
+}
+[data-theme="dark"] .badge.bg-primary {
+    background: var(--primary-gradient) !important;
+    box-shadow: 0 4px 12px rgba(31, 138, 95, 0.35) !important;
+}
+[data-theme="dark"] .border-primary { border-color: rgba(31, 138, 95, 0.5) !important; }
+[data-theme="dark"] .border-primary-subtle { border-color: rgba(31, 138, 95, 0.3) !important; }
+[data-theme="dark"] .alert-primary {
+    background-color: rgba(31, 138, 95, 0.14) !important;
+    color: var(--primary) !important;
+    border-color: rgba(31, 138, 95, 0.3) !important;
+}
+
+/* ==========================================================================
+   APPENDED — LIVE SEARCH SUGGESTIONS IN THE HERO (home.html)
+   The JS (.nav-search-wrapper input + .search-autocomplete-dropdown) now
+   works with the hero search bar. These rules adapt the dropdown to the
+   hero placement (full width, not the navbar's fixed 340px). Appended only.
+   ========================================================================== */
+.nav-search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1.5px solid rgba(226, 232, 240, 0.95);
+    border-radius: var(--radius-pill);
+    padding: 0.4rem 0.4rem 0.4rem 1rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.nav-search-wrapper:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(5, 104, 57, 0.12), var(--shadow-md);
+}
+
+.nav-search-wrapper .search-autocomplete-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    width: auto;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    z-index: 1060;
+    max-height: 320px;
+    overflow-y: auto;
+    animation: fadeInDropdown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-search-wrapper .search-autocomplete-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.9rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nav-search-wrapper .search-autocomplete-item:hover,
+.nav-search-wrapper .search-autocomplete-item.active {
+    background-color: rgba(5, 104, 57, 0.08);
+    color: var(--primary);
+}
+
+.nav-search-wrapper .search-autocomplete-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    background-color: #e2e8f0;
+    flex-shrink: 0;
+}
+
+[data-theme="dark"] .nav-search-wrapper {
+    background-color: var(--bg-surface);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .nav-search-wrapper:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(31, 138, 95, 0.2);
+}
+
+[data-theme="dark"] .nav-search-wrapper .search-autocomplete-dropdown {
+    background: rgba(22, 27, 34, 0.96);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .nav-search-wrapper .search-autocomplete-item {
+    color: var(--text-primary);
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .nav-search-wrapper .search-autocomplete-item:hover,
+[data-theme="dark"] .nav-search-wrapper .search-autocomplete-item.active {
+    background-color: rgba(31, 138, 95, 0.16);
+    color: var(--primary);
+}
+
+/* ==========================================================================
+   APPENDED — STACKING CONTEXT CLEANUP (homepage hero search dropdown)
+   The hero row lives inside `.hero-wrapper` which carries decorative blobs
+   (::before/::after). Raising the row above those blobs gives the search
+   wrapper a clean context so the autocomplete dropdown always paints above
+   the hero / carousel content, and is never clipped or hidden behind it.
+   ========================================================================== */
+.hero-wrapper > .container {
+    position: relative;
+    z-index: 1;
+}
+
+.nav-search-wrapper {
+    z-index: 1100;
+}
+
+.nav-search-wrapper .search-autocomplete-dropdown {
+    z-index: 1150;
+}
+
+/* ==========================================================================
+   APPENDED — HOMEPAGE SLIDER: CONSISTENT HEIGHT + object-fit: cover
+   Every slide now uses a real <img class="home-hero-slide-img"> filling its
+   container. Heights are equal at every breakpoint so the carousel never
+   jumps between slides. `!important` + the #id scoping is required here to
+   override the many older competing hero-slide height rules appended earlier
+   this stylesheet (some of which already ship with !important).
+   ========================================================================== */
+#topProjectsCarousel .carousel-item {
+    height: 520px !important;
+    min-height: 520px !important;
+}
+
+#topProjectsCarousel .hero-slide {
+    height: 520px !important;
+    min-height: 520px !important;
+}
+
+.home-hero-slide {
+    position: relative;
+    overflow: hidden;
+    background-color: #e2e8f0;
+}
+
+.home-hero-slide-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+@media (max-width: 991.98px) {
+    #topProjectsCarousel .carousel-item,
+    #topProjectsCarousel .hero-slide {
+        height: 420px !important;
+        min-height: 420px !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    #topProjectsCarousel .carousel-item,
+    #topProjectsCarousel .hero-slide {
+        height: 300px !important;
+        min-height: 300px !important;
+    }
+}
+
+/* --- Mobile hero overlay polish ----------------------------------------- */
+@media (max-width: 575.98px) {
+    #topProjectsCarousel .hero-info-card {
+        width: 88% !important;
+        max-width: 88% !important;
+        padding: 1rem 1.1rem !important;
+    }
+
+    #topProjectsCarousel .hero-info-card h3 {
+        font-size: 1.05rem !important;
+        line-height: 1.25 !important;
+    }
+
+    #topProjectsCarousel .hero-info-card > .small {
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+    }
+
+    #topProjectsCarousel .hero-info-card .btn {
+        font-size: 0.78rem;
+        padding: 0.45rem 0.7rem;
+    }
+
+    #topProjectsCarousel .carousel-control-prev,
+    #topProjectsCarousel .carousel-control-next {
+        width: 36px !important;
+        height: 36px !important;
+    }
+}
+
+/* ==========================================================================
+   APPENDED — REPORT PROJECT MODAL (custom component, scoped)
+   Matches the Report Comment design language while replacing Bootstrap's
+   default look. All colors come from the existing :root / dark-mode tokens.
+   ========================================================================== */
+.report-project-modal .modal-dialog {
+    max-width: 520px;
+}
+
+.report-project-modal .modal-content {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+.report-project-modal .modal-header {
+    padding: 1.5rem 1.5rem 0.25rem;
+    border-bottom: 0;
+}
+
+.report-project-modal .modal-title {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    letter-spacing: -0.01em;
+}
+
+.report-project-modal .report-modal-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--primary-light);
+    color: var(--accent);
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.report-project-modal .modal-body {
+    padding: 1rem 1.5rem 0.75rem;
+}
+
+.report-project-modal .form-label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.45rem;
+}
+
+.report-project-modal select,
+.report-project-modal textarea {
+    display: block;
+    width: 100%;
+    background-color: var(--bg-surface);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.7rem 2.5rem 0.7rem 1rem;
+    font-size: 0.92rem;
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+}
+
+.report-project-modal select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%23056839' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+}
+
+.report-project-modal textarea {
+    resize: vertical;
+    min-height: 90px;
+}
+
+.report-project-modal select:focus,
+.report-project-modal textarea:focus {
+    outline: none !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 4px rgba(5, 104, 57, 0.15) !important;
+}
+
+.report-project-modal ::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+}
+
+.report-form-error {
+    color: var(--danger);
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-top: 0.4rem;
+}
+
+.report-project-modal .modal-footer {
+    padding: 0.75rem 1.5rem 1.5rem;
+    border-top: 0;
+    display: flex;
+    gap: 0.6rem;
+}
+
+.report-project-modal .report-modal-cancel {
+    background: var(--bg-hover);
+    color: var(--text-secondary);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-pill);
+    padding: 0.55rem 1.4rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all var(--transition-fast);
+}
+
+.report-project-modal .report-modal-cancel:hover {
+    background: var(--border-color-hover);
+    color: var(--text-primary);
+    border-color: var(--primary-border);
+}
+
+.report-project-modal .report-modal-submit {
+    background: var(--danger);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 0.6rem 1.5rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+    transition: all var(--transition-fast);
+}
+
+.report-project-modal .report-modal-submit:hover {
+    filter: brightness(0.92);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(239, 68, 68, 0.35);
+}
+
+.report-project-modal .report-modal-submit:active {
+    transform: scale(0.98);
+}
+
+.report-project-modal .report-modal-submit:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    filter: none;
+}
+
+@media (max-width: 575.98px) {
+    .report-project-modal .modal-header {
+        padding: 1.15rem 1.15rem 0.1rem;
+    }
+
+    .report-project-modal .modal-body {
+        padding: 0.85rem 1.15rem 0.5rem;
+    }
+
+    .report-project-modal .modal-footer {
+        padding: 0.6rem 1.15rem 1.15rem;
+        flex-wrap: wrap;
+    }
+
+    .report-project-modal .report-modal-submit,
+    .report-project-modal .report-modal-cancel {
+        flex: 1 1 auto;
+    }
+}
+
+/* Emerald-tinted backdrop while the report modal is open */
+body:has(.report-project-modal.show) .modal-backdrop.show {
+    background-color: rgba(5, 69, 39, 0.55);
+}
+
+/* --- Report modal dark mode --------------------------------------------- */
+[data-theme="dark"] .report-project-modal .modal-content {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .report-project-modal .modal-title {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .report-project-modal .report-modal-icon {
+    background: rgba(31, 138, 95, 0.16);
+    color: var(--accent);
+}
+
+[data-theme="dark"] .report-project-modal .form-label {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .report-project-modal select,
+[data-theme="dark"] .report-project-modal textarea {
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .report-project-modal select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%231f8a5f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+[data-theme="dark"] .report-project-modal select:focus,
+[data-theme="dark"] .report-project-modal textarea:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 4px rgba(31, 138, 95, 0.25) !important;
+}
+
+[data-theme="dark"] .report-project-modal ::placeholder {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .report-project-modal .report-modal-cancel {
+    background: var(--bg-hover);
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .report-project-modal .report-modal-cancel:hover {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-color: var(--primary-border);
+}
+
+[data-theme="dark"] .report-project-modal .report-modal-submit {
+    background: var(--danger);
+    color: #ffffff;
+}
+
+/* ==========================================================================
+   APPENDED — PROJECT DETAIL: SOLAR POWERED BADGE + MOBILE POLISH
+   Scoped to .project-detail-page so other pages are untouched.
+   ========================================================================== */
+.solar-powered-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+}
+
+.project-detail-page .project-detail-image-wrap {
+    height: 400px;
+}
+
+.project-detail-page h1.display-5 {
+    font-size: clamp(1.6rem, 4.5vw, 2.6rem);
+    overflow-wrap: anywhere;
+}
+
+.project-detail-page .project-detail-img {
+    height: 100% !important;
+    object-fit: cover;
+}
+
+/* --- Project detail: small screens -------------------------------------- */
+@media (max-width: 767.98px) {
+    .project-detail-page .project-detail-image-wrap {
+        height: 280px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .project-detail-page .project-detail-image-wrap {
+        height: 250px;
+    }
+
+    .project-detail-page .sticky-donation-card .display-6 {
+        font-size: 2rem;
+    }
+
+    /* Comments: reduce card padding + nested indentation */
+    .project-detail-page .comments-feed .comment-card {
+        padding: 0.75rem 0.85rem;
+    }
+
+    .project-detail-page .comments-feed .comment-card .comment-card {
+        margin-left: 0.25rem !important;
+        padding-left: 0.4rem !important;
+    }
+
+    .project-detail-page .comments-feed .comment-card p {
+        font-size: 0.85rem;
+    }
+}
+
+/* --- Icon-only action buttons on mobile ---------------------------------- */
+.project-detail-page .project-actions-list .action-button .action-text {
+    display: inline;
+}
+
+@media (max-width: 575.98px) {
+    .project-detail-page .project-actions-list {
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .project-detail-page .project-actions-list .action-button {
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .project-detail-page .project-actions-list .action-button .action-text {
+        display: none;
+    }
+
+    .project-detail-page .project-actions-list .action-button .bi {
+        margin-right: 0 !important;
+    }
+}
+
+/* --- Icon-only Solar Powered badge text on mobile ------------------------- */
+@media (max-width: 575.98px) {
+    .project-detail-page .solar-powered-badge {
+        gap: 0;
+        width: 32px;
+        height: 32px;
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .project-detail-page .solar-powered-badge .solar-powered-badge-text {
+        display: none;
+    }
+
+    .project-detail-page .solar-powered-badge .bi {
+        margin: 0 !important;
+    }
+}
+
+/* ==========================================================================
+   APPENDED — PROFILE PAGE (accounts/profile.html)
+   Created Projects + Donations rendered as clean stacked vertical sections.
+   ========================================================================== */
+.profile-page .profile-section {
+    padding: 1.5rem;
+}
+
+.profile-page .profile-project-card {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 0.9rem;
+    box-shadow: var(--shadow-xs);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.profile-page .profile-project-card:hover {
+    border-color: var(--border-color-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-page .profile-project-thumb {
+    display: block;
+    width: 120px;
+    height: 90px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    flex-shrink: 0;
+    background-color: #e2e8f0;
+}
+
+.profile-page .profile-project-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.profile-page .profile-project-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-page .profile-project-title {
+    font-size: 0.95rem;
+    overflow-wrap: anywhere;
+    line-height: 1.35;
+}
+
+.profile-page .profile-donation-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.15rem;
+    box-shadow: var(--shadow-xs);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.profile-page .profile-donation-card:hover {
+    border-color: var(--border-color-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-page .profile-donation-main {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.profile-page .profile-donation-amount {
+    font-weight: 800;
+    font-size: 1.05rem;
+    white-space: nowrap;
+}
+
+/* --- Profile page dark mode ----------------------------------------------- */
+[data-theme="dark"] .profile-page .profile-project-card,
+[data-theme="dark"] .profile-page .profile-donation-card {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .profile-page .profile-project-thumb {
+    background-color: var(--bg-hover);
+}
+
+/* --- Profile page responsive ---------------------------------------------- */
+@media (max-width: 767.98px) {
+    .profile-page .profile-section {
+        padding: 1.15rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .profile-page .profile-project-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .profile-page .profile-project-thumb {
+        width: 100%;
+        height: 165px;
+    }
+
+    .profile-page .profile-project-actions {
+        width: 100%;
+    }
+
+    .profile-page .profile-donation-card {
+        align-items: flex-start;
+    }
+
+    .profile-page .profile-donation-amount {
+        font-size: 0.98rem;
+    }
+}
+
+/* The legacy .profile-tab-btn helpers remain defined above for any template
+   that may still use them; the profile page no longer renders tab pills. */

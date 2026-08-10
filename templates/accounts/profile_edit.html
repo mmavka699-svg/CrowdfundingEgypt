@@ -38,28 +38,22 @@
             <!-- First & Last Name Grid -->
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
-                    <label class="form-label"><i class="bi bi-person me-1 text-primary"></i> {{ form.first_name.label
-                        }}</label>
+                    <label class="form-label"><i class="bi bi-person me-1 text-primary"></i> {{ form.first_name.label }}</label>
                     {{ form.first_name|add_class:"form-control" }}
-                    {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors|join:",
-                        " }}</div>{% endif %}
+                    {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors|join:", " }}</div>{% endif %}
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label"><i class="bi bi-person me-1 text-primary"></i> {{ form.last_name.label
-                        }}</label>
+                    <label class="form-label"><i class="bi bi-person me-1 text-primary"></i> {{ form.last_name.label }}</label>
                     {{ form.last_name|add_class:"form-control" }}
-                    {% if form.last_name.errors %}<div class="text-danger small mt-1">{{ form.last_name.errors|join:", "
-                        }}</div>{% endif %}
+                    {% if form.last_name.errors %}<div class="text-danger small mt-1">{{ form.last_name.errors|join:", " }}</div>{% endif %}
                 </div>
             </div>
 
             <!-- Mobile Phone -->
             <div class="mb-3">
-                <label class="form-label"><i class="bi bi-phone me-1 text-primary"></i> {{ form.mobile_phone.label
-                    }}</label>
+                <label class="form-label"><i class="bi bi-phone me-1 text-primary"></i> {{ form.mobile_phone.label }}</label>
                 {{ form.mobile_phone|add_class:"form-control" }}
-                {% if form.mobile_phone.errors %}<div class="text-danger small mt-1">{{ form.mobile_phone.errors|join:",
-                    " }}</div>{% endif %}
+                {% if form.mobile_phone.errors %}<div class="text-danger small mt-1">{{ form.mobile_phone.errors|join:", " }}</div>{% endif %}
             </div>
 
             <!-- Profile Picture Field (Modern Avatar Upload Card) -->
@@ -86,22 +80,18 @@
                         {{ form.profile_picture }}
                     </div>
                 </div>
-                {% if form.profile_picture.errors %}<div class="text-danger small mt-1">{{
-                    form.profile_picture.errors|join:", " }}</div>{% endif %}
+                {% if form.profile_picture.errors %}<div class="text-danger small mt-1">{{ form.profile_picture.errors|join:", " }}</div>{% endif %}
             </div>
 
             <!-- Additional Details Grid -->
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
-                    <label class="form-label"><i class="bi bi-calendar3 me-1 text-primary"></i> {{ form.birthdate.label
-                        }}</label>
+                    <label class="form-label"><i class="bi bi-calendar3 me-1 text-primary"></i> {{ form.birthdate.label }}</label>
                     {{ form.birthdate|add_class:"form-control" }}
-                    {% if form.birthdate.errors %}<div class="text-danger small mt-1">{{ form.birthdate.errors|join:", "
-                        }}</div>{% endif %}
+                    {% if form.birthdate.errors %}<div class="text-danger small mt-1">{{ form.birthdate.errors|join:", " }}</div>{% endif %}
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label"><i class="bi bi-globe me-1 text-primary"></i> {{ form.country.label
-                        }}</label>
+                    <label class="form-label"><i class="bi bi-globe me-1 text-primary"></i> {{ form.country.label }}</label>
                     {{ form.country|add_class:"form-select" }}
                     {% if form.country.errors %}<div class="text-danger small mt-1">{{ form.country.errors|join:", " }}
                     </div>{% endif %}
@@ -110,11 +100,9 @@
 
             <!-- Facebook URL -->
             <div class="mb-4">
-                <label class="form-label"><i class="bi bi-facebook me-1 text-primary"></i> {{ form.facebook_url.label
-                    }}</label>
+                <label class="form-label"><i class="bi bi-facebook me-1 text-primary"></i> {{ form.facebook_url.label }}</label>
                 {{ form.facebook_url|add_class:"form-control" }}
-                {% if form.facebook_url.errors %}<div class="text-danger small mt-1">{{ form.facebook_url.errors|join:",
-                    " }}</div>{% endif %}
+                {% if form.facebook_url.errors %}<div class="text-danger small mt-1">{{ form.facebook_url.errors|join:", " }}</div>{% endif %}
             </div>
 
             <!-- Action Buttons -->
