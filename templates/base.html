@@ -34,13 +34,13 @@
     <!-- ==========================================================================
    GLASSMORPHIC STICKY NAVIGATION
    ========================================================================== -->
-    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top bg-white border-bottom shadow-xs py-2.5" style="z-index: 1040;">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'core:home' %}">
-                <span class="navbar-brand-icon">
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-dark" href="{% url 'core:home' %}">
+                <span class="navbar-brand-icon text-white rounded-3 d-inline-flex align-items-center justify-content-center" style="width: 34px; height: 34px; font-size: 1rem; background-color: var(--primary, #056839);">
                     <i class="fa-solid fa-hand-holding-heart"></i>
                 </span>
-                <span>Crowd-Funding <span class="text-primary">Egypt</span></span>
+                <span>Crowd-Funding <span class="fw-extrabold" style="color: var(--primary, #056839);">Egypt</span></span>
             </a>
 
             <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
@@ -49,23 +49,27 @@
             </button>
 
             <div class="collapse navbar-collapse" id="mainNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 gap-1">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'project_list' %}active{% endif %}"
-                            href="{% url 'projects:project_list' %}">
-                            <i class="bi bi-compass me-1"></i> Explore Projects
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'core:home' %}">
+                            Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'project_list' %}active{% endif %}" href="{% url 'projects:project_list' %}">
+                            Campaigns
                         </a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            <i class="bi bi-grid me-1"></i> Categories
+                            Categories
                         </a>
                         <ul class="dropdown-menu shadow-lg border-0">
                             {% for cat in nav_categories %}
                             <li>
                                 <a class="dropdown-item d-flex align-items-center"
                                     href="{% url 'projects:category_detail' cat.slug %}">
-                                    <i class="bi bi-folder2 me-2 text-primary"></i> {{ cat.name }}
+                                    <i class="bi bi-folder2 me-2" style="color: var(--primary, #056839);"></i> {{ cat.name }}
                                 </a>
                             </li>
                             {% empty %}
@@ -73,42 +77,29 @@
                             {% endfor %}
                         </ul>
                     </li>
-                    {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link text-primary font-weight-bold" href="{% url 'projects:project_create' %}">
-                            <i class="bi bi-plus-circle me-1"></i> Start a Project
+                        <a class="nav-link" href="{% url 'core:home' %}#featured">
+                            Featured
                         </a>
                     </li>
-                    {% endif %}
                 </ul>
 
-                <!-- Search Bar -->
-                <form class="d-flex me-lg-3 mb-2 mb-lg-0 nav-search-form" role="search"
-                    action="{% url 'projects:search' %}" method="get">
-                    <div class="nav-search-wrapper">
-                        <i class="bi bi-search nav-search-icon"></i>
-                        <input class="nav-search-input" type="search" name="q" list="navSearchDatalist"
-                            placeholder="Search projects, tags..." value="{{ request.GET.q|default:'' }}"
-                            aria-label="Search" id="navSearchInput">
-                        <datalist id="navSearchDatalist">
-                            {% for suggestion in nav_search_suggestions %}
-                            <option value="{{ suggestion }}"></option>
-                            {% endfor %}
-                        </datalist>
-                        <button class="nav-search-btn" type="submit" aria-label="Submit search">
-                            <i class="bi bi-arrow-right-short"></i>
-                        </button>
-                    </div>
-                </form>
+                <!-- User Auth & Action Controls -->
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Theme Toggle Button -->
+                    <button class="theme-toggle-btn me-1" id="themeToggleBtn" type="button"
+                        aria-label="Toggle light and dark theme">
+                        <i class="bi bi-moon-stars-fill theme-icon-moon"></i>
+                        <i class="bi bi-sun-fill theme-icon-sun"></i>
+                    </button>
 
-                <!-- User Auth Controls -->
-                <ul class="navbar-nav align-items-center">
                     {% if user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#"
-                            data-bs-toggle="dropdown">
+                    <a class="btn btn-primary btn-pill fw-bold shadow-sm px-3.5 py-2 d-inline-flex align-items-center gap-1.5" href="{% url 'projects:project_create' %}">
+                        <i class="bi bi-plus-lg"></i> Start a campaign
+                    </a>
+                    <div class="dropdown ms-1">
+                        <a class="dropdown-toggle d-flex align-items-center gap-2 text-decoration-none" href="#" data-bs-toggle="dropdown">
                             <img src="{{ user.avatar_url }}" class="nav-profile-avatar" alt="{{ user.get_full_name }}">
-                            <span class="fw-semibold text-dark">{{ user.first_name }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0">
                             <li class="px-3 py-2 border-bottom mb-1">
@@ -117,17 +108,15 @@
                             </li>
                             <li>
                                 <a class="dropdown-item" href="{% url 'accounts:profile' %}">
-                                    <i class="bi bi-person-circle me-2 text-primary"></i> My Profile
+                                    <i class="bi bi-person-circle me-2" style="color: var(--primary, #056839);"></i> My Profile
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item" href="{% url 'projects:project_create' %}">
-                                    <i class="bi bi-rocket-takeoff me-2 text-primary"></i> Start a project
+                                    <i class="bi bi-rocket-takeoff me-2" style="color: var(--primary, #056839);"></i> Start a project
                                 </a>
                             </li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
+                            <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form action="{% url 'accounts:logout' %}" method="post" class="d-inline">
                                     {% csrf_token %}
@@ -137,27 +126,14 @@
                                 </form>
                             </li>
                         </ul>
-                    </li>
+                    </div>
                     {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link fw-semibold" href="{% url 'accounts:login' %}">Log In</a>
-                    </li>
-                    <li class="nav-item ms-lg-2">
-                        <a class="btn btn-primary btn-pill shadow-sm" href="{% url 'accounts:register' %}">
-                            <i class="bi bi-person-plus me-1"></i> Sign Up
-                        </a>
-                    </li>
+                    <a class="btn btn-link text-decoration-none text-dark fw-semibold px-3 py-2" href="{% url 'accounts:login' %}">Sign In</a>
+                    <a class="btn btn-primary btn-pill fw-bold shadow-sm px-3.5 py-2 d-inline-flex align-items-center gap-1.5" href="{% url 'projects:project_create' %}">
+                        <i class="bi bi-plus-lg"></i> Start a campaign
+                    </a>
                     {% endif %}
-
-                    <!-- Theme Toggle Button -->
-                    <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-                        <button class="theme-toggle-btn" id="themeToggleBtn" type="button"
-                            aria-label="Toggle light and dark theme">
-                            <i class="bi bi-moon-stars-fill theme-icon-moon"></i>
-                            <i class="bi bi-sun-fill theme-icon-sun"></i>
-                        </button>
-                    </li>
-                </ul>
+                </div>
             </div>
         </div>
     </nav>
@@ -184,96 +160,70 @@
     <!-- ==========================================================================
    MODERN 4-COLUMN FOOTER WITH NEWSLETTER
    ========================================================================== -->
-    <footer class="footer-dark mt-5">
+    <footer class="footer-dark text-white mt-5 py-5" style="background-color: var(--bg-footer, #054527);">
         <div class="container">
             <div class="row g-4 mb-5">
-                <!-- Col 1: Platform Overview -->
+                <!-- Col 1: Platform Summary -->
                 <div class="col-lg-4 col-md-6">
-                    <a class="navbar-brand text-white mb-3 d-inline-flex" href="{% url 'core:home' %}">
-                        <span class="navbar-brand-icon">
+                    <a class="navbar-brand text-white mb-3 d-inline-flex align-items-center gap-2" href="{% url 'core:home' %}">
+                        <span class="bg-white text-success rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 28px; height: 28px; font-size: 0.85rem;">
                             <i class="fa-solid fa-hand-holding-heart"></i>
                         </span>
-                        <span>Crowd-Funding <span class="text-primary">Egypt</span></span>
+                        <span class="fw-bold">Crowd-Funding <span class="text-white opacity-75">Egypt</span></span>
                     </a>
-                    <p class="small text-muted mb-4">
-                        Egypt's premier community-driven crowdfunding platform connecting innovative creators,
-                        changemakers, and visionary projects with passionate backers worldwide.
+                    <p class="small text-white-50 mb-4" style="max-width: 320px; line-height: 1.6;">
+                        A transparent home for Egyptian causes. Every campaign is verified, every pound is tracked, and every backer sees where the money lands.
                     </p>
                     <div class="d-flex gap-2">
-                        <a href="#" class="footer-social-icon" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="footer-social-icon" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
-                        <a href="#" class="footer-social-icon" aria-label="Instagram"><i
-                                class="bi bi-instagram"></i></a>
-                        <a href="#" class="footer-social-icon" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-light rounded-circle p-0 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-light rounded-circle p-0 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-light rounded-circle p-0 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-light rounded-circle p-0 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
                     </div>
                 </div>
 
-                <!-- Col 2: Quick Links -->
+                <!-- Col 2: Explore -->
                 <div class="col-lg-2 col-md-6">
-                    <h5>Quick Links</h5>
+                    <h6 class="fw-bold text-white mb-3">Explore</h6>
                     <ul class="list-unstyled small d-flex flex-column gap-2 mb-0">
-                        <li><a href="{% url 'core:home' %}"><i class="bi bi-chevron-right me-1 text-primary"></i>
-                                Home</a></li>
-                        <li><a href="{% url 'projects:project_list' %}"><i
-                                    class="bi bi-chevron-right me-1 text-primary"></i> Explore Projects</a></li>
-                        {% if user.is_authenticated %}
-                        <li><a href="{% url 'projects:project_create' %}"><i
-                                    class="bi bi-chevron-right me-1 text-primary"></i> Start Campaign</a></li>
-                        {% endif %}
-                        <li><a href="{% url 'core:about' %}"><i class="bi bi-chevron-right me-1 text-primary"></i> About
-                                Us</a></li>
+                        <li><a href="{% url 'projects:project_list' %}" class="text-white-50 text-decoration-none">All campaigns</a></li>
+                        <li><a href="{% url 'core:home' %}#categories" class="text-white-50 text-decoration-none">Categories</a></li>
+                        <li><a href="{% url 'core:home' %}#featured" class="text-white-50 text-decoration-none">Featured</a></li>
+                        <li><a href="{% url 'core:about' %}" class="text-white-50 text-decoration-none">Success stories</a></li>
                     </ul>
                 </div>
 
-                <!-- Col 3: Popular Categories -->
+                <!-- Col 3: Trust -->
                 <div class="col-lg-3 col-md-6">
-                    <h5>Categories</h5>
+                    <h6 class="fw-bold text-white mb-3">Trust</h6>
                     <ul class="list-unstyled small d-flex flex-column gap-2 mb-0">
-                        {% for cat in nav_categories|slice:":5" %}
-                        <li>
-                            <a href="{% url 'projects:category_detail' cat.slug %}">
-                                <i class="bi bi-tag me-1 text-primary"></i> {{ cat.name }}
-                            </a>
-                        </li>
-                        {% empty %}
-                        <li class="text-muted">No categories listed yet</li>
-                        {% endfor %}
+                        <li><a href="{% url 'core:about' %}" class="text-white-50 text-decoration-none">How verification works</a></li>
+                        <li><a href="{% url 'core:about' %}" class="text-white-50 text-decoration-none">Fees & transparency</a></li>
+                        <li><a href="{% url 'core:about' %}" class="text-white-50 text-decoration-none">Refund policy</a></li>
+                        <li><a href="{% url 'core:about' %}" class="text-white-50 text-decoration-none">Report a campaign</a></li>
                     </ul>
                 </div>
 
-                <!-- Col 4: Newsletter Subscription -->
+                <!-- Col 4: Stay in the loop -->
                 <div class="col-lg-3 col-md-6">
-                    <h5>Stay Updated</h5>
-                    <p class="small text-muted mb-3">
-                        Subscribe to receive curated weekly highlights of groundbreaking Egyptian projects.
+                    <h6 class="fw-bold text-white mb-3">Stay in the loop</h6>
+                    <p class="small text-white-50 mb-3">
+                        Monthly impact reports. No spam.
                     </p>
-                    <form onsubmit="event.preventDefault(); alert('Thank you for subscribing to our newsletter!');"
-                        class="d-flex flex-column gap-2">
-                        <div class="input-group">
-                            <input type="email" class="form-control form-control-sm border-0 bg-dark text-white"
-                                placeholder="Enter your email" required
-                                style="border-radius: var(--radius-md) 0 0 var(--radius-md);">
-                            <button class="btn btn-primary btn-sm" type="submit"
-                                style="border-radius: 0 var(--radius-md) var(--radius-md) 0;">
-                                <i class="bi bi-send-fill"></i>
-                            </button>
-                        </div>
-                        <small class="text-muted" style="font-size: 0.75rem;">We respect your privacy. Unsubscribe
-                            anytime.</small>
+                    <form onsubmit="event.preventDefault(); alert('Thank you for subscribing!');" class="d-flex gap-2 bg-white rounded-pill p-1">
+                        <input type="email" class="form-control border-0 bg-transparent shadow-none px-3 py-1 small" placeholder="Enter your email" required style="font-size: 0.85rem;">
+                        <button class="btn btn-accent btn-pill btn-sm px-3 fw-bold" type="submit" style="background-color: var(--accent, #f25c05); border: none; color: #fff;">
+                            Subscribe
+                        </button>
                     </form>
                 </div>
             </div>
 
-            <hr style="border-color: rgba(255,255,255,0.08);">
+            <hr style="border-color: rgba(255,255,255,0.15);">
 
-            <div
-                class="d-flex flex-column flex-md-row justify-content-between align-items-center small text-muted pt-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center small text-white-50 pt-2">
                 <p class="mb-2 mb-md-0">&copy; {% now "Y" %} Crowd-Funding Egypt. All rights reserved.</p>
-                <div class="d-flex gap-3">
-                    <a href="{% url 'core:about' %}" class="text-muted">Privacy Policy</a>
-                    <a href="{% url 'core:about' %}" class="text-muted">Terms of Service</a>
-                    <a href="{% url 'core:about' %}" class="text-muted">Support</a>
-                </div>
+                <div>Cairo, Egypt &middot; Built for verified impact</div>
             </div>
         </div>
     </footer>
