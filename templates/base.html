@@ -63,7 +63,7 @@
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'project_list' %}active{% endif %}"
                             href="{% url 'projects:project_list' %}">
-                            Campaigns
+                            Projects
                         </a>
                     </li>
                     <li class="nav-item dropdown">
@@ -75,7 +75,8 @@
                             <li>
                                 <a class="dropdown-item d-flex align-items-center"
                                     href="{% url 'projects:category_detail' cat.slug %}">
-                                    <i class="bi bi-folder2 me-2" style="color: var(--primary, #056839);"></i> {{ cat.name }}
+                                    <i class="bi bi-folder2 me-2" style="color: var(--primary, #056839);"></i> {{
+                                    cat.name }}
                                 </a>
                             </li>
                             {% empty %}
@@ -104,7 +105,7 @@
                     {% if user.is_authenticated %}
                     <a class="btn btn-primary btn-pill fw-bold shadow-sm px-3.5 py-2 d-inline-flex align-items-center justify-content-center gap-1.5"
                         href="{% url 'projects:project_create' %}">
-                        <i class="bi bi-plus-lg"></i> Start a campaign
+                        <i class="bi bi-plus-lg"></i> Start a Project
                     </a>
                     <div class="dropdown navbar-user-dropdown">
                         <a class="dropdown-toggle d-flex align-items-center gap-2 text-decoration-none py-2" href="#"
@@ -261,9 +262,13 @@
 
             <hr style="border-color: rgba(255,255,255,0.15);">
 
-            <div class="text-center small text-white-50 mb-4 pb-3 border-bottom border-light" style="border-bottom-color: rgba(255,255,255,0.05) !important;">
-                <p class="mb-2 text-uppercase fw-bold" style="font-size: 0.7rem; color: rgba(255,255,255,0.4); letter-spacing: 1px;">Crafted with passion by</p>
-                <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 gap-md-4 fw-medium text-white-50">
+            <div class="text-center small text-white-50 mb-4 pb-3 border-bottom border-light"
+                style="border-bottom-color: rgba(255,255,255,0.05) !important;">
+                <p class="mb-2 text-uppercase fw-bold"
+                    style="font-size: 0.7rem; color: rgba(255,255,255,0.4); letter-spacing: 1px;">Crafted with passion
+                    by</p>
+                <div
+                    class="d-flex flex-wrap justify-content-center align-items-center gap-3 gap-md-4 fw-medium text-white-50">
                     <span>Amr Mohamed</span>
                     <span class="d-none d-md-inline">&middot;</span>
                     <span>Merna Mohamed</span>
