@@ -62,34 +62,45 @@
     --primary-light: rgba(31, 138, 95, 0.16);
     --primary-border: rgba(31, 138, 95, 0.35);
     --primary-gradient: linear-gradient(135deg, #1f8a5f 0%, #101915 100%);
-    
+
     /* Accent (Warm Orange/Coral Palette) */
     --accent: #e05d38;
     --accent-hover: #ff7a28;
     --accent-gradient: linear-gradient(135deg, #e05d38 0%, #ff7a28 100%);
 
     /* Backgrounds (Dark Emerald/Forest Surfaces) */
-    --bg-body: #101915;       /* من surface-2 */
-    --bg-surface: #16211d;    /* من surface */
-    --bg-card: #1b2a25;       /* من surface-3 */
-    --bg-hover: #22352f;      /* درجـة أفتح قليلاً للتفاعل عند الـ Hover */
+    --bg-body: #101915;
+    /* من surface-2 */
+    --bg-surface: #16211d;
+    /* من surface */
+    --bg-card: #1b2a25;
+    /* من surface-3 */
+    --bg-hover: #22352f;
+    /* درجـة أفتح قليلاً للتفاعل عند الـ Hover */
     --bg-glass: rgba(22, 33, 29, 0.88);
     --bg-footer: linear-gradient(to bottom, var(--primary), #0e402b);
 
     /* Typography / Ink */
-    --text-primary: #eef4f1;   /* من ink */
-    --text-secondary: #a6b8b1; /* من ink-soft */
-    --text-muted: #738a81;     /* درجة خافتة متناسقة مع الخُضرة */
+    --text-primary: #eef4f1;
+    /* من ink */
+    --text-secondary: #a6b8b1;
+    /* من ink-soft */
+    --text-muted: #738a81;
+    /* درجة خافتة متناسقة مع الخُضرة */
 
     /* Borders */
-    --border-color: rgba(255, 255, 255, 0.10); /* من line */
+    --border-color: rgba(255, 255, 255, 0.10);
+    /* من line */
     --border-color-hover: rgba(255, 255, 255, 0.20);
 
     /* Shadows */
     --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.35);  /* من shadow-sm */
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.45); /* من shadow-md */
-    --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55); /* من shadow-lg */
+    --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.35);
+    /* من shadow-sm */
+    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.45);
+    /* من shadow-md */
+    --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55);
+    /* من shadow-lg */
     --shadow-glow: 0 0 30px rgba(31, 138, 95, 0.35);
 }
 
@@ -164,14 +175,22 @@ body {
 }
 
 /* 2. تنسيق العناوين (h1 إلى h6) لتحصل على طابع الـ Modern SaaS */
-h1, h2, h3, h4, h5, h6, .hero-title {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.hero-title {
     font-family: 'Plus Jakarta Sans', sans-serif !important;
     font-weight: 700 !important;
-    letter-spacing: -0.025em !important; /* تقريب الحروف بنسبة بسيطة يعطي مظهر فخم جداً */
+    letter-spacing: -0.025em !important;
+    /* تقريب الحروف بنسبة بسيطة يعطي مظهر فخم جداً */
 }
 
 /* 3. تنسيق البادجات والأزرار الصغيرة لتبدو رقيقة وأنيقة */
-.badge, .btn-sm {
+.badge,
+.btn-sm {
     font-family: 'Plus Jakarta Sans', sans-serif !important;
     font-weight: 600 !important;
     letter-spacing: -0.01em;
@@ -207,8 +226,8 @@ a:hover {
 
 /* Selection */
 ::selection {
-    background: rgba(5, 104, 57, 0.15);
-    color: var(--primary);
+    background: var(--primary);
+    color: var(--accent);
 }
 
 /* Section Title Utility */
@@ -236,7 +255,7 @@ a:hover {
 .gradient-text {
     background: var(--primary-gradient);
     -webkit-background-clip: text;
-    background-clip:text ;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -400,6 +419,7 @@ a:hover {
         opacity: 0;
         transform: translateY(-6px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1698,13 +1718,14 @@ body {
 [data-theme="dark"] .hero-wrapper::after {
     background: radial-gradient(circle, rgba(5, 104, 57, 0.15) 0%, rgba(13, 17, 23, 0) 70%) !important;
 }
+
 [data-theme="dark"] .hero-info-card {
     background: rgba(3, 35, 20, 0.92) !important;
     border: 1px solid rgba(16, 185, 129, 0.25) !important;
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7) !important;
 }
 
-[data-theme="dark"] .hero-slide > div[style*="linear-gradient"] {
+[data-theme="dark"] .hero-slide>div[style*="linear-gradient"] {
     background: linear-gradient(to right, rgba(3, 35, 20, 0.95) 0%, rgba(3, 35, 20, 0.65) 45%, rgba(0, 0, 0, 0) 100%) !important;
 }
 
@@ -1759,10 +1780,12 @@ body,
         height: 640px !important;
         min-height: 640px;
     }
+
     .hero-slide {
         height: 640px !important;
         min-height: 640px;
     }
+
     .hero-slide .hero-info-card {
         position: absolute !important;
         top: 50% !important;
@@ -1774,9 +1797,11 @@ body,
         padding: 2.5rem 2rem !important;
         text-align: center;
     }
+
     .hero-slide .hero-info-card .d-flex {
         justify-content: center !important;
     }
+
     .hero-slide .hero-info-card .text-truncate {
         white-space: normal;
         display: -webkit-box;
@@ -1784,6 +1809,7 @@ body,
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
+
     .sticky-top {
         position: static !important;
     }
@@ -1794,13 +1820,16 @@ body,
         padding-top: 1rem !important;
         padding-bottom: 2rem !important;
     }
+
     .project-detail-img {
         height: 280px !important;
     }
+
     .hero-slide {
         height: 600px !important;
         min-height: 600px !important;
     }
+
     .hero-slide .hero-info-card {
         width: 95% !important;
         max-width: 95% !important;
@@ -1918,17 +1947,34 @@ body,
     box-shadow: 0 4px 12px rgba(5, 104, 57, 0.3) !important;
 }
 
-.bg-info-subtle { background-color: var(--primary-light) !important; }
-.text-info { color: var(--primary) !important; }
-.border-info-subtle { border-color: var(--primary-border) !important; }
+.bg-info-subtle {
+    background-color: var(--primary-light) !important;
+}
+
+.text-info {
+    color: var(--primary) !important;
+}
+
+.border-info-subtle {
+    border-color: var(--primary-border) !important;
+}
 
 [data-theme="dark"] .badge.bg-info {
     background: var(--primary-gradient) !important;
     box-shadow: 0 4px 12px rgba(31, 138, 95, 0.35) !important;
 }
-[data-theme="dark"] .bg-info-subtle { background-color: rgba(31, 138, 95, 0.16) !important; }
-[data-theme="dark"] .text-info { color: #7fd6ae !important; }
-[data-theme="dark"] .border-info-subtle { border-color: rgba(31, 138, 95, 0.35) !important; }
+
+[data-theme="dark"] .bg-info-subtle {
+    background-color: rgba(31, 138, 95, 0.16) !important;
+}
+
+[data-theme="dark"] .text-info {
+    color: #7fd6ae !important;
+}
+
+[data-theme="dark"] .border-info-subtle {
+    border-color: rgba(31, 138, 95, 0.35) !important;
+}
 
 /* ==========================================================================
    APPENDED — BOOTSTRAP `primary` SEMANTIC UTILITIES MATCHED TO BRAND
@@ -1936,28 +1982,51 @@ body,
    (used by badges, stat icons, links, form labels across templates) onto
    the project emerald + orange palette. Appended only.
    ========================================================================== */
-.text-primary { color: var(--primary) !important; }
-.text-primary:hover { color: var(--primary-hover) !important; }
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.text-primary:hover {
+    color: var(--primary-hover) !important;
+}
+
 .link-primary,
-a.text-primary { color: var(--primary) !important; }
-a.text-primary:hover { color: var(--primary-hover) !important; }
-.text-primary-emphasis { color: var(--primary-hover) !important; }
+a.text-primary {
+    color: var(--primary) !important;
+}
+
+a.text-primary:hover {
+    color: var(--primary-hover) !important;
+}
+
+.text-primary-emphasis {
+    color: var(--primary-hover) !important;
+}
 
 .bg-primary {
     background: var(--primary-gradient) !important;
     color: #ffffff !important;
 }
+
 .bg-primary-subtle {
     background-color: var(--primary-light) !important;
     color: var(--primary) !important;
 }
+
 .badge.bg-primary {
     background: var(--primary-gradient) !important;
     color: #ffffff !important;
     border: none !important;
 }
-.border-primary { border-color: var(--primary) !important; }
-.border-primary-subtle { border-color: var(--primary-border) !important; }
+
+.border-primary {
+    border-color: var(--primary) !important;
+}
+
+.border-primary-subtle {
+    border-color: var(--primary-border) !important;
+}
+
 .alert-primary {
     background-color: var(--primary-light) !important;
     color: var(--primary-hover) !important;
@@ -1972,21 +2041,41 @@ a.text-primary:hover { color: var(--primary-hover) !important; }
 }
 
 /* --- Dark-mode counterparts ------------------------------------------------ */
-[data-theme="dark"] .text-primary { color: var(--primary) !important; }
+[data-theme="dark"] .text-primary {
+    color: var(--primary) !important;
+}
+
 [data-theme="dark"] .link-primary,
-[data-theme="dark"] a.text-primary { color: var(--primary) !important; }
-[data-theme="dark"] a.text-primary:hover { color: var(--primary-hover) !important; }
-[data-theme="dark"] .bg-primary { background: var(--primary-gradient) !important; }
+[data-theme="dark"] a.text-primary {
+    color: var(--primary) !important;
+}
+
+[data-theme="dark"] a.text-primary:hover {
+    color: var(--primary-hover) !important;
+}
+
+[data-theme="dark"] .bg-primary {
+    background: var(--primary-gradient) !important;
+}
+
 [data-theme="dark"] .bg-primary-subtle {
     background-color: rgba(31, 138, 95, 0.16) !important;
     color: var(--primary) !important;
 }
+
 [data-theme="dark"] .badge.bg-primary {
     background: var(--primary-gradient) !important;
     box-shadow: 0 4px 12px rgba(31, 138, 95, 0.35) !important;
 }
-[data-theme="dark"] .border-primary { border-color: rgba(31, 138, 95, 0.5) !important; }
-[data-theme="dark"] .border-primary-subtle { border-color: rgba(31, 138, 95, 0.3) !important; }
+
+[data-theme="dark"] .border-primary {
+    border-color: rgba(31, 138, 95, 0.5) !important;
+}
+
+[data-theme="dark"] .border-primary-subtle {
+    border-color: rgba(31, 138, 95, 0.3) !important;
+}
+
 [data-theme="dark"] .alert-primary {
     background-color: rgba(31, 138, 95, 0.14) !important;
     color: var(--primary) !important;
@@ -2092,7 +2181,7 @@ a.text-primary:hover { color: var(--primary-hover) !important; }
    wrapper a clean context so the autocomplete dropdown always paints above
    the hero / carousel content, and is never clipped or hidden behind it.
    ========================================================================== */
-.hero-wrapper > .container {
+.hero-wrapper>.container {
     position: relative;
     z-index: 1;
 }
@@ -2138,6 +2227,7 @@ a.text-primary:hover { color: var(--primary-hover) !important; }
 }
 
 @media (max-width: 991.98px) {
+
     #topProjectsCarousel .carousel-item,
     #topProjectsCarousel .hero-slide {
         height: 420px !important;
@@ -2146,6 +2236,7 @@ a.text-primary:hover { color: var(--primary-hover) !important; }
 }
 
 @media (max-width: 575.98px) {
+
     #topProjectsCarousel .carousel-item,
     #topProjectsCarousel .hero-slide {
         height: 300px !important;
@@ -2166,7 +2257,7 @@ a.text-primary:hover { color: var(--primary-hover) !important; }
         line-height: 1.25 !important;
     }
 
-    #topProjectsCarousel .hero-info-card > .small {
+    #topProjectsCarousel .hero-info-card>.small {
         -webkit-line-clamp: 1;
         line-clamp: 1;
     }
@@ -2658,7 +2749,7 @@ body:has(.report-project-modal.show) .modal-backdrop.show {
    that may still use them; the profile page no longer renders tab pills. */
 
 /* ==========================================================================
-   APPENDED � USER PROFILE DROPDOWN RESPONSIVE FIX
+   APPENDED � USER PROFILE DROPDOWN RESPONSIVE FIX
    Ensures the user dropdown anchors correctly below the trigger on mobile,
    doesn't fly off screen horizontally, and behaves as a proper block
    inside the mobile navbar collapse without getting clipped.
