@@ -1,0 +1,1155 @@
+/* ============================================================================
+   Crowd-Funding Egypt — Custom Django Admin Theme
+   SaaS-style portal for the Django Admin Dashboard
+   Palette: Deep Forest Green + Amber Accent + Mint + Soft Grey
+   ============================================================================ */
+
+:root {
+    --cf-forest: #16211d;
+    --cf-forest-2: #1e2d26;
+    --cf-forest-3: #0a1913;
+    --cf-accent: #f25c05;
+    --cf-accent-soft: #fde8dc;
+    --cf-mint: #1fbf7a;
+    --cf-mint-dark: #17a06a;
+    --cf-bg: #f8fafc;
+    --cf-surface: #ffffff;
+    --cf-border: #e5eaf2;
+    --cf-text: #1b2622;
+    --cf-muted: #64748b;
+    --cf-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
+    --cf-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
+    --cf-radius: 12px;
+}
+
+html[data-theme="dark"] {
+    --cf-forest: #0f1915;
+    --cf-forest-2: #17241e;
+    --cf-forest-3: #0a1210;
+    --cf-accent-soft: #3a261c;
+    --cf-bg: #0b1220;
+    --cf-surface: #131c2e;
+    --cf-border: #22304a;
+    --cf-text: #e7eef5;
+    --cf-muted: #93a3bd;
+    --cf-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --cf-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* ----------------------------------------------------------------------------
+   1. Base / Typography
+   ---------------------------------------------------------------------------- */
+.admin-interface body,
+html[data-theme="dark"] .admin-interface body {
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--cf-bg);
+    color: var(--cf-text);
+    line-height: 1.55;
+    font-size: 14px;
+}
+
+.admin-interface #container { background: var(--cf-bg); }
+
+.admin-interface a:link,
+.admin-interface a:visited { color: #14764e; }
+html[data-theme="dark"] .admin-interface a:link,
+html[data-theme="dark"] .admin-interface a:visited { color: #53d3a0; }
+.admin-interface a:hover { color: var(--cf-accent); }
+
+.admin-interface h1, .admin-interface h2, .admin-interface h3,
+.admin-interface caption { font-family: "Plus Jakarta Sans", sans-serif; }
+
+.admin-interface #content { color: var(--cf-text); }
+
+/* ----------------------------------------------------------------------------
+   2. Top Header Bar (Navbar)
+   ---------------------------------------------------------------------------- */
+.admin-interface #header {
+    background: linear-gradient(120deg, var(--cf-forest) 0%, var(--cf-forest-2) 60%, var(--cf-forest-3) 100%);
+    color: #fff;
+    border-bottom: 3px solid var(--cf-accent);
+    box-shadow: 0 6px 18px rgba(10, 25, 19, 0.25);
+    padding: 12px 28px;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.admin-interface #branding { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
+
+.admin-interface #site-name { margin: 0; float: none; }
+
+.admin-interface #site-name a {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #fff !important;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-interface #site-name .cf-brand-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--cf-mint), #17a06a);
+    color: #07130e;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 4px 10px rgba(31, 191, 122, 0.45);
+}
+
+.admin-interface #site-name em { font-style: normal; color: var(--cf-mint); }
+
+.admin-interface #site-name .cf-brand-badge {
+    margin-left: 6px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #b9e6d0;
+}
+
+/* ---- User tools (welcome + quick links + theme toggle) ---- */
+.admin-interface #user-tools {
+    float: none;
+    color: #dce8e2;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+}
+
+.admin-interface #user-tools .cf-welcome {
+    white-space: nowrap;
+    margin-right: 4px;
+}
+.admin-interface #user-tools .cf-welcome strong { font-weight: 800; color: #fff; }
+
+.admin-interface #user-tools .cf-quicklinks {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+.admin-interface #user-tools .cf-quicklinks li { list-style: none; }
+.admin-interface #user-tools .cf-quicklinks a,
+.admin-interface #user-tools .cf-quicklinks button {
+    color: #dce8e2;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    padding: 7px 14px;
+    margin: 0 4px;
+    transition: all 0.18s ease;
+    font-size: 12.5px;
+    cursor: pointer;
+}
+.admin-interface #user-tools .cf-quicklinks a:hover,
+.admin-interface #user-tools .cf-quicklinks button:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #fff;
+}
+
+.admin-interface #user-tools .cf-quicklinks .bi { color: var(--cf-mint); font-size: 13px; }
+
+/* theme toggle pill */
+.admin-interface .cf-theme-toggle {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.2s ease;
+}
+.admin-interface .cf-theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.18);
+    transform: rotate(15deg);
+}
+/* icon swap is driven by the JS class `.is-dark` so it also works in `auto`
+   mode (system dark) — not only when data-theme="dark" is set explicitly. */
+.admin-interface .cf-theme-toggle .icon-sun,
+.admin-interface .cf-theme-toggle .icon-moon { display: none; line-height: 1; }
+.admin-interface .cf-theme-toggle .icon-moon { display: inline-flex; }
+.admin-interface .cf-theme-toggle.is-dark .icon-moon { display: none; }
+.admin-interface .cf-theme-toggle.is-dark .icon-sun { display: inline-flex; color: #ffd166; }
+.admin-interface .cf-theme-toggle:focus-visible { outline: 2px solid var(--cf-mint); outline-offset: 2px; }
+
+/* Django's built-in svg toggle (kept hidden when our icon button is used) */
+.admin-interface .theme-toggle { background: transparent; border: 0; cursor: pointer; padding: 4px; }
+.admin-interface .theme-toggle .theme-icon-when-auto,
+.admin-interface .theme-toggle .theme-icon-when-light,
+.admin-interface .theme-toggle .theme-icon-when-dark { fill: #0e1613; width: 1.15rem; height: 1.15rem; }
+.admin-interface .cf-theme-toggle svg { display: none; }
+html[data-theme="dark"] .admin-interface .theme-toggle svg { fill: #fff; }
+
+/* logout form inside header */
+.admin-interface #user-tools #logout-form { display: inline; margin: 0; }
+.admin-interface #user-tools #logout-form button { all: unset; }
+
+/* ----------------------------------------------------------------------------
+   3. Breadcrumbs
+   ---------------------------------------------------------------------------- */
+.admin-interface .breadcrumbs {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--cf-border);
+    color: var(--cf-muted);
+    margin: 0;
+    padding: 12px 28px;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+.admin-interface .breadcrumbs a { color: #14764e !important; }
+.admin-interface .breadcrumbs a:hover { color: var(--cf-accent) !important; }
+html[data-theme="dark"] .admin-interface .breadcrumbs a { color: #53d3a0 !important; }
+
+/* ----------------------------------------------------------------------------
+   4. Content container (all admin pages)
+   ---------------------------------------------------------------------------- */
+.admin-interface #main { padding: 0; }
+
+.admin-interface #content.colM,
+.admin-interface #content.colMS {
+    max-width: 1200px;
+    margin: 24px auto;
+    padding: 0 28px;
+    float: none;
+    overflow: visible;
+}
+
+.admin-interface .titles-and-tools { margin-bottom: 18px; }
+.admin-interface #content h1 { color: var(--cf-text); font-weight: 800; letter-spacing: -0.02em; }
+
+/* messages */
+.admin-interface ul.messagelist {
+    border: 0;
+    max-width: 1200px;
+    margin: 18px auto;
+    padding: 0 28px;
+}
+.admin-interface ul.messagelist li {
+    border: 1px solid var(--cf-border);
+    background: var(--cf-surface);
+    color: var(--cf-text);
+    border-radius: 10px;
+    box-shadow: var(--cf-shadow-sm);
+    padding: 10px 14px;
+}
+
+/* modules -> cards on every admin page */
+.admin-interface .module {
+    background: var(--cf-surface);
+    border: 1px solid var(--cf-border);
+    border-radius: var(--cf-radius);
+    box-shadow: var(--cf-shadow-sm);
+    overflow: hidden;
+    margin-bottom: 22px;
+}
+.admin-interface .module:has(> .module) { padding: 0; } /* changeform wrapper */
+.admin-interface .module h2, .admin-interface .module caption {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    color: var(--cf-text);
+    background: transparent;
+    padding: 14px 18px;
+    margin: 0;
+    border-bottom: 1px solid var(--cf-border);
+}
+
+/* tables */
+.admin-interface table { border-color: var(--cf-border); background: var(--cf-surface); }
+.admin-interface thead th,
+.admin-interface thead td,
+.admin-interface .form-row th,
+.admin-interface .form-row td { border-bottom: 1px solid var(--cf-border); background: #f4f7fb; color: var(--cf-text); }
+html[data-theme="dark"] .admin-interface thead th,
+html[data-theme="dark"] .admin-interface thead td,
+html[data-theme="dark"] .admin-interface .form-row th,
+html[data-theme="dark"] .admin-interface .form-row td { background: #182236; }
+.admin-interface tr.row1, .admin-interface tr.even { background: var(--cf-surface); }
+.admin-interface tr.row2, .admin-interface tr.odd { background: #fbfcfe; }
+html[data-theme="dark"] .admin-interface tr.row2,
+html[data-theme="dark"] .admin-interface tr.odd { background: #111a2a; }
+.admin-interface #result_list tbody tr:hover { background: var(--cf-accent-soft); }
+
+/* buttons */
+.admin-interface input[type="submit"],
+.admin-interface input[type="button"],
+.admin-interface .button,
+.admin-interface a.button {
+    background: var(--cf-mint);
+    border: 0;
+    color: #04251a;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 9px 16px;
+    box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12);
+    transition: filter 0.15s ease;
+}
+.admin-interface input[type="submit"]:hover,
+.admin-interface input[type="button"]:hover,
+.admin-interface .button:hover,
+.admin-interface a.button:hover {
+    background: var(--cf-mint-dark);
+    color: #04251a;
+    filter: brightness(1.05);
+}
+.admin-interface input.default,
+.admin-interface .default,
+.admin-interface .submit-row input.default {
+    background: var(--cf-accent);
+    color: #fff;
+    box-shadow: 0 6px 14px rgba(242, 92, 5, 0.35);
+}
+.admin-interface .submit-row {
+    background: transparent;
+    border: 0;
+    border-top: 1px solid var(--cf-border);
+    padding: 16px;
+}
+
+/* changelist toolbar, search, pagination polish */
+.admin-interface #changelist { background: var(--cf-surface); border: 1px solid var(--cf-border); border-radius: var(--cf-radius); box-shadow: var(--cf-shadow-sm); }
+.admin-interface #toolbar { border-color: var(--cf-border); }
+.admin-interface #toolbar form input[type="search"] { border-radius: 8px; }
+.admin-interface .paginator { background: #f4f7fb; border-top: 1px solid var(--cf-border); color: var(--cf-muted); }
+.admin-interface .paginator a, .admin-interface .paginator span { border-radius: 8px; }
+.admin-interface .paginator a:link, .admin-interface .paginator a:visited { background: var(--cf-surface); color: #14764e; }
+
+/* form rows/inputs */
+.admin-interface input[type="text"], .admin-interface input[type="password"],
+.admin-interface input[type="email"], .admin-interface input[type="url"],
+.admin-interface input[type="number"], .admin-interface input[type="date"],
+.admin-interface textarea, .admin-interface select {
+    border: 1px solid var(--cf-border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: var(--cf-surface);
+    color: var(--cf-text);
+    box-sizing: border-box;
+}
+html[data-theme="dark"] .admin-interface input[type="text"],
+html[data-theme="dark"] .admin-interface input[type="password"],
+html[data-theme="dark"] .admin-interface input[type="email"],
+html[data-theme="dark"] .admin-interface input[type="url"],
+html[data-theme="dark"] .admin-interface input[type="number"],
+html[data-theme="dark"] .admin-interface input[type="date"],
+html[data-theme="dark"] .admin-interface textarea,
+html[data-theme="dark"] .admin-interface select { background: #0f172a; border-color: #22304a; }
+
+/* ----------------------------------------------------------------------------
+   5. Dashboard (index page) — SaaS two-column layout
+   ---------------------------------------------------------------------------- */
+.dashboard.admin-interface #content {
+    width: 100%;
+    max-width: none;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+/* ---- Kill conflicting Django defaults that squeeze & shrink the dashboard ---- */
+.admin-interface body.dashboard #content { width: 100% !important; max-width: none !important; }
+.admin-interface #content.colMS,
+.admin-interface #content.colM { margin-right: 0 !important; float: none !important; }
+.admin-interface .dashboard #content-main,
+.admin-interface .dashboard #content-related { float: none !important; width: auto !important; margin: 0 !important; }
+
+.cf-dash-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 26px;
+}
+.dashboard .cf-dash-head h1 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.25;
+    margin: 4px 0 6px;
+    color: var(--cf-text);
+}
+.cf-dash-head .cf-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--cf-accent-soft);
+    color: var(--cf-accent);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+.cf-dash-head p.cf-dash-subtitle { color: var(--cf-muted); margin: 0; max-width: 560px; font-size: 13.5px; }
+
+.cf-dash-head .cf-quick-actions { display: flex; gap: 10px; }
+
+.cf-dash-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(280px, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.cf-main,
+.cf-side {
+    min-width: 0;
+}
+
+/* ---- Left: app cards ---- */
+.cf-app-card {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    background: var(--cf-surface);
+    border: 1px solid var(--cf-border);
+    border-radius: var(--cf-radius);
+    box-shadow: var(--cf-shadow-sm);
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.cf-app-card:hover { box-shadow: var(--cf-shadow); transform: translateY(-2px); }
+
+.cf-app-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--cf-border);
+    background: linear-gradient(100deg, rgba(31, 191, 122, 0.07), rgba(255, 255, 255, 0) 60%);
+}
+html[data-theme="dark"] .cf-app-head { background: linear-gradient(100deg, rgba(31, 191, 122, 0.12), rgba(255, 255, 255, 0) 60%); }
+
+.cf-app-head .cf-app-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 11px;
+    background: linear-gradient(135deg, var(--cf-forest), var(--cf-forest-2));
+    color: var(--cf-mint);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    box-shadow: var(--cf-shadow-sm);
+}
+.cf-app-head h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.4;
+    color: var(--cf-text);
+}
+.cf-app-head .cf-app-meta { font-size: 11.5px; color: var(--cf-muted); } 
+.cf-app-head .cf-app-link {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #14764e;
+    text-decoration: none;
+    border: 1px solid var(--cf-border);
+    border-radius: 999px;
+    padding: 6px 12px;
+    transition: all 0.15s ease;
+}
+.cf-app-head .cf-app-link:hover { background: var(--cf-accent-soft); color: var(--cf-accent); }
+
+/* model rows — pure flexbox: left identity, right actions, never overlapping */
+.cf-model-list {
+    margin: 0;
+    padding: 14px 18px 18px;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.cf-model-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    min-width: 0;
+    box-sizing: border-box;
+    gap: 14px;
+    padding: 10px 14px;
+    background: var(--cf-surface);
+    border: 1px solid var(--cf-border);
+    border-radius: 10px;
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    position: static !important;
+}
+.cf-model-row:hover {
+    background: var(--cf-accent-soft);
+    border-color: rgba(47, 204, 143, 0.45);
+    box-shadow: var(--cf-shadow-sm);
+}
+html[data-theme="dark"] .cf-model-row:hover { background: #1b2a42; }
+
+.cf-model-row .cf-model-icon {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    flex-grow: 0;
+    border-radius: 10px;
+    background: #eef7f2;
+    color: #14764e;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+}
+html[data-theme="dark"] .cf-model-row .cf-model-icon { background: #1c2c44; color: #53d3a0; }
+
+/* left side: icon + title — grows to fill, never overlaps the buttons */
+.cf-model-info {
+    display: flex;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex: 1 1 auto !important;
+    gap: 12px;
+    min-width: 0;
+}
+.cf-model-meta {
+    flex: 1 1 auto !important;
+    min-width: 0;
+    margin-right: 16px;
+    text-align: left;
+}
+.cf-model-name {
+    font-weight: 700;
+    color: var(--cf-text);
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 1.4;
+    display: inline-block !important;
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    min-width: 0;
+}
+.cf-model-name:hover { color: var(--cf-accent); }
+.cf-model-sub { display: block; font-size: 11.5px; color: var(--cf-muted); line-height: 1.4; }
+
+/* right side: buttons grouped, fixed, on their own column — never overlap text */
+.cf-model-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    position: static !important;
+    white-space: nowrap;
+}
+
+.cf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.4;
+    text-decoration: none;
+    border-radius: 6px;
+    padding: 4px 12px;
+    min-height: 28px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    position: static;
+}
+.cf-btn .bi { font-size: 11px; }
+
+.cf-btn-add {
+    background: rgba(31, 191, 122, 0.13);
+    color: #14805a;
+    border: 1px solid var(--cf-mint);
+}
+html[data-theme="dark"] .cf-btn-add { background: rgba(31, 191, 122, 0.18); color: #53d3a0; }
+.cf-btn-add:hover { background: var(--cf-mint); color: #04251a; border-color: var(--cf-mint-dark); }
+
+.cf-btn-change {
+    background: transparent;
+    color: #14764e;
+    border: 1px solid var(--cf-border);
+}
+html[data-theme="dark"] .cf-btn-change { color: #53d3a0; }
+.cf-btn-change:hover { background: #eaf7f0; border-color: var(--cf-mint); color: #14764e; }
+
+.cf-btn-view {
+    background: transparent;
+    color: var(--cf-muted);
+    border: 1px solid var(--cf-border);
+}
+.cf-btn-view:hover { background: #f1f5f9; color: var(--cf-text); }
+
+.cf-empty {
+    background: var(--cf-surface);
+    border: 1px dashed var(--cf-border);
+    border-radius: var(--cf-radius);
+    padding: 40px;
+    text-align: center;
+    color: var(--cf-muted);
+}
+
+/* ---- Right: Recent Actions ---- */
+.cf-side { position: sticky; top: 18px; }
+
+.cf-recent-card {
+    background: var(--cf-surface);
+    border: 1px solid var(--cf-border);
+    border-radius: var(--cf-radius);
+    box-shadow: var(--cf-shadow-sm);
+    overflow: hidden;
+}
+.cf-recent-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px;
+    background: linear-gradient(120deg, var(--cf-forest), var(--cf-forest-2));
+    color: #fff;
+}
+.cf-recent-head .cf-recent-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.14);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--cf-mint);
+}
+.cf-recent-head h3 { margin: 0; font-size: 15.5px; font-weight: 800; color: #fff; line-height: 1.4; }
+.cf-recent-head .cf-badge {
+    margin-left: auto;
+    background: var(--cf-accent);
+    color: #fff;
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 800;
+}
+.cf-recent-sub {
+    margin: 0;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--cf-border);
+    color: var(--cf-muted);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.cf-timeline { margin: 0; padding: 8px 18px 18px; list-style: none; }
+.cf-timeline-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--cf-border);
+}
+.cf-timeline-item:last-child { border-bottom: 0; }
+
+.cf-tl-badge {
+    width: 30px; height: 30px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+}
+.cf-tl-add .cf-tl-badge   { background: #e2f8ee; color: #17a06a; }
+.cf-tl-change .cf-tl-badge { background: #fff1e6; color: var(--cf-accent); }
+.cf-tl-delete .cf-tl-badge { background: #fde4e4; color: #d3312f; }
+.cf-tl-other .cf-tl-badge { background: #e9edf5; color: var(--cf-muted); }
+
+html[data-theme="dark"] .cf-tl-add .cf-tl-badge { background: #12321f; }
+html[data-theme="dark"] .cf-tl-change .cf-tl-badge { background: #3a261c; }
+html[data-theme="dark"] .cf-tl-delete .cf-tl-badge { background: #3a1c1c; }
+
+.cf-tl-text { margin: 0 0 3px; font-size: 13px; font-weight: 600; color: var(--cf-text); }
+.cf-tl-text a { color: var(--cf-text); text-decoration: none; }
+.cf-tl-text a:hover { color: var(--cf-accent); }
+.cf-tl-type-item {
+    display: inline-block;
+    background: #f1f5f9;
+    border-radius: 999px;
+    padding: 2px 9px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--cf-muted);
+    text-transform: capitalize;
+    white-space: nowrap;
+}
+.cf-tl-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.cf-tl-time { font-size: 11px; color: var(--cf-muted); white-space: nowrap; margin-left: auto; }
+html[data-theme="dark"] .cf-tl-type-item { background: #22304a; color: #b6c4d8; }
+
+.cf-none { padding: 8px 18px 18px; color: var(--cf-muted); text-align: center; margin: 0; }
+
+/* ----------------------------------------------------------------------------
+   6. Login page polish
+   ---------------------------------------------------------------------------- */
+.admin-interface.login #content {
+    margin: 0 auto;
+    padding: 40px 0;
+    display: flex;
+    justify-content: center;
+}
+.admin-interface.login #content form {
+    background: var(--cf-surface);
+    border: 1px solid var(--cf-border);
+    border-radius: var(--cf-radius);
+    box-shadow: var(--cf-shadow);
+    padding: 28px 30px;
+    min-width: 340px;
+}
+
+/* ----------------------------------------------------------------------------
+   7. Responsive
+   ---------------------------------------------------------------------------- */
+@media (max-width: 1100px) {
+    .cf-dash-grid { grid-template-columns: 1fr; }
+    .cf-side { position: static; }
+}
+
+@media (max-width: 767px) {
+    .admin-interface #header { flex-wrap: wrap; padding: 12px 16px; }
+    .admin-interface #user-tools { flex-wrap: wrap; gap: 6px; }
+    .admin-interface #user-tools .cf-quicklinks { flex-wrap: wrap; }
+    .cf-dash-head { flex-direction: column; align-items: flex-start; }
+    .cf-model-row { flex-wrap: wrap; padding: 10px 12px; }
+    .cf-model-actions { margin-left: 0; width: 100%; justify-content: flex-start; }
+    .admin-interface #content.colM,
+    .admin-interface #content.colMS { padding: 0 16px; }
+}
+
+/* ----------------------------------------------------------------------------
+   8. AUTO theme support
+   The blocks above only react to html[data-theme="dark"]. Django's toggle has a
+   third state ("auto"), so mirror every dark token when the OS is dark and the
+   user has not forced light.
+   ---------------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+    html[data-theme="auto"], html:not([data-theme]) {
+        --cf-forest: #0f1915;
+        --cf-forest-2: #17241e;
+        --cf-forest-3: #0a1210;
+        --cf-accent-soft: #3a261c;
+        --cf-bg: #0b1220;
+        --cf-surface: #131c2e;
+        --cf-border: #22304a;
+        --cf-text: #e7eef5;
+        --cf-muted: #93a3bd;
+        --cf-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+        --cf-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+    html[data-theme="auto"] .admin-interface a:link,
+    html[data-theme="auto"] .admin-interface a:visited { color: #53d3a0; }
+    html[data-theme="auto"] .admin-interface thead th,
+    html[data-theme="auto"] .admin-interface thead td,
+    html[data-theme="auto"] .admin-interface .form-row th,
+    html[data-theme="auto"] .admin-interface .form-row td { background: #182236; }
+    html[data-theme="auto"] .admin-interface tr.row2,
+    html[data-theme="auto"] .admin-interface tr.odd { background: #111a2a; }
+    html[data-theme="auto"] .admin-interface .paginator,
+    html[data-theme="auto"] .admin-interface .cf-tl-type-item { background: #22304a; color: #b6c4d8; }
+    html[data-theme="auto"] .cf-model-row .cf-model-icon { background: #1c2c44; color: #53d3a0; }
+    html[data-theme="auto"] .cf-btn-change,
+    html[data-theme="auto"] .cf-btn-add { color: #53d3a0; }
+}
+
+/* ----------------------------------------------------------------------------
+   9. Dark-mode leftovers (hard-coded light values fixed for every page)
+   ---------------------------------------------------------------------------- */
+html[data-theme="dark"] .cf-btn-change:hover { background: #1b2a42; border-color: var(--cf-mint); color: #7de3b6; }
+html[data-theme="dark"] .cf-btn-view:hover { background: #1b2a42; color: var(--cf-text); }
+html[data-theme="dark"] .admin-interface .paginator { background: #182236; color: var(--cf-muted); }
+html[data-theme="dark"] .admin-interface .paginator a:link,
+html[data-theme="dark"] .admin-interface .paginator a:visited { background: var(--cf-surface); color: #53d3a0; }
+html[data-theme="dark"] .admin-interface #changelist-filter,
+html[data-theme="dark"] .admin-interface .object-tools a { background: var(--cf-surface); color: var(--cf-text); }
+
+/* ----------------------------------------------------------------------------
+   10. Cross-page consistency (changelist, change form, filters, delete, history)
+   ---------------------------------------------------------------------------- */
+.admin-interface #header { position: sticky; top: 0; z-index: 40; }
+
+/* object tools (Add / History / View on site) */
+.admin-interface .object-tools a,
+.admin-interface .object-tools a:link,
+.admin-interface .object-tools a:visited {
+    background: var(--cf-surface);
+    border: 1px solid var(--cf-border);
+    color: #14764e;
+    border-radius: 999px;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-weight: 700;
+    font-size: 12.5px;
+    letter-spacing: 0;
+    text-transform: none;
+    padding: 7px 14px;
+    box-shadow: var(--cf-shadow-sm);
+}
+.admin-interface .object-tools a.addlink,
+.admin-interface .object-tools a.addlink:link { background: var(--cf-mint); border-color: var(--cf-mint); color: #04251a; }
+.admin-interface .object-tools a:hover { background: var(--cf-accent-soft); color: var(--cf-accent); border-color: var(--cf-accent); }
+
+/* changelist toolbar + search */
+.admin-interface #toolbar {
+    background: transparent;
+    border-bottom: 1px solid var(--cf-border);
+    padding: 12px 14px;
+}
+.admin-interface #toolbar form#changelist-search { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.admin-interface #toolbar form input[type="submit"] { margin: 0; }
+.admin-interface #searchbar {
+    border: 1px solid var(--cf-border) !important;
+    border-radius: 8px;
+    padding: 8px 12px;
+    min-width: 240px;
+    background: var(--cf-surface);
+    color: var(--cf-text);
+}
+.admin-interface #searchbar:focus { outline: none; border-color: var(--cf-mint) !important; box-shadow: 0 0 0 3px rgba(31, 191, 122, 0.18); }
+.admin-interface #changelist .actions {
+    background: var(--cf-bg);
+    border-bottom: 1px solid var(--cf-border);
+    color: var(--cf-muted);
+    padding: 10px 14px;
+}
+.admin-interface #result_list { border: 0; }
+.admin-interface #result_list thead th {
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    font-weight: 800;
+    color: var(--cf-muted);
+}
+.admin-interface #result_list td, .admin-interface #result_list th { padding: 11px 12px; vertical-align: middle; }
+
+/* filter sidebar */
+.admin-interface #changelist-filter {
+    background: var(--cf-surface);
+    border: 1px solid var(--cf-border);
+    border-radius: var(--cf-radius);
+    box-shadow: var(--cf-shadow-sm);
+    margin-left: 16px;
+    overflow: hidden;
+}
+.admin-interface #changelist-filter h2 {
+    background: linear-gradient(120deg, var(--cf-forest), var(--cf-forest-2));
+    color: #fff;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 12px 16px;
+    border: 0;
+}
+.admin-interface #changelist-filter li.selected a { color: var(--cf-accent); font-weight: 700; }
+
+/* change form */
+.admin-interface .form-row { padding: 12px 16px; border-bottom: 1px solid var(--cf-border); }
+.admin-interface .form-row:last-child { border-bottom: 0; }
+.admin-interface fieldset.module .form-row th,
+.admin-interface fieldset.module .form-row td { background: transparent; border-bottom: 0; }
+.admin-interface label { font-weight: 700; color: var(--cf-text); }
+.admin-interface .help, .admin-interface .help-tooltip, .admin-interface div.help { color: var(--cf-muted); font-size: 12px; }
+.admin-interface input:focus, .admin-interface textarea:focus, .admin-interface select:focus {
+    outline: none;
+    border-color: var(--cf-mint);
+    box-shadow: 0 0 0 3px rgba(31, 191, 122, 0.18);
+}
+.admin-interface .errornote,
+.admin-interface ul.errorlist {
+    background: #fde4e4;
+    border: 1px solid #f3b6b6;
+    color: #8f1f1d;
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+html[data-theme="dark"] .admin-interface .errornote,
+html[data-theme="dark"] .admin-interface ul.errorlist { background: #3a1c1c; border-color: #6b2b2b; color: #ffbdbd; }
+.admin-interface .submit-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.admin-interface .submit-row a.deletelink,
+.admin-interface .deletelink-box a {
+    background: #fde4e4;
+    color: #b3261e;
+    border: 1px solid #f3b6b6;
+    border-radius: 10px;
+    padding: 9px 16px;
+    font-weight: 700;
+}
+.admin-interface .submit-row a.deletelink:hover { background: #b3261e; color: #fff; }
+
+/* inlines */
+.admin-interface .inline-group { border-radius: var(--cf-radius); overflow: hidden; }
+.admin-interface .inline-related h3 {
+    background: var(--cf-bg);
+    border-bottom: 1px solid var(--cf-border);
+    color: var(--cf-text);
+    font-weight: 700;
+    padding: 10px 14px;
+}
+.admin-interface .add-row a { font-weight: 700; color: #14764e; }
+
+/* selector / raw-id widgets, calendars */
+.admin-interface .selector-available h2, .admin-interface .selector-chosen h2 { background: var(--cf-bg); color: var(--cf-text); }
+.admin-interface .calendarbox, .admin-interface .clockbox { border-radius: var(--cf-radius); box-shadow: var(--cf-shadow); overflow: hidden; }
+
+/* login page */
+.admin-interface.login #content form .submit-row { border: 0; padding: 8px 0 0; }
+.admin-interface.login #content form input[type="text"],
+.admin-interface.login #content form input[type="password"] { width: 100%; }
+.admin-interface.login #header { position: static; }
+
+/* history & delete-confirmation pages */
+.admin-interface #content-related, .admin-interface .delete-confirmation ul { line-height: 1.7; }
+.admin-interface .delete-confirmation #content > ul { background: var(--cf-surface); border: 1px solid var(--cf-border); border-radius: var(--cf-radius); padding: 16px 32px; }
+
+/* responsive extras */
+@media (max-width: 767px) {
+    .admin-interface #changelist-filter { margin: 16px 0 0; width: 100%; }
+    .admin-interface #searchbar { min-width: 0; width: 100%; }
+    .admin-interface .submit-row { justify-content: stretch; }
+}
+
+/* ----------------------------------------------------------------------------
+   11. Filter sidebar — full rebuild (works with Django 4/5 markup + admin-interface)
+   #changelist-filter can be: <h2> + <h3>/<ul>  (Django 4)
+                              <h2> + <details class="filter-details"> (Django 5)
+                              admin-interface's own "filters" markup
+   ---------------------------------------------------------------------------- */
+.admin-interface #changelist {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+.admin-interface #changelist .changelist-form-container {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.admin-interface #changelist-filter {
+    flex: 0 0 250px;
+    width: 250px;
+    max-width: 250px;
+    float: none;
+    margin: 0;
+    padding: 0;
+    position: sticky;
+    top: 84px;
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--cf-surface);
+    border: 1px solid var(--cf-border);
+    border-radius: var(--cf-radius);
+    box-shadow: var(--cf-shadow-sm);
+    font-size: 13px;
+    scrollbar-width: thin;
+}
+.admin-interface #changelist-filter::-webkit-scrollbar { width: 8px; }
+.admin-interface #changelist-filter::-webkit-scrollbar-thumb {
+    background: var(--cf-border);
+    border-radius: 999px;
+}
+
+/* header */
+.admin-interface #changelist-filter > h2 {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    margin: 0;
+    background: linear-gradient(120deg, var(--cf-forest), var(--cf-forest-2));
+    color: #fff;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 0;
+}
+
+/* group title (Django 4: h3 — Django 5: summary) */
+.admin-interface #changelist-filter h3,
+.admin-interface #changelist-filter summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0;
+    padding: 10px 14px;
+    background: var(--cf-bg);
+    border-top: 1px solid var(--cf-border);
+    color: var(--cf-text);
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+.admin-interface #changelist-filter summary::-webkit-details-marker,
+.admin-interface #changelist-filter summary::marker { display: none; content: ""; }
+.admin-interface #changelist-filter summary::after,
+.admin-interface #changelist-filter h3.cf-collapsible::after {
+    content: "\F282"; /* bi-chevron-down */
+    font-family: "bootstrap-icons";
+    font-size: 11px;
+    color: var(--cf-muted);
+    transition: transform 0.18s ease;
+}
+.admin-interface #changelist-filter details[open] > summary::after,
+.admin-interface #changelist-filter h3.cf-collapsible.is-open::after { transform: rotate(180deg); }
+.admin-interface #changelist-filter h3:hover,
+.admin-interface #changelist-filter summary:hover { background: var(--cf-accent-soft); color: var(--cf-accent); }
+
+/* options list */
+.admin-interface #changelist-filter ul {
+    margin: 0;
+    padding: 6px;
+    border: 0;
+    list-style: none;
+    background: transparent;
+}
+.admin-interface #changelist-filter ul li {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    list-style: none;
+}
+.admin-interface #changelist-filter ul li a {
+    display: block;
+    padding: 7px 10px;
+    border-radius: 8px;
+    color: var(--cf-muted);
+    font-weight: 600;
+    line-height: 1.35;
+    text-decoration: none;
+    white-space: normal;
+    word-break: break-word;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.admin-interface #changelist-filter ul li a:hover {
+    background: var(--cf-accent-soft);
+    color: var(--cf-accent);
+}
+.admin-interface #changelist-filter ul li.selected {
+    border: 0;
+}
+.admin-interface #changelist-filter ul li.selected a {
+    background: var(--cf-accent-soft);
+    color: var(--cf-accent);
+    font-weight: 800;
+    box-shadow: inset 0 0 0 1px var(--cf-accent);
+}
+/* "clear this filter" link Django renders inside selected items */
+.admin-interface #changelist-filter li.selected a.clear-filter,
+.admin-interface #changelist-filter #changelist-filter-clear a {
+    display: inline-block;
+    margin: 6px 10px 10px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: transparent;
+    border: 1px dashed var(--cf-border);
+    color: var(--cf-muted);
+    font-size: 11.5px;
+    font-weight: 700;
+    box-shadow: none;
+}
+.admin-interface #changelist-filter li.selected a.clear-filter:hover,
+.admin-interface #changelist-filter #changelist-filter-clear a:hover {
+    border-color: #b3261e;
+    border-style: solid;
+    color: #b3261e;
+    background: #fde4e4;
+}
+
+/* inputs used by date/dropdown filters */
+.admin-interface #changelist-filter select,
+.admin-interface #changelist-filter input[type="text"],
+.admin-interface #changelist-filter input[type="date"] {
+    width: calc(100% - 12px);
+    margin: 6px;
+    padding: 7px 10px;
+    border: 1px solid var(--cf-border);
+    border-radius: 8px;
+    background: var(--cf-surface);
+    color: var(--cf-text);
+    font-size: 12.5px;
+}
+
+/* dark mode */
+html[data-theme="dark"] .admin-interface #changelist-filter { background: var(--cf-surface); color: var(--cf-text); }
+html[data-theme="dark"] .admin-interface #changelist-filter h3,
+html[data-theme="dark"] .admin-interface #changelist-filter summary { background: #182236; }
+html[data-theme="dark"] .admin-interface #changelist-filter li.selected a.clear-filter:hover,
+html[data-theme="dark"] .admin-interface #changelist-filter #changelist-filter-clear a:hover { background: #3a1c1c; color: #ffbdbd; border-color: #6b2b2b; }
+
+/* mobile: filters become a collapsible panel above the table */
+@media (max-width: 1024px) {
+    .admin-interface #changelist { display: block; }
+    .admin-interface #changelist-filter {
+        width: 100%;
+        max-width: none;
+        flex: none;
+        position: static;
+        max-height: none;
+        margin: 0 0 16px;
+    }
+    .admin-interface #changelist-filter.cf-collapsed > *:not(h2) { display: none; }
+    .admin-interface #changelist-filter > h2 { cursor: pointer; }
+    .admin-interface #changelist-filter > h2::after {
+        content: "\F282";
+        font-family: "bootstrap-icons";
+        float: inline-end;
+        font-size: 11px;
+        transition: transform 0.18s ease;
+    }
+    .admin-interface #changelist-filter.cf-collapsed > h2::after { transform: rotate(-90deg); }
+}

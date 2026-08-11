@@ -1,0 +1,71 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | Crowd-Funding Egypt Admin{% endblock %}
+
+{% block bodyclass %}{{ block.super }} admin-interface{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'admin/css/admin_dashboard.css' %}">
+{% endblock %}
+
+{% block extrahead %}{{ block.super }}
+{# no-flash: apply the saved theme before the first paint #}
+<script>
+    (function () {
+        try {
+            var m = localStorage.getItem("theme");
+            if (m === "light" || m === "dark" || m === "auto") {
+                document.documentElement.dataset.theme = m;
+            }
+        } catch (e) {}
+    })();
+</script>
+<script src="{% static 'admin/js/admin_dashboard.js' %}" defer></script>
+{% endblock %}
+
+{% block branding %}
+<div id="site-name">
+    <a href="{% url 'admin:index' %}" class="cf-brand">
+        <span class="cf-brand-icon"><i class="bi bi-heart-pulse-fill"></i></span>
+        <span class="cf-brand-text">Crowd-Funding <em>Egypt</em><span class="cf-brand-badge">Admin Panel</span></span>
+    </a>
+</div>
+{% if user.is_anonymous %}
+<button type="button" class="theme-toggle cf-theme-toggle" aria-label="{% translate 'Toggle theme' %}">
+    <span class="icon-moon"><i class="bi bi-moon-stars-fill"></i></span>
+    <span class="icon-sun"><i class="bi bi-sun-fill"></i></span>
+</button>
+{% endif %}
+{% endblock %}
+
+{% block usertools %}{% if has_permission %}
+<div id="user-tools" class="cf-user-tools">
+    <button type="button" class="theme-toggle cf-theme-toggle" aria-label="{% translate 'Toggle theme' %}">
+        <span class="icon-moon"><i class="bi bi-moon-stars-fill"></i></span>
+        <span class="icon-sun"><i class="bi bi-sun-fill"></i></span>
+    </button>
+    <div class="cf-welcome">{% translate 'Welcome,' %}
+        <strong>{% firstof user.get_short_name user.get_username %}</strong></div>
+    <ul class="cf-quicklinks">
+        {% if site_url %}
+        <li><a href="{{ site_url }}"><i class="bi bi-box-arrow-up-right"></i> {% translate 'View site' %}</a></li>
+        {% endif %}
+        {% if user.has_usable_password %}
+        <li><a href="{% url 'admin:password_change' %}"><i class="bi bi-key-fill"></i> {% translate 'Change password' %}</a></li>
+        {% endif %}
+        <li>
+            <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
+                {% csrf_token %}
+                <button type="submit"><i class="bi bi-box-arrow-right"></i> {% translate 'Log out' %}</button>
+            </form>
+        </li>
+    </ul>
+</div>
+{% endif %}{% endblock %}
+
+{% block nav-global %}{% endblock %}
