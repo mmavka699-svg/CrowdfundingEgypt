@@ -9,6 +9,7 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("accounts/social/", include("allauth.urls")),  # Facebook OAuth2 bonus
     path("projects/", include("projects.urls")),
+    
 ]
 
 if settings.DEBUG:

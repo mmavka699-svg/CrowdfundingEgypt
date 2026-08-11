@@ -24,15 +24,14 @@
                     Discover inspiring causes, healthcare, tech startups, and community endeavors. Every pound funded brings real impact to Egypt.
                 </p>
 
-                <!-- Search Bar -->
-                <form class="mb-3" action="{% url 'projects:search' %}" method="get" style="max-width: 520px;">
-                    <div class="d-flex align-items-center bg-white border rounded-pill p-1.5 shadow-sm">
-                        <i class="bi bi-search text-muted ms-3 me-2"></i>
-                        <input type="search" name="q" class="form-control border-0 bg-transparent shadow-none px-0" placeholder="Search campaigns by title or tag..." value="{{ request.GET.q|default:'' }}" aria-label="Search">
-                        <button class="btn btn-primary btn-pill px-4 py-2 fw-bold text-white shadow-xs" type="submit" style="background-color: var(--primary, #056839); border: none;">
-                            Search
-                        </button>
-                    </div>
+                <!-- Search Bar with Live Suggestions -->
+                <form class="nav-search-wrapper mb-3" action="{% url 'projects:search' %}" method="get" style="max-width: 520px;">
+                    <i class="bi bi-search nav-search-icon"></i>
+                    <input type="search" name="q" class="nav-search-input" placeholder="Search campaigns by title or tag..." value="{{ request.GET.q|default:'' }}" aria-label="Search" autocomplete="off">
+                    <button class="nav-search-btn" type="submit" aria-label="Search">
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                    <div class="search-autocomplete-dropdown d-none"></div>
                 </form>
 
                 <!-- Bullet Feature Badges Strip -->
@@ -85,8 +84,9 @@
                 <div class="carousel-inner">
                     {% for p in top_rated_projects %}
                     <div class="carousel-item {% if forloop.first %}active{% endif %}" data-bs-interval="6000">
-                        <div class="hero-slide position-relative" style="height: 760px; background-image: url('{% if p.images.first %}{{ p.images.first.image.url }}{% else %}{% static 'img/placeholder.jpg' %}{% endif %}'); background-size: cover; background-position: center;">
-                            
+                        <div class="hero-slide position-relative home-hero-slide">
+                            <img src="{% if p.images.first %}{{ p.images.first.image.url }}{% else %}{% static 'img/placeholder.jpg' %}{% endif %}" class="home-hero-slide-img" alt="{{ p.title }}">
+
                             <!-- Primary Color Left-to-Right Horizontal Gradient Overlay Wrapper -->
                             <div class="position-absolute w-100 h-100 top-0 start-0" style="background: linear-gradient(to right, rgba(5, 69, 39, 0.95) 0%, rgba(5, 69, 39, 0.55) 45%, rgba(0, 0, 0, 0) 100%); pointer-events: none; z-index: 1;"></div>
 
@@ -123,7 +123,7 @@
                     </div>
                     {% empty %}
                     <div class="carousel-item active">
-                        <div class="hero-slide position-relative text-white d-flex align-items-center justify-content-center" style="height: 760px; background-color: var(--primary, #056839);">
+                        <div class="hero-slide position-relative text-white d-flex align-items-center justify-content-center home-hero-slide" style="background-color: var(--primary, #056839);">
                             <div class="text-center p-5">
                                 <h2 class="fw-bold text-white display-5 mb-3">Support Causes That Matter</h2>
                                 <p class="lead text-white-50 mx-auto mb-4" style="max-width: 560px;">
