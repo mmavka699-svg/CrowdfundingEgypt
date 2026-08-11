@@ -74,7 +74,7 @@
     --bg-card: #1b2a25;       /* من surface-3 */
     --bg-hover: #22352f;      /* درجـة أفتح قليلاً للتفاعل عند الـ Hover */
     --bg-glass: rgba(22, 33, 29, 0.88);
-    --bg-footer: #0a100d;
+    --bg-footer: linear-gradient(to bottom, var(--primary), #0e402b);
 
     /* Typography / Ink */
     --text-primary: #eef4f1;   /* من ink */
@@ -2656,3 +2656,25 @@ body:has(.report-project-modal.show) .modal-backdrop.show {
 
 /* The legacy .profile-tab-btn helpers remain defined above for any template
    that may still use them; the profile page no longer renders tab pills. */
+
+/* ==========================================================================
+   APPENDED � USER PROFILE DROPDOWN RESPONSIVE FIX
+   Ensures the user dropdown anchors correctly below the trigger on mobile,
+   doesn't fly off screen horizontally, and behaves as a proper block
+   inside the mobile navbar collapse without getting clipped.
+   ========================================================================== */
+.navbar-user-dropdown .dropdown-menu {
+    z-index: 1050 !important;
+    min-width: 220px;
+}
+
+@media (max-width: 991.98px) {
+    .navbar-user-dropdown .dropdown-menu {
+        position: static !important;
+        float: none !important;
+        transform: none !important;
+        margin-top: 0.75rem !important;
+        width: 100% !important;
+        max-width: 320px;
+    }
+}

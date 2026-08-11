@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Sign In Via {{ provider.name }} — Crowd-Funding Egypt{% endblock %}
+
+{% block content %}
+<div class="container my-5" style="max-width:440px;">
+    <div class="form-card" data-animate="fade-up">
+        <div class="text-center mb-4">
+            {% if provider.id == 'facebook' %}
+            <div class="mx-auto mb-3" style="width:60px; height:60px; font-size:1.8rem; background-color: #1877F2; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 14px rgba(24, 119, 242, 0.4);">
+                <i class="fa-brands fa-facebook-f"></i>
+            </div>
+            {% else %}
+            <div class="mx-auto mb-3" style="width:60px; height:60px; font-size:1.8rem; background-color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 14px rgba(5, 104, 57, 0.4);">
+                <i class="fa-solid fa-user-circle"></i>
+            </div>
+            {% endif %}
+            
+            {% if process == "connect" %}
+            <h3 class="fw-bold text-dark mb-1">Connect {{ provider.name }}</h3>
+            <p class="text-muted small">You are about to connect a new third party account from <strong>{{ provider.name }}</strong> to your Crowd-Funding Egypt profile.</p>
+            {% else %}
+            <h3 class="fw-bold text-dark mb-1">Sign In Via {{ provider.name }}</h3>
+            <p class="text-muted small">You are about to sign in using your third party account from <strong>{{ provider.name }}</strong>.</p>
+            {% endif %}
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-lg w-100 btn-pill shadow-sm mb-3">
+                <i class="bi bi-box-arrow-in-right me-2"></i> Continue
+            </button>
+        </form>
+
+        <div class="text-center mt-3">
+            <a href="{% url 'accounts:login' %}" class="text-muted small text-decoration-none">Cancel &amp; Back to Login</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
