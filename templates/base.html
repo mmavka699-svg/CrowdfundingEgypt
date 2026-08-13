@@ -75,8 +75,8 @@
                             <li>
                                 <a class="dropdown-item d-flex align-items-center"
                                     href="{% url 'projects:category_detail' cat.slug %}">
-                                    <i class="bi bi-folder2 me-2" style="color: var(--primary, #056839);"></i> {{
-                                    cat.name }}
+                                    <i class="bi bi-folder2 me-2" style="color: var(--primary, #056839);"></i>
+                                    <span>{{cat.name }}</span>
                                 </a>
                             </li>
                             {% empty %}
@@ -110,7 +110,8 @@
                     <div class="dropdown navbar-user-dropdown">
                         <a class="dropdown-toggle d-flex align-items-center gap-2 text-decoration-none py-2" href="#"
                             data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                            <img src="{{ user.avatar_url }}" class="nav-profile-avatar" alt="{{ user.get_full_name|default:user.email }}">
+                            <img src="{{ user.avatar_url }}" class="nav-profile-avatar"
+                                alt="{{ user.get_full_name|default:user.email }}">
                             <span class="d-lg-none fw-bold" style="color: var(--text-primary);">
                                 {{ user.get_full_name|default:user.email }}
                             </span>
