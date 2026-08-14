@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}How Verification Works — Crowd-Funding Egypt{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="fw-bold mb-4" style="color: var(--primary);">How Verification Works</h1>
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5">
+                <p class="lead mb-4">Trust is the foundation of Crowd-Funding Egypt. We manually verify every project to ensure authenticity and impact.</p>
+                
+                <h4 class="fw-bold mt-4 mb-3"><i class="bi bi-shield-check me-2 text-success"></i> Our Process</h4>
+                <ol class="list-group list-group-numbered list-group-flush mb-4">
+                    <li class="list-group-item bg-transparent border-0 py-3"><strong>Identity Check:</strong> We verify the identity of the project creator using official national ID documents.</li>
+                    <li class="list-group-item bg-transparent border-0 py-3"><strong>Project Review:</strong> Our team reviews the project description, goals, and feasibility.</li>
+                    <li class="list-group-item bg-transparent border-0 py-3"><strong>Fund Destination:</strong> We ensure that funds are directed to a valid, registered Egyptian bank account or e-wallet.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

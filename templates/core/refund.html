@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Refund Policy — Crowd-Funding Egypt{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="fw-bold mb-4" style="color: var(--primary);">Refund Policy</h1>
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5">
+                <p class="lead mb-4">We want you to donate with peace of mind. Here is how our refunds work.</p>
+                
+                <h4 class="fw-bold mt-4 mb-3"><i class="bi bi-arrow-counterclockwise me-2 text-warning"></i> General Rules</h4>
+                <p>Refunds are available under the following conditions:</p>
+                <ul class="mb-4 text-muted">
+                    <li class="mb-2">If a project fails verification after being published.</li>
+                    <li class="mb-2">If a project creator explicitly cancels their campaign before funds are disbursed.</li>
+                    <li class="mb-2">If we suspect fraudulent activity related to the campaign.</li>
+                </ul>
+                <div class="alert alert-info border-0 rounded-3">
+                    <i class="bi bi-info-circle me-2"></i> <strong>Note:</strong> Once funds are successfully disbursed to the verified creator at the end of a successful campaign, refunds can no longer be processed by the platform.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
