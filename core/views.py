@@ -85,6 +85,56 @@ def home_view(request):
 def about_view(request):
     return render(request, "core/about.html")
 
+def verification_view(request):
+    return render(request, "core/verification.html")
+
+def fees_view(request):
+    return render(request, "core/fees.html")
+
+def refund_view(request):
+    return render(request, "core/refund.html")
+
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from projects.models import Report, Project
+import re
+
+@login_required
+def report_view(request):
+    if request.method == "POST":
+        project_url = request.POST.get("project_url", "")
+        reason = request.POST.get("reason")
+        details = request.POST.get("details")
+
+        if project_url and reason and details:
+            # Try to extract slug from URL
+            match = re.search(r'/projects/([^/]+)/?', project_url)
+            project = None
+            if match:
+                slug = match.group(1)
+                project = Project.objects.filter(slug=slug).first()
+
+            if project:
+                valid_reasons = [r[0] for r in Report.Reason.choices]
+                if reason not in valid_reasons:
+                    reason = Report.Reason.OTHER
+
+                Report.objects.create(
+                    reporter=request.user,
+                    project=project,
+                    reason=reason,
+                    details=details
+                )
+                messages.success(request, "Your report has been submitted successfully. Thank you for helping keep the platform safe!")
+                return redirect("core:home")
+            else:
+                messages.error(request, "Could not find a project with that URL. Please ensure it is a valid project link.")
+        else:
+            messages.error(request, "Please fill out all required fields.")
+
+    return render(request, "core/report.html")
+
 
 def csrf_failure_view(request, reason=""):
     """

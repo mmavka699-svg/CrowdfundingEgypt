@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Fees & Transparency — Crowd-Funding Egypt{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="fw-bold mb-4" style="color: var(--primary);">Fees & Transparency</h1>
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5">
+                <p class="lead mb-4">We believe in keeping things simple and completely transparent.</p>
+                
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-4 bg-light rounded-4 h-100 text-center border">
+                            <h2 class="display-4 fw-bold text-dark">0%</h2>
+                            <h5 class="fw-bold">Platform Fee</h5>
+                            <p class="text-muted small">We do not take a cut from your donations. Our platform is free to use.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-4 bg-light rounded-4 h-100 text-center border">
+                            <h2 class="display-4 fw-bold text-dark">2.5%</h2>
+                            <h5 class="fw-bold">Transaction Fee</h5>
+                            <p class="text-muted small">This goes directly to our payment processors to cover processing costs.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

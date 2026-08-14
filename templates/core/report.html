@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Report a Project — Crowd-Funding Egypt{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="fw-bold mb-4" style="color: var(--primary);">Report a Project</h1>
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5">
+                <p class="lead mb-4">Help us keep the platform safe. If you see something suspicious, let us know.</p>
+                
+                <form method="POST" action="{% url 'core:report' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Project URL</label>
+                        <input type="url" name="project_url" class="form-control rounded-3" placeholder="https://crowdfunding.eg/projects/..." required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Reason for Reporting</label>
+                        <select name="reason" class="form-select rounded-3" required>
+                            <option value="">Select a reason...</option>
+                            <option value="spam">Spam</option>
+                            <option value="inappropriate">Inappropriate Content</option>
+                            <option value="fraud">Suspected Fraud or Scam</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Additional Details</label>
+                        <textarea name="details" class="form-control rounded-3" rows="4" placeholder="Please provide any evidence or context..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-danger btn-lg w-100 rounded-pill fw-bold">Submit Report</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
