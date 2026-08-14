@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% load humanize %}
 {% block title %}My Profile — Crowd-Funding Egypt{% endblock %}
 
@@ -26,95 +27,117 @@
             </div>
         </div>
 
-        <!-- Activity Tabs Column -->
+        <!-- Activity Column: Created Projects + Donations, stacked vertically -->
         <div class="col-md-8">
-            <div class="form-card p-4">
-                <ul class="nav nav-pills mb-4 gap-2" id="profileTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active btn-pill profile-tab-btn" data-bs-toggle="tab"
-                            data-bs-target="#projectsTab" type="button">
-                            <i class="bi bi-rocket-takeoff me-1"></i> My Projects ({{ user_projects.count }})
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link btn-pill profile-tab-btn" data-bs-toggle="tab"
-                            data-bs-target="#donationsTab" type="button">
-                            <i class="bi bi-heart-fill me-1"></i> My Donations ({{ user_donations.count }})
-                        </button>
-                    </li>
-                </ul>
+            <div class="d-flex flex-column gap-4 profile-page">
 
-                <div class="tab-content" id="profileTabsContent">
-                    <!-- Projects Tab -->
-                    <div class="tab-pane fade show active" id="projectsTab" role="tabpanel">
-                        <div class="d-flex flex-column gap-2">
-                            {% for p in user_projects %}
-                            <div
-                                class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-light border hover-lift">
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="bi bi-folder2 text-primary fs-5"></i>
-                                    <a href="{{ p.get_absolute_url }}" class="fw-bold text-dark text-decoration-none">{{ p.title }}</a>
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
+                <!-- ==================== CREATED PROJECTS ==================== -->
+                <section class="form-card p-3 p-sm-4 profile-section" id="projects-section">
+                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                        <div>
+                            <h5 class="fw-extrabold text-dark mb-1">
+                                <i class="bi bi-rocket-takeoff me-2 text-primary"></i> Created Projects
+                            </h5>
+                            <p class="text-muted small mb-0">{{ user_projects.count }} campaign{{ user_projects.count|pluralize }}</p>
+                        </div>
+                        <a href="{% url 'projects:project_create' %}" class="btn btn-outline-primary btn-sm btn-pill">
+                            <i class="bi bi-plus-lg me-1"></i> Start a project
+                        </a>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        {% for p in user_projects %}
+                        <div class="profile-project-card">
+                            <a href="{{ p.get_absolute_url }}" class="profile-project-thumb" aria-label="{{ p.title }}">
+                                <img src="{% if p.images.first %}{{ p.images.first.image.url }}{% else %}{% static 'img/placeholder.jpg' %}{% endif %}" alt="{{ p.title }}" loading="lazy">
+                            </a>
+                            <div class="profile-project-info">
+                                <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-1">
+                                    <a href="{{ p.get_absolute_url }}" class="fw-bold text-dark text-decoration-none profile-project-title">{{ p.title }}</a>
                                     <span class="badge
                                         {% if p.status == 'running' %}bg-success-subtle text-success border-success-subtle
                                         {% elif p.status == 'funded' %}bg-primary-subtle text-primary border-primary-subtle
                                         {% elif p.status == 'coming_soon' %}bg-info-subtle text-info border-info-subtle
                                         {% elif p.status == 'cancelled' %}bg-danger-subtle text-danger border-danger-subtle
                                         {% else %}bg-secondary-subtle text-secondary border-secondary-subtle
-                                        {% endif %} border rounded-pill px-3 py-1">
+                                        {% endif %} border rounded-pill px-3 py-1 extra-small">
                                         {% if p.status == 'funded' %}<i class="bi bi-trophy-fill me-1"></i>
                                         {% elif p.status == 'coming_soon' %}<i class="bi bi-hourglass-split me-1"></i>{% endif %}
                                         {{ p.get_status_display }}</span>
-                                    <a href="{% url 'projects:project_edit' p.slug %}"
-                                        class="btn btn-sm btn-outline-primary btn-pill" title="Edit Project">
-                                        <i class="bi bi-pencil"></i>
+                                </div>
+                                <div class="text-muted small mb-2">{{ p.progress_percentage }}% funded &middot; {{ p.donations.count }} backers</div>
+                                <div class="progress rounded-pill mb-3" style="height: 5px; background-color: #e5e9e6;">
+                                    <div class="progress-bar rounded-pill" role="progressbar"
+                                        style="width: {{ p.progress_percentage }}%; background: var(--primary, #056839);"
+                                        aria-valuenow="{{ p.progress_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2 mt-auto pt-1">
+                                    <a href="{% url 'projects:project_edit' p.slug %}" class="btn btn-sm btn-outline-primary btn-pill" title="Edit Project">
+                                        <i class="bi bi-pencil"></i> <span class="d-none d-md-inline">Edit</span>
                                     </a>
                                     <button type="button" class="btn btn-sm btn-outline-danger btn-pill"
                                         data-bs-toggle="modal" data-bs-target="#deleteProjectModal{{ p.id }}"
                                         title="Delete Project">
-                                        <i class="bi bi-trash"></i>
+                                        <i class="bi bi-trash"></i> <span class="d-none d-md-inline">Delete</span>
                                     </button>
                                 </div>
                             </div>
-                            {% empty %}
-                            <div class="text-center py-5 text-muted">
-                                <i class="bi bi-folder-plus fs-1 d-block mb-2 text-primary opacity-50"></i>
-                                <p class="mb-2">You haven't launched any projects yet.</p>
-                                <a href="{% url 'projects:project_create' %}" class="btn btn-primary btn-sm btn-pill">
-                                    Start Your First Project
-                                </a>
-                            </div>
-                            {% endfor %}
                         </div>
+                        {% empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-folder-plus fs-1 d-block mb-2 text-primary opacity-50"></i>
+                            <p class="mb-2">You haven't launched any projects yet.</p>
+                            <a href="{% url 'projects:project_create' %}" class="btn btn-primary btn-sm btn-pill">
+                                Start Your First Project
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <!-- ==================== MY DONATIONS ==================== -->
+                <section class="form-card p-3 p-sm-4 profile-section" id="donations-section">
+                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                        <div>
+                            <h5 class="fw-extrabold text-dark mb-1">
+                                <i class="bi bi-heart-fill me-2 text-primary"></i> My Donations
+                            </h5>
+                            <p class="text-muted small mb-0">{{ user_donations.count }} contribution{{ user_donations.count|pluralize }}</p>
+                        </div>
+                        <a href="{% url 'projects:project_list' %}" class="btn btn-outline-primary btn-sm btn-pill">
+                            Explore Campaigns
+                        </a>
                     </div>
 
-                    <!-- Donations Tab -->
-                    <div class="tab-pane fade" id="donationsTab" role="tabpanel">
-                        <div class="d-flex flex-column gap-2">
-                            {% for d in user_donations %}
-                            <div
-                                class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-light border">
-                                <div>
-                                    <a href="{{ d.project.get_absolute_url }}"
-                                        class="fw-bold text-dark text-decoration-none d-block">{{ d.project.title }}</a>
-                                    <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ d.created_at|date:"M d, Y" }}</small>
-                                </div>
-                                <span class="fw-bold text-success fs-6">+{{ d.amount|intcomma }} EGP</span>
+                    <div class="d-flex flex-column gap-3">
+                        {% for d in user_donations %}
+                        <div class="profile-donation-card">
+                            <div class="profile-donation-main">
+                                <a href="{{ d.project.get_absolute_url }}"
+                                    class="fw-bold text-dark text-decoration-none d-block">{{ d.project.title }}</a>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar3 me-1"></i>{{ d.created_at|date:"M d, Y" }}
+                                </small>
                             </div>
-                            {% empty %}
-                            <div class="text-center py-5 text-muted">
-                                <i class="bi bi-heart fs-1 d-block mb-2 text-danger opacity-50"></i>
-                                <p class="mb-2">You haven't backed any campaigns yet.</p>
-                                <a href="{% url 'projects:project_list' %}"
-                                    class="btn btn-outline-primary btn-sm btn-pill">
-                                    Explore Projects to Back
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="profile-donation-amount text-success">+{{ d.amount|intcomma }} EGP</span>
+                                <a href="{{ d.project.get_absolute_url }}" class="btn btn-outline-secondary btn-sm btn-pill">
+                                    View
                                 </a>
                             </div>
-                            {% endfor %}
                         </div>
+                        {% empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-heart fs-1 d-block mb-2 text-danger opacity-50"></i>
+                            <p class="mb-2">You haven't backed any campaigns yet.</p>
+                            <a href="{% url 'projects:project_list' %}"
+                                class="btn btn-outline-primary btn-sm btn-pill">
+                                Explore Projects to Back
+                            </a>
+                        </div>
+                        {% endfor %}
                     </div>
-                </div>
+                </section>
             </div>
         </div>
     </div>

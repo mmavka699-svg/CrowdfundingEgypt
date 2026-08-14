@@ -63,13 +63,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const financialInputs = document.querySelectorAll(".number-format-input, input[name='amount'], input[name='total_target']");
 
     financialInputs.forEach((input) => {
-        // Convert type="number" to type="text" so browser permits commas without clearing input
         if (input.type === "number") {
             input.type = "text";
         }
         input.setAttribute("inputmode", "decimal");
 
-        // Format initial value on page load
         if (input.value) {
             input.value = formatNumberWithCommas(input.value);
         }
@@ -78,7 +76,6 @@ document.addEventListener("DOMContentLoaded", function () {
             this.value = formatNumberWithCommas(this.value);
         });
 
-        // Unformat on form submit so Django receives clean numeric string
         const form = input.closest("form");
         if (form && !form.dataset.numberFormatAttached) {
             form.dataset.numberFormatAttached = "true";
@@ -253,12 +250,122 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Listen for OS color scheme changes if user hasn't set explicit preference
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     if (mediaQuery.addEventListener) {
         mediaQuery.addEventListener("change", function (e) {
             if (!localStorage.getItem("theme")) {
                 applyTheme(e.matches ? "dark" : "light");
+            }
+        });
+    }
+
+    // --------------------------------------------------------------
+    // 11. Complete Live Search Autocomplete & Keyboard Navigation
+    // --------------------------------------------------------------
+    const searchInput = document.querySelector(".nav-search-wrapper input");
+    const dropdown = document.querySelector(".nav-search-wrapper .search-autocomplete-dropdown");
+    let selectedIndex = -1;
+    let searchTimeout = null;
+
+    if (searchInput && dropdown) {
+
+        // A. Live Fetching Data on Input (Debounced)
+        searchInput.addEventListener("input", function () {
+            const query = this.value.trim();
+            clearTimeout(searchTimeout);
+
+            if (!query) {
+                hideDropdown();
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`/projects/autocomplete/?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        dropdown.innerHTML = "";
+                        selectedIndex = -1;
+
+                        if (data.results && data.results.length > 0) {
+                            data.results.forEach(item => {
+                                const a = document.createElement("a");
+                                a.href = item.url;
+                                a.className = "search-autocomplete-item list-group-item list-group-item-action d-flex align-items-center gap-2 p-2";
+                                a.innerHTML = `
+                                    ${item.image ? `<img src="${item.image}" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">` : ''}
+                                    <div>
+                                        <div class="fw-semibold text-truncate" style="max-width: 200px;">${item.title}</div>
+                                        ${item.category ? `<small class="text-muted">${item.category}</small>` : ''}
+                                    </div>
+                                `;
+                                dropdown.appendChild(a);
+                            });
+                            showDropdown();
+                        } else {
+                            dropdown.innerHTML = `<div class="p-3 text-muted text-center small">No campaigns found</div>`;
+                            showDropdown();
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Search fetch error:", err);
+                        hideDropdown();
+                    });
+            }, 300);
+        });
+
+        // B. Re-show Dropdown on Focus
+        searchInput.addEventListener("focus", function () {
+            if (this.value.trim() && dropdown.children.length > 0) {
+                showDropdown();
+            }
+        });
+
+        // C. Keyboard Controls (Arrow Up/Down, Enter, Escape)
+        searchInput.addEventListener("keydown", function (e) {
+            const items = dropdown.querySelectorAll(".search-autocomplete-item");
+            if (!items.length || dropdown.classList.contains("d-none")) return;
+
+            if (e.key === "ArrowDown") {
+                e.preventDefault();
+                selectedIndex = (selectedIndex + 1) % items.length;
+                updateHighlight(items);
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+                updateHighlight(items);
+            } else if (e.key === "Enter" && selectedIndex >= 0 && items[selectedIndex]) {
+                e.preventDefault();
+                items[selectedIndex].click();
+            } else if (e.key === "Escape") {
+                hideDropdown();
+            }
+        });
+
+        // Helper Functions
+        function updateHighlight(items) {
+            items.forEach((item, index) => {
+                if (index === selectedIndex) {
+                    item.classList.add("active");
+                    item.scrollIntoView({ block: "nearest" });
+                } else {
+                    item.classList.remove("active");
+                }
+            });
+        }
+
+        function showDropdown() {
+            dropdown.classList.remove("d-none");
+        }
+
+        function hideDropdown() {
+            dropdown.classList.add("d-none");
+            selectedIndex = -1;
+        }
+
+        // D. Close Dropdown on Outside Click
+        document.addEventListener("click", function (e) {
+            if (!searchInput.closest(".nav-search-wrapper").contains(e.target)) {
+                hideDropdown();
             }
         });
     }

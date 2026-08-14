@@ -175,6 +175,12 @@ class Project(models.Model):
         return max(delta, 0)
 
     @property
+    def days_until_open(self):
+        today = timezone.localdate()
+        delta = (self.start_date - today).days
+        return max(delta, 0)
+
+    @property
     def average_rating(self):
         agg = self.ratings.aggregate(avg=models.Avg("stars"))
         return round(agg["avg"] or 0, 1)

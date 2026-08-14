@@ -1,101 +1,123 @@
 {% load static %}
 {% load humanize %}
-<div class="col-sm-6 col-lg-3">
-    <div class="card project-card h-100">
-        <!-- Floating Translucent Category Badge -->
-        <span class="project-card-badge">
-            <i class="bi bi-folder2 me-1 text-primary"></i> {{ project.category.name }}
-        </span>
-        {% if project.status == 'coming_soon' or project.campaign_state == 'future' %}
-        <span class="badge bg-info text-white position-absolute top-0 end-0 m-3 rounded-pill shadow-sm px-2.5 py-1.5 fw-semibold" style="z-index: 5; font-size: 0.75rem;">
-            <i class="bi bi-hourglass-split me-1"></i> Coming Soon
-        </span>
-        {% endif %}
+<div class="col-12 col-md-6 col-lg-4">
+    <div class="card project-card h-100 border-0 rounded-4 shadow-sm overflow-hidden bg-white">
+        <!-- Floating Badges Header Overlay -->
+        <div class="position-absolute top-0 start-0 w-100 p-3 d-flex justify-content-between align-items-center"
+            style="z-index: 5; pointer-events: none;">
+            <span class="badge bg-white text-dark shadow-sm rounded-pill px-3 py-1.5 fw-semibold border"
+                style="font-size: 0.75rem; pointer-events: auto;">
+                <i class="bi bi-tag-fill me-1 text-success"></i> {{ project.category.name }}
+            </span>
+            {% if project.is_featured or project.average_rating >= 4.5 %}
+            <span class="badge bg-accent text-white shadow-sm rounded-pill px-2.5 py-1.5 fw-bold"
+                style="font-size: 0.75rem; background-color: var(--accent, #f25c05); pointer-events: auto;">
+                <i class="bi bi-lightning-fill me-1"></i> Featured
+            </span>
+            {% elif project.status == 'coming_soon' or project.campaign_state == 'future' %}
+            <span class="badge bg-info text-white shadow-sm rounded-pill px-2.5 py-1.5 fw-semibold"
+                style="font-size: 0.75rem; pointer-events: auto;">
+                <i class="bi bi-hourglass-split me-1"></i> Coming Soon
+            </span>
+            {% endif %}
+        </div>
 
-        <!-- Card Image Header: Multiple Images -> Carousel, Single Image -> Standard Zoom Image -->
-        <div class="project-card-img-wrapper">
+        <!-- Card Image Header -->
+        <div class="project-card-img-wrapper" style="height: 200px; overflow: hidden; position: relative;">
             {% if project.images.all|length > 1 %}
-            <div id="cardCarousel-{{ project.id }}" class="carousel slide card-carousel" data-bs-ride="carousel" data-bs-touch="true" data-bs-interval="4000">
-                <div class="carousel-indicators">
+            <div id="cardCarousel-{{ project.id }}" class="carousel slide card-carousel h-100" data-bs-ride="carousel"
+                data-bs-touch="true" data-bs-interval="4000">
+                <div class="carousel-inner h-100">
                     {% for img in project.images.all %}
-                    <button type="button" data-bs-target="#cardCarousel-{{ project.id }}" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-label="Slide {{ forloop.counter }}"></button>
-                    {% endfor %}
-                </div>
-                <div class="carousel-inner">
-                    {% for img in project.images.all %}
-                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                        <a href="{{ project.get_absolute_url }}">
-                            <img src="{{ img.image.url }}" class="card-img-top" alt="{{ project.title }}">
+                    <div class="carousel-item h-100 {% if forloop.first %}active{% endif %}">
+                        <a href="{{ project.get_absolute_url }}" class="d-block h-100">
+                            <img src="{{ img.image.url }}" class="card-img-top w-100 h-100" alt="{{ project.title }}"
+                                style="object-fit: cover;">
                         </a>
                     </div>
                     {% endfor %}
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#cardCarousel-{{ project.id }}" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#cardCarousel-{{ project.id }}" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
-                </button>
             </div>
             {% else %}
             <a href="{{ project.get_absolute_url }}" class="d-block w-100 h-100">
                 <img src="{% if project.images.first %}{{ project.images.first.image.url }}{% else %}{% static 'img/placeholder.jpg' %}{% endif %}"
-                     class="card-img-top" alt="{{ project.title }}">
+                    class="card-img-top w-100 h-100" alt="{{ project.title }}" style="object-fit: cover;">
             </a>
             {% endif %}
         </div>
 
         <!-- Card Body Content -->
-        <div class="project-card-body d-flex flex-column">
-            <h5 class="project-card-title">
-                <a href="{{ project.get_absolute_url }}">{{ project.title|truncatechars:42 }}</a>
+        <div class="card-body p-4 d-flex flex-column">
+            <!-- Title -->
+            <h5 class="fw-bold fs-6 mb-2 lh-base">
+                <a href="{{ project.get_absolute_url }}" class="text-dark text-decoration-none hover-primary">
+                    {{ project.title|truncatechars:48 }}
+                </a>
             </h5>
 
-            <div class="mt-auto">
-                <!-- Custom Animated Progress Bar -->
-                <div class="progress-custom">
-                    <div class="progress-bar-custom" style="width: {{ project.progress_percentage }}%;"></div>
+            <!-- Rating Stars Strip -->
+            <div class="d-flex align-items-center gap-1 mb-2">
+                <i class="fa-solid fa-star text-warning small"></i>
+                <span class="fw-bold text-dark small ms-1">{{ project.average_rating }}</span>
+                <span class="text-muted small">({{ project.ratings_count }} ratings)</span>
+            </div>
+
+            <!-- Details Snippet -->
+            <p class="text-muted small mb-3 flex-grow-1"
+                style="font-size: 0.825rem; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                {{ project.details }}
+            </p>
+
+            <!-- Tags Pills Strip -->
+            <div class="d-flex flex-wrap gap-1 mb-3">
+                {% for tag in project.tags.all|slice:":3" %}
+                <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1 fw-normal"
+                    style="font-size: 0.725rem;">
+                    {{ tag.name }}
+                </span>
+                {% empty %}
+                <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1 fw-normal"
+                    style="font-size: 0.725rem;">
+                    Campaign
+                </span>
+                {% endfor %}
+            </div>
+
+            <div class="mt-auto pt-2 border-top">
+                <!-- Custom Orange Progress Bar -->
+                <div class="progress rounded-pill mb-2" style="height: 6px; background-color: #e5e9e6;">
+                    <div class="progress-bar rounded-pill" role="progressbar"
+                        style="width: {{ project.progress_percentage }}%; background: var(--accent-gradient, linear-gradient(135deg, #f25c05 0%, #ff7a28 100%));"
+                        aria-valuenow="{{ project.progress_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
 
-                <!-- Financial Stats -->
-                <div class="d-flex justify-content-between align-items-center small mb-3">
+                <!-- Financial Breakdown -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <span class="fw-bold text-dark fs-6">{{ project.formatted_total_donated }}</span>
-                        <span class="text-muted" style="font-size: 0.775rem;"> raised of {{ project.formatted_target }}</span>
+                        <strong class="text-dark small fw-extrabold">{{ project.formatted_total_donated }}</strong>
+                        <span class="text-muted extra-small">raised of {{ project.formatted_target }}</span>
                     </div>
-                    {% if project.status == 'coming_soon' or project.campaign_state == 'future' %}
-                    <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill fw-bold">
-                        Coming Soon
-                    </span>
-                    {% else %}
-                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill fw-bold">
+                    <span class="fw-bold small text-danger" style="color: var(--accent, #f25c05) !important;">
                         {{ project.progress_percentage }}%
                     </span>
-                    {% endif %}
                 </div>
 
-                <!-- Footer Metadata Strip -->
-                <div class="d-flex justify-content-between align-items-center pt-2 border-top small text-muted" style="font-size: 0.8rem;">
-                    <span class="text-warning fw-semibold">
-                        <i class="fa-solid fa-star me-1"></i>{{ project.average_rating }}
+                <!-- Footer Strip: Backers/Days Left & Donate Button -->
+                <div class="d-flex justify-content-between align-items-center gap-2 pt-1">
+                    <span class="text-muted extra-small" style="font-size: 0.775rem;">
+                        {% if project.status == 'coming_soon' or project.campaign_state == 'future' %}
+                        Starts {{ project.start_date|date:"M d" }}
+                        {% else %}
+                        {{ project.days_left }} days left
+                        {% endif %}
                     </span>
-                    {% if project.status == 'coming_soon' or project.campaign_state == 'future' %}
-                    <span class="text-info fw-semibold">
-                        <i class="bi bi-calendar-event me-1"></i>Starts {{ project.start_date|date:"M d" }}
-                    </span>
-                    {% else %}
-                    <span>
-                        <i class="bi bi-clock me-1 text-primary"></i>{{ project.days_left }} days left
-                    </span>
-                    {% endif %}
-                </div>
 
-                <!-- Action Button -->
-                <a href="{{ project.get_absolute_url }}" class="btn btn-outline-primary btn-sm w-100 mt-3 btn-pill">
-                    View Details
-                </a>
+                    <a href="{{ project.get_absolute_url }}"
+                        class="btn btn-accent btn-sm rounded-pill px-3.5 py-1.5 fw-bold text-white shadow-xs"
+                        style="background-color: var(--accent, #f25c05); border: none; font-size: 0.825rem;">
+                        <i class="bi bi-heart-fill me-1" style="font-size: 0.75rem;"></i> Donate
+                    </a>
+                </div>
             </div>
         </div>
     </div>

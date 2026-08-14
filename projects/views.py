@@ -59,14 +59,14 @@ def search_autocomplete_view(request):
         return JsonResponse({"results": [], "tags": []})
 
     projects = (
-        Project.objects.filter(
-            Q(title__icontains=query) | Q(tags__name__icontains=query),
-            status=Project.Status.RUNNING,
-        )
-        .distinct()
-        .prefetch_related("images")
-        .select_related("category")[:5]
+    Project.objects.filter(
+        Q(title__icontains=query) | Q(tags__name__icontains=query),
+        status=Project.Status.RUNNING,
     )
+    .distinct()
+    .prefetch_related("images")
+    .select_related("category")[:5]
+)
 
     results_data = []
     for p in projects:

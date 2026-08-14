@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     "accounts",
     "projects",
     "core",
+    "chatbot",
+    
 ]
 
 MIDDLEWARE = [
@@ -90,6 +92,9 @@ DATABASES = {
         "PASSWORD": os.environ.get("DB_PASSWORD", "postgres"),
         "HOST": os.environ.get("DB_HOST", "localhost"),
         "PORT": os.environ.get("DB_PORT", "5432"),
+        "OPTIONS": {
+            "sslmode": "disable",
+        },
     }
 }
 
@@ -181,3 +186,6 @@ MESSAGE_TAGS = {
 # CSRF — Custom failure view (user-friendly on stale tokens, no security bypass)
 # ---------------------------------------------------------------------------
 CSRF_FAILURE_VIEW = "core.views.csrf_failure_view"
+
+
+GOOGLE_API_KEY   = os.getenv("GOOGLE_API_KEY" , None)

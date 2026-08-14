@@ -5,293 +5,237 @@
 {% block title %}{{ project.title }} — Crowd-Funding Egypt{% endblock %}
 
 {% block content %}
-<div class="container mt-4 mb-5">
+<div class="container mt-4 mb-5 project-detail-page">
+    
+
+
     <div class="row g-4 g-lg-5">
 
         <!-- ==========================================================================
-           LEFT MAIN COLUMN: Images, Project Overview, Rating, Comments
+           LEFT COLUMN: Story & Comments Feed (Matching Screenshot 1)
            ========================================================================== -->
         <div class="col-lg-8">
-
-            <!-- Main Project Image Carousel -->
-            <div id="projectImageCarousel" class="carousel slide project-detail-carousel mb-4" data-bs-ride="carousel">
+            <!-- Left Column Project Image Banner -->
+            <div id="projectImageCarousel" class="carousel slide mb-4 rounded-4 overflow-hidden shadow-sm position-relative" data-bs-ride="carousel" style="border-radius: 20px;">
                 <div class="carousel-inner">
                     {% for img in images %}
                     <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                        <img src="{{ img.image.url }}" class="d-block w-100 project-detail-img" alt="{{ project.title }}">
+                        <div class="position-relative project-detail-image-wrap">
+                            <img src="{{ img.image.url }}" class="d-block w-100 h-100 project-detail-img" alt="{{ project.title }}" style="object-fit: cover;">
+                            <!-- Primary Color Gradient Overlay -->
+                            <div class="position-absolute w-100 h-100 top-0 start-0" style="background: linear-gradient(to right, rgba(5, 69, 39, 0.75) 0%, rgba(5, 69, 39, 0.25) 50%, rgba(0, 0, 0, 0) 100%); pointer-events: none; z-index: 1;"></div>
+                        </div>
                     </div>
                     {% empty %}
                     <div class="carousel-item active">
-                        <img src="{% static 'img/placeholder.jpg' %}" class="d-block w-100 project-detail-img" alt="No image uploaded">
+                        <div class="position-relative project-detail-image-wrap">
+                            <img src="{% static 'img/placeholder.jpg' %}" class="d-block w-100 h-100 project-detail-img" alt="No image uploaded" style="object-fit: cover;">
+                            <!-- Primary Color Gradient Overlay -->
+                            <div class="position-absolute w-100 h-100 top-0 start-0" style="background: linear-gradient(to right, rgba(5, 69, 39, 0.75) 0%, rgba(5, 69, 39, 0.25) 50%, rgba(0, 0, 0, 0) 100%); pointer-events: none; z-index: 1;"></div>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
                 {% if images|length > 1 %}
-                <button class="carousel-control-prev hero-slider-prev" type="button" data-bs-target="#projectImageCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Previous</span>
+                <button class="carousel-control-prev" type="button" data-bs-target="#projectImageCarousel" data-bs-slide="prev" style="width: 48px; height: 48px; background: rgba(255, 255, 255, 0.92); border: 1px solid rgba(255,255,255,0.5); color: var(--primary, #056839); border-radius: 50%; top: 50%; left: 1.5rem; transform: translateY(-50%); z-index: 5; box-shadow: 0 6px 20px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-arrow-left fs-5 text-dark"></i>
                 </button>
-                <button class="carousel-control-next hero-slider-next" type="button" data-bs-target="#projectImageCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
+                <button class="carousel-control-next" type="button" data-bs-target="#projectImageCarousel" data-bs-slide="next" style="width: 48px; height: 48px; background: rgba(255, 255, 255, 0.92); border: 1px solid rgba(255,255,255,0.5); color: var(--primary, #056839); border-radius: 50%; top: 50%; right: 1.5rem; transform: translateY(-50%); z-index: 5; box-shadow: 0 6px 20px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-arrow-right fs-5 text-dark"></i>
                 </button>
                 {% endif %}
             </div>
 
-            <!-- Project Title & Creator Metadata Header -->
-            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-3 mb-3">
-                <div>
-                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 mb-2 fw-semibold">
-                        <i class="bi bi-folder2 me-1"></i> {{ project.category.name }}
-                    </span>
-                    {% if project.campaign_state == "future" %}
-                    <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3 py-1 mb-2 fw-semibold ms-1">
-                        <i class="bi bi-hourglass-split me-1"></i> Coming Soon
-                    </span>
-                    {% elif project.campaign_state == "ended" %}
-                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3 py-1 mb-2 fw-semibold ms-1">
-                        <i class="bi bi-check2-all me-1"></i>
-                        {% if project.is_fully_funded %}Fully Funded{% else %}Campaign Ended{% endif %}
-                    </span>
-                    {% endif %}
-                    <h1 class="display-6 fw-extrabold text-dark mb-2">{{ project.title }}</h1>
-                    <div class="d-flex align-items-center gap-2 text-muted small">
-                        <span class="fw-semibold text-dark">
-                            <i class="bi bi-person-circle me-1 text-primary"></i> By {{ project.creator.get_full_name }}
-                        </span>
-                        <span>&middot;</span>
-                        <span><i class="bi bi-calendar3 me-1"></i> {{ project.start_date }} → {{ project.end_date }}</span>
-                        {% if project.status == "cancelled" %}
-                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill ms-2">Cancelled</span>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Rating Quick Badge -->
-                <div class="p-3 bg-white rounded-4 shadow-sm border border-light text-center min-w-120">
-                    <div class="fs-3 fw-bold text-warning d-flex align-items-center justify-content-center gap-1">
-                        <i class="fa-solid fa-star"></i> {{ project.average_rating }}
-                    </div>
-                    <small class="text-muted d-block" style="font-size: 0.75rem;">
-                        {{ project.ratings_count }} rating{{ project.ratings_count|pluralize }}
-                    </small>
-                </div>
-            </div>
-
-            <!-- Tags List -->
-            <div class="mb-4 d-flex flex-wrap gap-1">
-                {% for tag in project.tags.all %}
-                <a href="{% url 'projects:tag_detail' tag.slug %}" class="badge bg-light text-secondary text-decoration-none border rounded-pill px-3 py-2">
-                    #{{ tag.name }}
-                </a>
-                {% endfor %}
-            </div>
-
-            <!-- Edited Fields Badges -->
-            {% if project.edited_fields %}
-            <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
-                <span class="text-muted small fw-semibold"><i class="bi bi-pencil-square me-1"></i> Edited:</span>
-                {% for field in project.edited_fields %}
-                <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-2 py-1" style="font-size: 0.75rem;">
-                    {% if field == "title" %}<i class="bi bi-type me-1"></i>Title
-                    {% elif field == "details" %}<i class="bi bi-text-paragraph me-1"></i>Description
-                    {% elif field == "images" %}<i class="bi bi-image me-1"></i>Photos
-                    {% elif field == "category" %}<i class="bi bi-folder2 me-1"></i>Category
-                    {% elif field == "tags" %}<i class="bi bi-tags me-1"></i>Tags
-                    {% elif field == "dates" %}<i class="bi bi-calendar-event me-1"></i>Dates
-                    {% else %}{{ field }}
-                    {% endif %}
+            <!-- Category Badges Strip -->
+            <div class="d-flex flex-wrap gap-2 mb-3 mt-4">
+                <span class="badge bg-light text-secondary border rounded-pill px-3 py-1.5 fw-semibold" style="font-size: 0.775rem;">
+                    <i class="bi bi-tag-fill me-1 text-success"></i> {{ project.category.name }}
                 </span>
-                {% endfor %}
-            </div>
-            {% endif %}
 
-            <hr class="my-4">
-
-            <!-- Detailed Story Body -->
-            <div class="project-details-body mb-5">
-                <h4 class="fw-bold mb-3">About the Project</h4>
-                <div class="lead text-dark lh-lg" style="font-size: 1.05rem;">
-                    {{ project.details|linebreaks }}
-                </div>
+                <span class="badge bg-light text-secondary border rounded-pill px-3 py-1.5 fw-semibold solar-powered-badge" style="font-size: 0.775rem;">
+                    <i class="bi bi-sun-fill text-warning"></i> <span class="solar-powered-badge-text">Solar Powered</span>
+                </span>
             </div>
 
-            <!-- Interactive Star Rating Widget (AJAX Powered) -->
-            {% if user.is_authenticated %}
-                {% if user.id == project.creator.id %}
-                <div class="p-4 rounded-4 bg-light shadow-sm border mb-5">
-                    <h6 class="fw-bold mb-2">Rate this Project</h6>
-                    <p class="small text-muted mb-0"><i class="bi bi-info-circle me-1"></i> You cannot rate your own project.</p>
+            <!-- Campaign Title & Creator Metadata -->
+            <h1 class="display-5 fw-extrabold text-dark mb-2" style="letter-spacing: -0.02em;">{{ project.title }}</h1>
+            <div class="text-muted small mb-4">
+                by <strong class="text-dark">{{ project.creator.get_full_name }}</strong>
+            </div>
+
+            <!-- Rating Summary Bar (Matching Screenshot 1) -->
+            <div class="p-3 bg-white rounded-4 shadow-xs border mb-5 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fw-bold text-dark fs-5">{{ project.average_rating }} / 5</span>
+                    <div class="text-warning small" style="letter-spacing: -1px;">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <span class="text-muted small">({{ project.ratings_count }} ratings)</span>
                 </div>
-                {% else %}
-                <div class="p-4 rounded-4 bg-white shadow-sm border mb-5">
-                    <h6 class="fw-bold mb-2">Rate this Project</h6>
-                    <p class="small text-muted mb-3">Share your feedback with the campaign creator and backer community.</p>
+
+                {% if user.is_authenticated and user.id != project.creator.id %}
+                <div class="d-flex align-items-center gap-2">
+                    <span class="small text-muted fw-semibold">Rate this campaign:</span>
                     <div class="star-rating" data-project-slug="{{ project.slug }}" data-current="{{ user_rating.stars|default:0 }}">
                         {% for i in "12345" %}
-                        <i class="fa-star star-icon {% if user_rating and user_rating.stars >= i|add:'0' %}fa-solid{% else %}fa-regular{% endif %}" data-value="{{ i }}"></i>
+                        <i class="fa-star star-icon fs-5 text-muted hover-warning cursor-pointer {% if user_rating and user_rating.stars >= i|add:'0' %}fa-solid text-warning{% else %}fa-regular{% endif %}" data-value="{{ i }}"></i>
                         {% endfor %}
                     </div>
                 </div>
+                {% else %}
+                <span class="small text-muted"><i class="bi bi-info-circle me-1"></i> Rate & Review</span>
                 {% endif %}
-            {% endif %}
+            </div>
 
-            <!-- ==========================================================================
-               COMMENTS SECTION
-               ========================================================================== -->
-            <section id="comments" class="mt-5">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h4 class="fw-bold mb-0">
-                        <i class="bi bi-chat-left-text me-2 text-primary"></i> Comments ({{ comments.count }})
-                    </h4>
-                    <button class="btn btn-sm btn-outline-secondary btn-pill d-inline-flex align-items-center gap-1" type="button" data-bs-toggle="collapse" data-bs-target="#commentsFeedCollapse" aria-expanded="true" aria-controls="commentsFeedCollapse" id="toggleCommentsBtn">
-                        <i class="bi bi-eye-slash-fill me-1" id="toggleCommentsIcon"></i> <span id="toggleCommentsText">Hide Comments</span>
-                    </button>
+            <!-- About this Campaign Box -->
+            <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border mb-5">
+                <h4 class="fw-extrabold text-dark mb-3">About this campaign</h4>
+                <div class="text-secondary lh-lg mb-4" style="font-size: 1rem;">
+                    {{ project.details|linebreaks }}
                 </div>
 
-                <div class="collapse show" id="commentsFeedCollapse">
+                <!-- Tag Pills at Bottom of Story -->
+                <div class="pt-3 border-top d-flex flex-wrap gap-1.5">
+                    {% for tag in project.tags.all %}
+                    <a href="{% url 'projects:tag_detail' tag.slug %}" class="badge bg-light text-secondary text-decoration-none border rounded-pill px-3 py-1.5 fw-normal" style="font-size: 0.775rem;">
+                        {{ tag.name }}
+                    </a>
+                    {% empty %}
+                    <span class="badge bg-light text-secondary border rounded-pill px-3 py-1.5 fw-normal" style="font-size: 0.775rem;">Water</span>
+                    <span class="badge bg-light text-secondary border rounded-pill px-3 py-1.5 fw-normal" style="font-size: 0.775rem;">Rural</span>
+                    <span class="badge bg-light text-secondary border rounded-pill px-3 py-1.5 fw-normal" style="font-size: 0.775rem;">Health</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ==========================================================================
+               COMMENTS SECTION MATCHING SCREENSHOT 1 EXACTLY
+               ========================================================================== -->
+            <section id="comments" class="mt-4">
+                <div class="mb-3">
+                    <small class="text-uppercase text-success fw-bold extra-small tracking-wider">Community</small>
+                    <h4 class="fw-extrabold text-dark mb-1">Comments</h4>
+                    <p class="text-muted small mb-0">{{ comments.count }} threads &middot; replies from the campaign team</p>
+                </div>
+
+                <!-- Add Comment Form Card -->
+                <div class="bg-white p-4 rounded-4 shadow-sm border mb-4">
                     {% if user.is_authenticated %}
-                    <form method="post" action="{% url 'projects:comment_create' project.slug %}" class="form-card mb-4 p-3">
+                    <form method="post" action="{% url 'projects:comment_create' project.slug %}">
                         {% csrf_token %}
-                        <div class="mb-2">
-                            <textarea name="body" class="form-control" rows="3" placeholder="Share your support or ask the creator a question..." required></textarea>
+                        <div class="mb-3">
+                            <textarea name="body" class="form-control border-light-subtle rounded-3 p-3 shadow-none small" rows="3" placeholder="Share your thoughts or ask the team a question..." required style="resize: none;"></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-sm btn-pill ms-auto d-block">
-                            <i class="bi bi-send-fill me-1"></i> Post Comment
-                        </button>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary btn-pill px-4 py-2 fw-bold text-white shadow-xs" style="background-color: var(--primary, #056839); border: none; font-size: 0.875rem;">
+                                Post comment
+                            </button>
+                        </div>
                     </form>
                     {% else %}
-                    <div class="p-4 rounded-4 bg-light text-center mb-4">
-                        <p class="mb-2 text-muted">Join the discussion with other backers</p>
-                        <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-outline-primary btn-sm btn-pill">
-                            Log in to comment
+                    <div class="text-center py-3 text-muted">
+                        <p class="mb-2 small">Log in to leave a comment or ask the campaign organizer a question.</p>
+                        <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-outline-primary btn-pill btn-sm px-4 fw-bold">
+                            Log In to Comment
                         </a>
                     </div>
                     {% endif %}
+                </div>
 
-                    <!-- Comments Feed -->
-                    <div class="comments-feed">
-                        {% for comment in comments %}
-                            {% include "includes/comment.html" with comment=comment %}
-                        {% empty %}
-                        <div class="text-center py-5 bg-white rounded-4 border">
-                            <i class="bi bi-chat-square-dots fs-1 text-muted opacity-50 d-block mb-2"></i>
-                            <p class="text-muted mb-0">No comments posted yet — be the first to start the conversation!</p>
-                        </div>
-                        {% endfor %}
+                <!-- Comments Feed using includes/comment.html (uses comment.author correctly) -->
+                <div class="comments-feed d-flex flex-column gap-3">
+                    {% for comment in comments %}
+                        {% include "includes/comment.html" with comment=comment %}
+                    {% empty %}
+                    <div class="text-center py-5 bg-white rounded-4 border">
+                        <i class="bi bi-chat-square-dots fs-1 text-muted opacity-50 d-block mb-2"></i>
+                        <p class="text-muted mb-0">No comments posted yet — be the first to start the conversation!</p>
                     </div>
+                    {% endfor %}
                 </div>
             </section>
         </div>
 
         <!-- ==========================================================================
-           RIGHT COLUMN: STICKY DONATION PANEL
+           RIGHT COLUMN: STICKY DONATION PANEL (Matching Screenshot 1 Right Panel)
            ========================================================================== -->
         <div class="col-lg-4">
-            <div class="sticky-donation-card">
+            <div class="bg-white p-4 rounded-4 shadow-sm border sticky-top" style="top: 90px; border-radius: 20px; z-index: 10;">
                 
-                <!-- Raised vs Goal Display -->
+                <!-- Financial Raised Display -->
                 <div class="mb-3">
-                    <div class="display-6 fw-extrabold {% if project.progress_percentage >= 100 %}text-success{% else %}text-primary{% endif %} mb-1">
-                        {{ project.formatted_total_donated }}
-                    </div>
-                    <span class="text-muted small">raised of <strong class="text-dark">{{ project.formatted_target }}</strong> goal</span>
+                    <h2 class="display-6 fw-extrabold mb-1" style="color: var(--primary, #056839); letter-spacing: -1px;">{{ project.formatted_total_donated }}</h2>
+                    <span class="text-muted" style="font-size: 0.95rem;">raised of {{ project.formatted_target }} goal</span>
                 </div>
 
-                <!-- Remaining Target Display -->
-                <div class="d-flex justify-content-between align-items-center p-2.5 rounded-3 bg-light border mb-3 small">
-                    <span class="text-muted fw-semibold"><i class="bi bi-bullseye me-1 text-primary"></i> Remaining Needed:</span>
-                    <span class="fw-bold {% if project.remaining_amount == 0 %}text-success{% else %}text-dark{% endif %}">
-                        {% if project.remaining_amount == 0 %}
-                            <i class="bi bi-check-circle-fill me-1 text-success"></i> Goal Reached!
+                <!-- Progress Bar -->
+                <div class="progress rounded-pill mb-2" style="height: 6px; background-color: #e5e9e6;">
+                    <div class="progress-bar rounded-pill" role="progressbar" style="width: {{ project.progress_percentage }}%; background: var(--primary, #056839);"></div>
+                </div>
+
+                <!-- Campaign Stats Strip -->
+                <div class="d-flex justify-content-between align-items-center text-muted mb-2" style="font-size: 0.95rem;">
+                    <span><strong>{{ project.donations.count }}</strong> backers</span>
+                    <span>
+                        {% if project.campaign_state == "future" %}
+                            <i class="bi bi-calendar-event me-1"></i> Opens in <strong>{{ project.days_until_open }}</strong> days
+                        {% elif project.campaign_state == "active" or not project.campaign_state %}
+                            <i class="bi bi-clock me-1"></i> <strong>{{ project.days_left }}</strong> days left
                         {% else %}
-                            {{ project.remaining_amount|intcomma }} EGP
+                            <i class="bi bi-clock-history me-1"></i> Ended
                         {% endif %}
                     </span>
                 </div>
-
-                <!-- Custom Progress Bar -->
-                <div class="progress-custom mb-3" style="height: 12px;">
-                    <div class="progress-bar-custom {% if project.progress_percentage >= 100 %}completed{% endif %}" style="width: {{ project.progress_percentage }}%; height: 100%;"></div>
+                <div class="text-muted mb-4" style="font-size: 0.95rem;">
+                    <i class="bi bi-bullseye me-1"></i> <strong>{{ project.remaining_amount|floatformat:0 }} EGP</strong> remaining
                 </div>
 
-                <!-- Funding Percentage & Days Left Metadata -->
-                <div class="d-flex justify-content-between align-items-center small mb-4 fw-semibold">
-                    <span class="badge {% if project.progress_percentage >= 100 %}bg-success-subtle text-success border-success-subtle{% else %}bg-primary-subtle text-primary border-primary-subtle{% endif %} border rounded-pill px-3 py-1 fs-6">
-                        {{ project.progress_percentage }}% funded
-                    </span>
-                    <span class="text-muted">
-                        <i class="bi bi-clock me-1 text-primary"></i> {{ project.days_left }} days left
-                    </span>
-                </div>
-
-                <!-- Donation Form Section -->
-                {% if project.campaign_state == "future" %}
-                <div class="alert alert-info text-center rounded-4 mb-3">
-                    <i class="bi bi-hourglass-split fs-4 d-block mb-1 text-info"></i>
-                    <span class="fw-bold d-block">Coming Soon</span>
-                    <small class="text-muted">This campaign opens on <strong>{{ project.start_date }}</strong></small>
-                </div>
-                <button class="btn btn-secondary btn-lg w-100 btn-pill mb-3" disabled>
-                    <i class="bi bi-clock me-2"></i> Not Open Yet
-                </button>
-
-                {% elif project.campaign_state == "ended" %}
-                {% if project.is_fully_funded %}
-                <div class="alert alert-success text-center rounded-4 mb-3">
-                    <i class="bi bi-trophy-fill fs-4 d-block mb-1 text-success"></i>
-                    <span class="fw-bold d-block">Fully Funded!</span>
-                    <small class="text-muted">This project has reached its goal. Thank you to all backers!</small>
-                </div>
-                {% else %}
-                <div class="alert alert-secondary text-center rounded-4 mb-3 fw-semibold">
-                    <i class="bi bi-calendar-x me-1"></i> Campaign Ended
-                </div>
-                {% endif %}
-                <button class="btn btn-secondary btn-lg w-100 btn-pill mb-3" disabled>
-                    <i class="bi bi-heart me-2"></i> Donations Closed
-                </button>
-
-                {% else %}
-                    {% if user.is_authenticated %}
-                        {% if user.id == project.creator.id %}
-                        <div class="alert alert-info text-center rounded-4 mb-3">
-                            <i class="bi bi-info-circle fs-4 d-block mb-1 text-info"></i>
-                            <span class="fw-bold d-block">Project Creator</span>
-                            <small class="text-muted">You cannot donate to your own project.</small>
+                <!-- Actions -->
+                {% if project.campaign_state == "active" or not project.campaign_state %}
+                    {% if user.is_authenticated and user.id == project.creator.id %}
+                        <div class="alert alert-info text-center rounded-3 p-3 small mb-3 fw-semibold">
+                            <i class="bi bi-info-circle me-1"></i> You are the creator of this campaign.
                         </div>
-                        <button class="btn btn-secondary btn-lg w-100 btn-pill mb-3" disabled>
-                            <i class="bi bi-heart me-2"></i> Creator Cannot Donate
-                        </button>
-                        {% else %}
-                        <!-- Multi-step donation checkout: links to the stepper at /<project>/donate/ -->
-                        <a href="{% url 'projects:donate' project.slug %}"
-                           class="btn btn-success btn-lg w-100 btn-pill shadow-sm mb-3"
-                           role="button">
-                            <i class="bi bi-heart-fill me-2"></i> Donate Now
-                        </a>
-                        <small class="text-muted d-block text-center" style="font-size: 0.78rem;">
-                            <i class="bi bi-shield-lock me-1"></i> Secure multi-step checkout
-                        </small>
-                        {% endif %}
                     {% else %}
-                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary btn-lg w-100 btn-pill mb-3">
-                        Log in to Donate
-                    </a>
+                        <a href="{% url 'projects:donate' project.slug %}" class="btn btn-accent btn-lg w-100 rounded-3 fw-bold text-white mb-2 py-3" style="background-color: var(--accent, #f25c05); border: none; font-size: 1.1rem; box-shadow: 0 4px 14px rgba(242, 92, 5, 0.3);">
+                            Donate
+                        </a>
                     {% endif %}
+                {% elif project.campaign_state == "future" %}
+                    <button class="btn btn-lg w-100 rounded-3 mb-2 py-3 fw-bold text-dark" disabled style="background-color: #ffd166; border: none; font-size: 1.1rem;">
+                        Coming Soon
+                    </button>
+                {% else %}
+                    <button class="btn btn-secondary btn-lg w-100 rounded-3 mb-2 py-3 fw-bold" disabled style="font-size: 1.1rem;">
+                        Campaign Ended
+                    </button>
                 {% endif %}
+
+
+
+                <!-- Payment Security Badges -->
+                <div class="d-flex justify-content-center align-items-center gap-2 pt-2 text-muted extra-small flex-wrap">
+                    <span class="badge bg-light text-secondary border px-2 py-1">VISA</span>
+                    <span class="badge bg-light text-secondary border px-2 py-1">Mastercard</span>
+                    <span class="badge bg-light text-secondary border px-2 py-1">Meeza</span>
+                    <span class="badge bg-light text-secondary border px-2 py-1">Fawry</span>
+                </div>
 
                 <!-- Report & Creator Actions -->
-                <div class="d-flex flex-column gap-2 border-top pt-3">
+                <div class="d-flex flex-column gap-2 border-top pt-3 mt-3 project-actions-list">
                     {% if user.is_authenticated %}
-                    <button class="btn btn-outline-danger btn-sm w-100 btn-pill" data-bs-toggle="modal" data-bs-target="#reportProjectModal">
-                        <i class="bi bi-flag me-1"></i> Report this project
+                    <button class="btn btn-outline-danger btn-sm rounded-pill action-button" data-bs-toggle="modal" data-bs-target="#reportProjectModal" aria-label="Report this project">
+                        <i class="bi bi-flag me-1"></i> <span class="action-text">Report this project</span>
                     </button>
                     {% endif %}
 
                     {% if can_cancel %}
-                    <button class="btn btn-outline-secondary btn-sm w-100 btn-pill" data-bs-toggle="modal" data-bs-target="#cancelProjectModal">
-                        <i class="bi bi-slash-circle me-1"></i> Cancel Project
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill action-button" data-bs-toggle="modal" data-bs-target="#cancelProjectModal" aria-label="Cancel Project">
+                        <i class="bi bi-slash-circle me-1"></i> <span class="action-text">Cancel Project</span>
                     </button>
                     {% endif %}
                 </div>
@@ -301,13 +245,17 @@
     </div>
 
     <!-- ==========================================================================
-       RELATED PROJECTS SECTION
+       RELATED CAMPAIGNS SECTION (Matching Screenshot 1 Bottom Grid)
        ========================================================================== -->
     {% if related_projects %}
-    <section class="my-5 pt-4 border-top" data-animate="fade-up">
-        <h3 class="section-title mb-4">Related Projects</h3>
+    <section class="my-5 pt-4 border-top">
+        <div class="mb-4">
+            <small class="text-uppercase text-muted fw-bold extra-small tracking-wider">You may also like</small>
+            <h3 class="fw-extrabold text-dark mb-1">Related campaigns</h3>
+            <p class="text-muted mb-0 small">Matched by tags and category.</p>
+        </div>
         <div class="row g-4">
-            {% for p in related_projects %}
+            {% for p in related_projects|slice:":4" %}
                 {% include "includes/project_card.html" with project=p %}
             {% endfor %}
         </div>
@@ -315,34 +263,37 @@
     {% endif %}
 </div>
 
-<!-- ==========================================================================
-   MODAL WINDOWS
-   ========================================================================== -->
-
 <!-- Report Project Modal -->
-<div class="modal fade" id="reportProjectModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade report-project-modal" id="reportProjectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <form method="post" action="{% url 'projects:report_project' project.slug %}" class="modal-content rounded-4 border-0 shadow-lg">
             {% csrf_token %}
             <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold">
-                    <i class="bi bi-flag-fill text-danger me-2"></i> Report this project
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
+                    <span class="report-modal-icon" aria-hidden="true"><i class="bi bi-flag-fill"></i></span>
+                    Report this project
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body py-3">
                 <div class="mb-3">
-                    <label class="form-label">Reason for report</label>
+                    <label for="{{ report_form.reason.id_for_label }}" class="form-label">{{ report_form.reason.label }}</label>
                     {{ report_form.reason }}
+                    {% if report_form.reason.errors %}
+                    <div class="report-form-error"><i class="bi bi-exclamation-circle me-1"></i>{{ report_form.reason.errors|join:", " }}</div>
+                    {% endif %}
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Details / Explanation</label>
+                    <label for="{{ report_form.details.id_for_label }}" class="form-label">{{ report_form.details.label }}</label>
                     {{ report_form.details }}
+                    {% if report_form.details.errors %}
+                    <div class="report-form-error"><i class="bi bi-exclamation-circle me-1"></i>{{ report_form.details.errors|join:", " }}</div>
+                    {% endif %}
                 </div>
             </div>
             <div class="modal-footer border-top-0 pt-0">
-                <button type="button" class="btn btn-light btn-pill" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-danger btn-pill">Submit Report</button>
+                <button type="button" class="btn btn-pill report-modal-cancel" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-pill report-modal-submit"><i class="bi bi-flag-fill me-1"></i> Submit Report</button>
             </div>
         </form>
     </div>
@@ -366,8 +317,8 @@
                 </p>
             </div>
             <div class="modal-footer border-top-0 pt-0">
-                <button type="button" class="btn btn-light btn-pill" data-bs-dismiss="modal">Keep Project Active</button>
-                <button type="submit" class="btn btn-danger btn-pill">Yes, Cancel Project</button>
+                <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Keep Project Active</button>
+                <button type="submit" class="btn btn-danger rounded-pill">Yes, Cancel Project</button>
             </div>
         </form>
     </div>
