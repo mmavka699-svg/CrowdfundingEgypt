@@ -151,7 +151,7 @@
                         href="{% url 'accounts:login' %}">Sign In</a>
                     <a class="btn btn-primary btn-pill fw-bold shadow-sm px-3.5 py-2 d-inline-flex align-items-center justify-content-center gap-1.5"
                         href="{% url 'projects:project_create' %}">
-                        <i class="bi bi-plus-lg"></i> Start a campaign
+                        <i class="bi bi-plus-lg"></i> Start a project
                     </a>
                     {% endif %}
                 </div>
@@ -172,7 +172,7 @@
         {% endfor %}
         {% endif %}
     </div>
-
+    <i class="fa-solid fa-robot robot" id="chatbot-toggle"></i>
     <!-- Main Page Body Container -->
     <main class="min-vh-100">
         {% block content %}{% endblock %}
@@ -196,7 +196,7 @@
                         <span class="fw-bold">Crowd-Funding <span class="text-white opacity-75">Egypt</span></span>
                     </a>
                     <p class="small text-white-50 mb-4" style="max-width: 320px; line-height: 1.6;">
-                        A transparent home for Egyptian causes. Every campaign is verified, every pound is tracked, and
+                        A transparent home for Egyptian causes. Every project is verified, every pound is tracked, and
                         every backer sees where the money lands.
                     </p>
                     <div class="d-flex gap-2">
@@ -221,7 +221,7 @@
                     <h6 class="fw-bold text-white mb-3">Explore</h6>
                     <ul class="list-unstyled small d-flex flex-column gap-2 mb-0">
                         <li><a href="{% url 'projects:project_list' %}" class="text-white-50 text-decoration-none">All
-                                campaigns</a></li>
+                                projects</a></li>
                         <li><a href="{% url 'core:home' %}#categories"
                                 class="text-white-50 text-decoration-none">Categories</a></li>
                         <li><a href="{% url 'core:home' %}#featured"
@@ -241,7 +241,7 @@
                         <li><a href="{% url 'core:about' %}" class="text-white-50 text-decoration-none">Refund
                                 policy</a></li>
                         <li><a href="{% url 'core:about' %}" class="text-white-50 text-decoration-none">Report a
-                                campaign</a></li>
+                                project</a></li>
                     </ul>
                 </div>
 
@@ -295,6 +295,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/chatbot.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 

@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     "accounts",
     "projects",
     "core",
+    "chatbot",
+    
 ]
 
 MIDDLEWARE = [
@@ -184,3 +186,6 @@ MESSAGE_TAGS = {
 # CSRF — Custom failure view (user-friendly on stale tokens, no security bypass)
 # ---------------------------------------------------------------------------
 CSRF_FAILURE_VIEW = "core.views.csrf_failure_view"
+
+
+GOOGLE_API_KEY   = os.getenv("GOOGLE_API_KEY" , None)
