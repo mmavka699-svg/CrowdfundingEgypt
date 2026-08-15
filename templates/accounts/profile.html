@@ -25,6 +25,20 @@
                     </a>
                 </div>
             </div>
+
+            <!-- Wallet Card -->
+            <div class="form-card text-center p-4 mt-4" style="border-radius: 1rem; background-color: var(--primary); color: white;">
+                <h6 class="text-white-50 mb-1">Wallet Balance</h6>
+                <h3 class="fw-bold text-white mb-3">{{ profile_user.wallet_balance|default:"0.00" }} EGP</h3>
+                <div class="d-flex flex-column gap-2">
+                    <a href="{% url 'accounts:charge_wallet' %}" class="btn btn-light btn-sm fw-bold rounded-pill">
+                        <i class="bi bi-plus-circle me-1"></i> Charge Wallet
+                    </a>
+                    <a href="{% url 'accounts:wallet_history' %}" class="btn btn-outline-light btn-sm rounded-pill">
+                        <i class="bi bi-clock-history me-1"></i> Transaction History
+                    </a>
+                </div>
+            </div>
         </div>
 
         <!-- Activity Column: Created Projects + Donations, stacked vertically -->

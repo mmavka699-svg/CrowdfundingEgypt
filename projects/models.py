@@ -236,8 +236,26 @@ class Project(models.Model):
             raise ValueError(
                 "Project cannot be cancelled: donations have reached 25% or more of the target."
             )
-        self.status = self.Status.CANCELLED
-        self.save(update_fields=["status"])
+        
+        from accounts.models import WalletTransaction
+        from django.db import transaction
+        
+        with transaction.atomic():
+            self.status = self.Status.CANCELLED
+            self.save(update_fields=["status"])
+            
+            for donation in self.donations.select_related("donor"):
+                user = donation.donor
+                user.refresh_from_db(fields=["wallet_balance"])
+                user.wallet_balance += donation.amount
+                user.save(update_fields=["wallet_balance"])
+                
+                WalletTransaction.objects.create(
+                    user=user,
+                    amount=donation.amount,
+                    transaction_type=WalletTransaction.TransactionType.CREDIT,
+                    description=f"Refund for cancelled project: {self.title}"
+                )
 
 
 def project_image_upload_path(instance, filename):

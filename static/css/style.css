@@ -226,8 +226,8 @@ a:hover {
 
 /* Selection */
 ::selection {
-    background: var(--primary);
-    color: var(--accent);
+    background: var(--primary-hover);
+    color: white;
 }
 
 /* Section Title Utility */
@@ -2967,12 +2967,25 @@ body:has(.report-project-modal.show) .modal-backdrop.show {
     animation: typing 1.4s infinite ease-in-out both;
 }
 
-.chatbot-typing-dot:nth-child(1) { animation-delay: -0.32s; }
-.chatbot-typing-dot:nth-child(2) { animation-delay: -0.16s; }
+.chatbot-typing-dot:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.chatbot-typing-dot:nth-child(2) {
+    animation-delay: -0.16s;
+}
 
 @keyframes typing {
-    0%, 80%, 100% { transform: scale(0); }
-    40% { transform: scale(1); }
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0);
+    }
+
+    40% {
+        transform: scale(1);
+    }
 }
 
 @media (max-width: 575.98px) {

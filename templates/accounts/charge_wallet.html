@@ -1,25 +1,7 @@
 {% extends "base.html" %}
 {% load humanize %}
 {% load static %}
-{% block title %}Donate — {{ project.title }}{% endblock %}
-
-{#
-============================================================================
-DONATE — Multi-Step Checkout (Single-Page Stepper)
-============================================================================
-Flow:
-Step 1 Enter the Amount -> amount field + preset quick-selections
-Step 2 Select Payment Method -> PayPal / Google Pay / Apple Pay / Card (+ Add New Card)
-Step 3 Add New Card -> cardholder/name/number/expiry/CVV + green preview card
-Step 4 Enter PIN -> 4-digit verification (simulated 3-D Secure)
-Step 5 Success -> green checkmark + "OK" back to the project
-
-Everything is client-side (no page reloads). The only server round-trip is
-the final "Confirm" action, which POSTs a JSON payload to
-`{% url 'projects:donate' project.slug %}` and only then is the Donation
-record created in the database.
-============================================================================
-#}
+{% block title %}Charge Wallet — Crowd-Funding Egypt{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/payment_stepper.css' %}">
@@ -30,48 +12,18 @@ record created in the database.
     <div class="row justify-content-center">
         <div class="col-lg-9 col-xl-8">
 
-            <!-- ================================================================
-                 CAMPAIGN SUMMARY STRIP (keeps the backer grounded about the
-                 project they are contributing to)
-                 ================================================================ -->
-            <div class="don-summary d-flex align-items-center gap-3 mb-4">
-                <span class="don-summary-icon"><i class="bi bi-heart-fill"></i></span>
-                <div class="min-w-0">
-                    <div class="fw-bold text-dark text-truncate">{{ project.title }}</div>
-                    <small class="text-muted">
-                        <i class="bi bi-bar-chart-line me-1"></i>
-                        {{ project.formatted_total_donated }} raised of
-                        <strong class="text-success">{{ project.formatted_target }}</strong> goal
-                        &middot; {{ project.progress_percentage }}% funded
-                    </small>
+            <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded-4 border">
+                <div class="fw-bold text-dark fs-5">
+                    <i class="bi bi-wallet2 text-primary me-2"></i> Current Wallet Balance:
+                    <span class="text-success">{{ user.wallet_balance|default:"0.00" }} EGP</span>
                 </div>
-                <a href="{{ project.get_absolute_url }}"
-                    class="btn btn-sm btn-outline-secondary btn-pill ms-auto d-none d-sm-inline-flex">
-                    <i class="bi bi-arrow-left me-1"></i> Back to Project
-                </a>
             </div>
-
-            {% if eligibility_error %}
-            <!-- ================================================================
-                 ELIGIBILITY BLOCK: campaign not open / creator / fully funded
-                 ================================================================ -->
-            <div class="don-card p-5 text-center">
-                <i class="bi bi-info-circle text-warning fs-1 d-block mb-3"></i>
-                <h2 class="fw-bold h5 mb-2">Donations are not available</h2>
-                <p class="text-muted mb-4">{{ eligibility_error }}</p>
-                <a href="{{ project.get_absolute_url }}" class="btn btn-primary btn-pill">
-                    <i class="bi bi-arrow-left me-1"></i> Back to Project
-                </a>
-            </div>
-            {% else %}
 
             <!-- ================================================================
                  MAIN STEPPER CARD
                  ================================================================ -->
-            <div class="don-card" id="donStepper" data-donate-url="{% url 'projects:donate' project.slug %}"
-                data-project-url="{{ project.get_absolute_url }}" data-profile-url="{% url 'accounts:profile' %}"
-                data-wallet-balance="{{ user.wallet_balance|default:0 }}"
-                data-max-amount="{{ project.remaining_amount }}">
+            <div class="don-card" id="donStepper" data-charge-url="{% url 'accounts:charge_wallet' %}"
+                data-profile-url="{% url 'accounts:profile' %}" data-presets="100,250,500,1000,2000,5000">
 
                 <!-- CSRF token, re-sent as the X-CSRFToken header on submit -->
                 <input type="hidden" id="donCsrfToken" value="{{ csrf_token }}">
@@ -94,8 +46,8 @@ record created in the database.
                          STEP 1 — ENTER THE AMOUNT
                          ====================================================== -->
                     <section class="don-panel" data-panel="1">
-                        <h2 class="don-panel-title h3">Enter the Amount</h2>
-                        <p class="don-panel-sub">Every contribution counts — choose a quick amount or type your own.</p>
+                        <h2 class="don-panel-title h3">Enter Top-up Amount</h2>
+                        <p class="don-panel-sub">Select a quick amount or enter a custom amount.</p>
 
                         <!-- Quick preset selection buttons -->
                         <div class="d-flex flex-wrap gap-2 mb-2" id="donPresets"></div>
@@ -105,7 +57,7 @@ record created in the database.
                             <div class="input-group">
                                 <span class="input-group-text don-currency">EGP</span>
                                 <input type="text" id="donAmountInput" class="form-control don-amount-field"
-                                    inputmode="decimal" placeholder="0.00" aria-label="Donation amount"
+                                    inputmode="decimal" placeholder="0.00" aria-label="Charge amount"
                                     data-currency="EGP">
                             </div>
                         </div>
@@ -126,20 +78,7 @@ record created in the database.
                          ====================================================== -->
                     <section class="don-panel" data-panel="2">
                         <h2 class="don-panel-title h3">Select Payment Method</h2>
-                        <p class="don-panel-sub">How would you like to support this project?</p>
-
-                        {% if user.is_authenticated %}
-                        <label class="don-method" data-method="wallet">
-                            <input type="radio" name="donMethod" value="wallet">
-                            <span class="don-radio"></span>
-                            <i class="bi bi-wallet2 don-method-icon"></i>
-                            <span>
-                                <span class="don-method-name d-block">Wallet Balance</span>
-                                <span class="don-method-desc">Pay from your {{ user.wallet_balance|default:"0.00" }} EGP
-                                    balance</span>
-                            </span>
-                        </label>
-                        {% endif %}
+                        <p class="don-panel-sub">How would you like to charge your wallet?</p>
 
                         <label class="don-method" data-method="paypal">
                             <input type="radio" name="donMethod" value="paypal">
@@ -204,14 +143,6 @@ record created in the database.
                     <section class="don-panel" data-panel="3">
                         <h2 class="don-panel-title h3">Add New Card</h2>
                         <p class="don-panel-sub">We never store your card details — payment is tokenized securely.</p>
-
-                        <div class="alert alert-info d-none mb-4 border-0 shadow-sm" id="donSplitNotice"
-                            style="background-color: var(--don-green-light); color: var(--don-green-deep);">
-                            <i class="bi bi-info-circle-fill me-2"></i>
-                            Your wallet balance (<span id="donSplitWalletAmount"></span> EGP) is insufficient.
-                            You will pay the remaining <strong id="donSplitCardAmount"></strong> EGP with your card
-                            below.
-                        </div>
 
                         <div class="row g-4">
                             <!-- Live green-gradient card preview (Figma style) -->
@@ -312,18 +243,17 @@ record created in the database.
                             <div class="don-success-icon"><i class="bi bi-check-lg"></i></div>
                             <h2 class="don-panel-title h3">Success</h2>
                             <p class="don-panel-sub mb-4">
-                                Thank you for making a donation of
-                                <strong class="text-success" id="donSuccessAmount"></strong>
-                                to <span class="fw-bold" id="donSuccessTitle"></span>.
+                                Your wallet has been successfully charged with
+                                <strong class="text-success" id="donSuccessAmount"></strong>.
                             </p>
 
                             <button type="button" class="btn-donate px-5" id="donOkBtn">
-                                <i class="bi bi-check2-circle me-1"></i> OK
+                                <i class="bi bi-check2-circle me-1"></i> Return to Profile
                             </button>
                             <div class="mt-3">
-                                <a href="{% url 'accounts:profile' %}#donationsTab" id="donProfileLink"
+                                <a href="{% url 'accounts:profile' %}#walletTab" id="donProfileLink"
                                     class="small fw-semibold">
-                                    <i class="bi bi-person-heart me-1"></i> View my donations
+                                    <i class="bi bi-wallet2 me-1"></i> View my wallet history
                                 </a>
                             </div>
                         </div>
@@ -331,7 +261,6 @@ record created in the database.
 
                 </div>
             </div>
-            {% endif %}
         </div>
     </div>
 </div>

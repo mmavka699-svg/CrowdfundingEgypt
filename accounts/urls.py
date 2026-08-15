@@ -36,4 +36,8 @@ urlpatterns = [
     path("profile/", views.profile_view, name="profile"),
     path("profile/edit/", views.profile_edit_view, name="profile_edit"),
     path("profile/delete/", views.profile_delete_view, name="profile_delete"),
+
+    # Wallet
+    path("wallet/charge/", views.charge_wallet_view, name="charge_wallet"),
+    path("wallet/history/", views.wallet_history_view, name="wallet_history"),
 ]
