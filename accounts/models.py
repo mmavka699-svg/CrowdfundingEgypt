@@ -1,6 +1,7 @@
 import os
 import uuid
 
+from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
@@ -89,6 +90,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         _("country"), max_length=2, choices=Country.choices, blank=True, null=True
     )
 
+    wallet_balance = models.DecimalField(
+        _("wallet balance"), max_digits=12, decimal_places=2, default=0.00
+    )
+
     is_active = models.BooleanField(
         _("active"),
         default=False,
@@ -136,3 +141,20 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         """Sum of all donations made by this user (used on profile page)."""
         from django.db.models import Sum
         return self.donations.aggregate(total=Sum("amount"))["total"] or 0
+
+class WalletTransaction(models.Model):
+    class TransactionType(models.TextChoices):
+        CREDIT = "credit", _("Credit (Deposit/Refund)")
+        DEBIT = "debit", _("Debit (Withdrawal/Donation)")
+        
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="wallet_transactions")
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    transaction_type = models.CharField(max_length=10, choices=TransactionType.choices)
+    description = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.get_transaction_type_display()} of {self.amount} EGP for {self.user}"

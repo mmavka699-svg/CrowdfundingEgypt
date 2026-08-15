@@ -275,3 +275,62 @@ def profile_delete_view(request):
     else:
         form = AccountDeletionForm(user=request.user)
     return render(request, "accounts/profile_delete.html", {"form": form})
+
+
+import json
+from decimal import Decimal, InvalidOperation
+from django.http import JsonResponse
+from projects.views import _validate_card_payload
+from .models import WalletTransaction
+
+
+@login_required
+def charge_wallet_view(request):
+    if request.method == "GET":
+        return render(request, "accounts/charge_wallet.html")
+        
+    try:
+        payload = json.loads(request.body or b"{}")
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid request payload."}, status=400)
+
+    try:
+        amount = Decimal(str(payload.get("amount", "0")))
+        if amount < Decimal("1.00"):
+            raise ValueError
+    except (InvalidOperation, ValueError):
+        return JsonResponse({"success": False, "error": "Please enter a valid amount (minimum 1.00)."}, status=400)
+
+    method = str(payload.get("payment_method") or "").strip()
+    allowed_methods = {"paypal", "google_pay", "apple_pay", "card"}
+    if method not in allowed_methods:
+        return JsonResponse({"success": False, "error": "Please choose a valid payment method."}, status=400)
+
+    if method == "card":
+        card_error = _validate_card_payload(payload)
+        if card_error:
+            return JsonResponse({"success": False, "error": card_error}, status=400)
+
+    password = str(payload.get("password") or "")
+    if not password or not request.user.check_password(password):
+        return JsonResponse({"success": False, "error": "Incorrect password. Please try again."}, status=400)
+
+    # Persist the top-up
+    user = request.user
+    user.wallet_balance += amount
+    user.save(update_fields=["wallet_balance"])
+    
+    WalletTransaction.objects.create(
+        user=user,
+        amount=amount,
+        transaction_type=WalletTransaction.TransactionType.CREDIT,
+        description=f"Wallet top-up via {method.replace('_', ' ').title()}"
+    )
+
+    return JsonResponse({"success": True, "amount": str(amount), "redirect_url": reverse("accounts:profile")})
+
+
+@login_required
+def wallet_history_view(request):
+    transactions = request.user.wallet_transactions.all()
+    return render(request, "accounts/wallet_history.html", {"transactions": transactions})

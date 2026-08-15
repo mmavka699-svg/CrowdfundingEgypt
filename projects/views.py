@@ -1,5 +1,8 @@
 import json
+import os
 import re
+import uuid
+from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -419,38 +422,65 @@ def _process_ajax_donation(request, project):
 
     # (2) Payment method whitelist
     method = str(payload.get("payment_method") or "").strip()
-    allowed_methods = {"paypal", "google_pay", "apple_pay", "card"}
+    allowed_methods = {"paypal", "google_pay", "apple_pay", "card", "wallet", "wallet_split"}
     if method not in allowed_methods:
         return JsonResponse(
             {"success": False, "error": "Please choose a valid payment method."}, status=400
         )
 
-    # (3) Card details (only required when paying with a card)
-    if method == "card":
+    # (3) Card details (required when paying with a card or wallet_split with card)
+    secondary_method = str(payload.get("secondary_payment_method") or "").strip()
+    if method == "card" or (method == "wallet_split" and secondary_method == "card"):
         card_error = _validate_card_payload(payload)
         if card_error:
             return JsonResponse({"success": False, "error": card_error}, status=400)
 
-    # (4) Verification PIN
-    # NOTE: simulated 3-D Secure check. In production this step is handled by
-    # the payment processor (e.g. Stripe 3DS challenge) — the PIN is never our
-    # responsibility, and card data is tokenized off-platform.
-    pin = str(payload.get("pin") or "")
-    if not (pin.isdigit() and len(pin) == 4):
+    # (4) Verification Password
+    password = str(payload.get("password") or "")
+    if not password or not request.user.check_password(password):
         return JsonResponse(
-            {"success": False, "error": "Please enter the 4-digit verification PIN."}, status=400
+            {"success": False, "error": "Incorrect password. Please try again."}, status=400
         )
 
     # (5) Persist the donation — single write point, after ALL validations pass
-    try:
-        donation = Donation.objects.create(
-            project=project, donor=request.user, amount=amount
-        )
-    except ValidationError as exc:
-        return JsonResponse({"success": False, "error": "; ".join(exc.messages)}, status=400)
+    from accounts.models import WalletTransaction
+    from django.db import transaction
 
-    # (6) Re-sync project status (e.g. FUNDED when the target is now reached)
-    project.sync_status()
+    with transaction.atomic():
+        user = request.user
+        wallet_deduction = Decimal("0.00")
+        
+        if method == "wallet":
+            if user.wallet_balance < amount:
+                return JsonResponse({"success": False, "error": "Insufficient wallet balance."}, status=400)
+            wallet_deduction = amount
+            
+        elif method == "wallet_split":
+            if user.wallet_balance <= 0:
+                return JsonResponse({"success": False, "error": "Wallet is empty, cannot split."}, status=400)
+            if user.wallet_balance >= amount:
+                return JsonResponse({"success": False, "error": "Wallet balance is sufficient, use Wallet only."}, status=400)
+            wallet_deduction = user.wallet_balance
+            
+        if wallet_deduction > 0:
+            user.wallet_balance -= wallet_deduction
+            user.save(update_fields=["wallet_balance"])
+            WalletTransaction.objects.create(
+                user=user,
+                amount=wallet_deduction,
+                transaction_type=WalletTransaction.TransactionType.DEBIT,
+                description=f"Donation to project: {project.title}" + (" (Split Payment)" if method == "wallet_split" else "")
+            )
+
+        try:
+            donation = Donation.objects.create(
+                project=project, donor=request.user, amount=amount
+            )
+        except ValidationError as exc:
+            return JsonResponse({"success": False, "error": "; ".join(exc.messages)}, status=400)
+
+        # (6) Re-sync project status (e.g. FUNDED when the target is now reached)
+        project.sync_status()
 
     return JsonResponse(
         {

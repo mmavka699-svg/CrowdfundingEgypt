@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Wallet History — Crowd-Funding Egypt{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="fw-bold mb-4" style="color: var(--primary);">Wallet Transaction History</h1>
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                    <h5 class="mb-0 text-muted">Current Balance: <strong class="text-dark">{{ user.wallet_balance|default:"0.00" }} EGP</strong></h5>
+                    <a href="{% url 'accounts:charge_wallet' %}" class="btn btn-primary btn-sm rounded-pill fw-bold">
+                        <i class="bi bi-plus-circle me-1"></i> Charge Wallet
+                    </a>
+                </div>
+
+                {% if transactions %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in transactions %}
+                            <tr>
+                                <td class="text-muted small">{{ t.created_at|date:"M d, Y H:i" }}</td>
+                                <td>{{ t.description }}</td>
+                                <td class="text-end fw-bold {% if t.transaction_type == 'credit' %}text-success{% else %}text-danger{% endif %}">
+                                    {% if t.transaction_type == 'credit' %}+{% else %}-{% endif %}{{ t.amount }} EGP
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-wallet2 display-1 mb-3 text-secondary opacity-50"></i>
+                    <p class="mb-0">You have no wallet transactions yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

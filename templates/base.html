@@ -120,6 +120,9 @@
                             <li class="px-3 py-2 border-bottom mb-1">
                                 <div class="fw-bold text-dark">{{ user.get_full_name|default:user.email }}</div>
                                 <small class="text-muted">{{ user.email }}</small>
+                                <div class="mt-2 fw-bold" style="color: var(--primary);">
+                                    <i class="bi bi-wallet2 me-1"></i> {{ user.wallet_balance|default:"0.00" }} EGP
+                                </div>
                             </li>
                             <li>
                                 <a class="dropdown-item" href="{% url 'accounts:profile' %}">
