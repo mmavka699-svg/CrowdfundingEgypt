@@ -1,0 +1,31 @@
+{% load i18n %}
+{% if is_nav_sidebar_enabled %}
+<header class="cf-topbar">
+    <div class="cf-topbar-crumbs">
+        <i class="bi bi-house-door-fill"></i>
+        <span class="cf-topbar-brand">Crowd-Funding Egypt</span>
+        {% if title %}<b>/ {{ title }}</b>{% endif %}
+    </div>
+    <div class="cf-topbar-user">
+        <div class="cf-topbar-links">
+            {% if site_url %}
+            <a href="{{ site_url }}"><i class="bi bi-box-arrow-up-right"></i> {% translate 'View site' %}</a>
+            {% endif %}
+            {% if user.has_usable_password %}
+            <a href="{% url 'admin:password_change' %}"><i class="bi bi-key-fill"></i> {% translate 'Change password' %}</a>
+            {% endif %}
+            <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="cf-logout"><i class="bi bi-box-arrow-right"></i> {% translate 'Log out' %}</button>
+            </form>
+        </div>
+        <button type="button" class="theme-toggle cf-theme-toggle" aria-label="{% translate 'Toggle theme' %}">
+            <span class="icon-moon"><i class="bi bi-moon-stars-fill"></i></span>
+            <span class="icon-sun"><i class="bi bi-sun-fill"></i></span>
+        </button>
+        {% if user.is_authenticated %}
+        <span class="cf-topbar-avatar">{% firstof user.get_short_name user.get_username|slice:":2"|upper %}</span>
+        {% endif %}
+    </div>
+</header>
+{% endif %}

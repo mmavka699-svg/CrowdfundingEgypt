@@ -1,0 +1,50 @@
+{% load i18n static project_tags %}
+{% if available_apps %}
+<button class="sticky toggle-nav-sidebar" id="toggle-nav-sidebar" aria-label="{% translate 'Toggle navigation' %}"></button>
+<nav class="sticky cf-nav" id="nav-sidebar" aria-label="{% translate 'Sidebar' %}">
+  <div class="cf-nav-scroll">
+
+    <div class="cf-nav-brand">
+      <a href="{% url 'admin:index' %}" class="cf-brand">
+        <span class="cf-brand-icon"><i class="bi bi-heart-pulse-fill"></i></span>
+        <span class="cf-brand-text">Crowd-Funding <em>Egypt</em><span class="cf-brand-badge">Admin Panel</span></span>
+      </a>
+    </div>
+
+    <ul class="cf-nav-sections">
+
+      <li class="cf-nav-group">
+        <span class="cf-nav-group-label">{% translate 'Overview' %}</span>
+        <ul class="cf-nav-list">
+          <li class="cf-nav-item {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+            <a href="{% url 'admin:index' %}">
+              <span class="cf-nav-ic" aria-hidden="true"><i class="bi bi-grid-1x2"></i></span>
+              <span class="cf-nav-text">{% translate 'Dashboard' %}</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+
+      {% admin_nav_sections available_apps as sections %}
+      {% for section in sections %}
+      <li class="cf-nav-group">
+        <span class="cf-nav-group-label">{{ section.label|safe }}</span>
+        <ul class="cf-nav-list">
+          {% for model in section.models %}
+          <li class="cf-nav-item {% if model.admin_url and model.admin_url in request.path|urlencode %}active{% endif %}">
+            <a href="{% if model.admin_url %}{{ model.admin_url }}{% else %}#{% endif %}"
+               {% if model.admin_url and model.admin_url in request.path|urlencode %}aria-current="page"{% endif %}>
+              <span class="cf-nav-ic" aria-hidden="true"><i class="bi {{ model.object_name|model_icon }}"></i></span>
+              <span class="cf-nav-text">{{ model.name }}</span>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </li>
+      {% endfor %}
+
+    </ul>
+
+  </div>
+</nav>
+{% endif %}
