@@ -6,7 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="chatbot-header-title">
                     <i class="fa-solid fa-robot"></i> CrowdFundingEgypt Chatbot
                 </div>
-                <button class="chatbot-close" id="chatbot-close-btn">&times;</button>
+                <div class="chatbot-header-actions">
+                    <button class="chatbot-btn" id="chatbot-clear-btn" title="Clear Chat"><i class="fa-solid fa-trash-can"></i></button>
+                    <button class="chatbot-btn d-none d-md-flex" id="chatbot-expand-btn" title="Expand"><i class="fa-solid fa-expand"></i></button>
+                    <button class="chatbot-btn chatbot-close" id="chatbot-close-btn" title="Close">&times;</button>
+                </div>
             </div>
             <div class="chatbot-messages" id="chatbot-messages">
                 <div class="chatbot-message chatbot-message-bot">
@@ -44,6 +48,35 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
             container.classList.add('d-none');
+        });
+    }
+
+    const clearBtn = document.getElementById('chatbot-clear-btn');
+    const expandBtn = document.getElementById('chatbot-expand-btn');
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            messagesContainer.innerHTML = `
+                <div class="chatbot-message chatbot-message-bot">
+                    <p style="margin-bottom:0;">Hi there! How can I help you with Crowd-Funding Egypt today?</p>
+                </div>
+            `;
+        });
+    }
+
+    if (expandBtn) {
+        expandBtn.addEventListener('click', () => {
+            container.classList.toggle('chatbot-expanded');
+            const icon = expandBtn.querySelector('i');
+            if (container.classList.contains('chatbot-expanded')) {
+                icon.classList.remove('fa-expand');
+                icon.classList.add('fa-compress');
+                expandBtn.title = "Collapse";
+            } else {
+                icon.classList.remove('fa-compress');
+                icon.classList.add('fa-expand');
+                expandBtn.title = "Expand";
+            }
         });
     }
 
