@@ -24,7 +24,7 @@ from google import genai
 from google.genai import types
 
 from .models import ChatLog
-from .services import get_relevant_context
+from .services import get_chatbot_tools
 
 dotenv.load_dotenv()
 
@@ -83,14 +83,9 @@ about this specific platform.
    - Format numbers with commas (e.g., 1,000,000 EGP)
    - When listing campaigns, use bullet points
 
-=== CONTEXT (retrieved from the platform database) ===
-
-{context}
-
-=== END CONTEXT ===
-
-Answer the user's question using ONLY the context above and your knowledge \
-of how the platform works. Do not add information beyond what is provided.
+Answer the user's question using the tools provided to fetch necessary \
+platform data. If the data is not available through a tool, say \
+"I don't have that information right now."
 """
 
 
@@ -163,18 +158,15 @@ def chat(request):
 
     # --- Input validation ---
     raw_message = data.get("message", "")
+    raw_history = data.get("history", [])
     user_message, validation_error = _validate_message(raw_message)
     if validation_error:
         return JsonResponse({"error": validation_error}, status=400)
 
-    # --- Retrieve scoped context ---
-    context, intent = get_relevant_context(user_message, user=request.user)
-    was_refused = intent == "injection"
+    # --- Get User Tools ---
+    tools = get_chatbot_tools(request.user)
 
-    # --- Build system prompt ---
-    system_prompt = SYSTEM_PROMPT.format(context=context)
-
-    # --- Call Gemini API ---
+    # --- Call Gemini API with Native Function Calling ---
     current_api_key = (
         getattr(settings, "GOOGLE_API_KEY", None)
         or getattr(settings, "GEMINI_API_KEY", None)
@@ -187,15 +179,19 @@ def chat(request):
             status=500,
         )
 
+    was_refused = False
+
     try:
         client = genai.Client(api_key=current_api_key)
-        response = client.models.generate_content(
-            model="gemini-3.5-flash",
-            contents=user_message,
+        chat_session = client.chats.create(
+            model="gemini-3.1-flash-lite",
+            history=raw_history,
             config=types.GenerateContentConfig(
-                system_instruction=system_prompt,
+                system_instruction=SYSTEM_PROMPT,
+                tools=tools,
             ),
         )
+        response = chat_session.send_message(user_message)
         reply_text = response.text or "I'm sorry, I couldn't generate a reply."
     except Exception as e:
         error_msg = str(e)
@@ -216,7 +212,7 @@ def chat(request):
             user=request.user,
             message=user_message[:500],
             response_snippet=reply_text[:200],
-            intent=intent,
+            intent="tool_call_error",
             was_refused=was_refused,
         )
         return JsonResponse(json_response, status=status_code)
@@ -226,7 +222,7 @@ def chat(request):
         user=request.user,
         message=user_message[:500],
         response_snippet=reply_text[:200],
-        intent=intent,
+        intent="auto_tool_call",
         was_refused=was_refused,
     )
 

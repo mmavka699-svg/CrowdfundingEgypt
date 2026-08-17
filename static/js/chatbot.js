@@ -35,6 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputField = document.getElementById('chatbot-input');
     const messagesContainer = document.getElementById('chatbot-messages');
 
+    // Store conversation history
+    let chatHistory = [];
+
     // Toggle Chatbot
     if (toggleBtn) {
         toggleBtn.addEventListener('click', () => {
@@ -56,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
+            chatHistory = []; // Reset history
             messagesContainer.innerHTML = `
                 <div class="chatbot-message chatbot-message-bot">
                     <p style="margin-bottom:0;">Hi there! How can I help you with Crowd-Funding Egypt today?</p>
@@ -173,6 +177,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 3. API Call
         try {
+            // Push user message to history
+            chatHistory.push({ role: 'user', parts: [{ text: message }] });
+
             const csrftoken = getCookie('csrftoken');
             const response = await fetch('/api/chat/', {
                 method: 'POST',
@@ -180,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrftoken
                 },
-                body: JSON.stringify({ message: message })
+                body: JSON.stringify({ message: message, history: chatHistory })
             });
 
             const data = await response.json();
@@ -188,8 +195,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 appendMessage(data.reply || "I'm sorry, I couldn't generate a reply.");
+                // Push bot reply to history
+                if (data.reply) {
+                    chatHistory.push({ role: 'model', parts: [{ text: data.reply }] });
+                }
             } else {
                 appendMessage("Error: " + (data.error || "Something went wrong."));
+                // Remove the user message from history if the request failed
+                chatHistory.pop();
             }
 
         } catch (error) {
