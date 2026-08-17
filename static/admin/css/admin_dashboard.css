@@ -51,6 +51,14 @@ html[data-theme="dark"] .admin-interface body {
 
 .admin-interface #container { background: var(--cf-bg); }
 
+/* The classic green header bar only remains on the login page;
+   inside the app the sidebar holds the brand and a white topbar
+   (rendered in the content_title block) replaces the old header. */
+body.admin-interface:not(.login) #header {
+    display: none;
+}
+body.admin-interface:not(.login) nav[aria-label="Breadcrumbs"] { display: none; }
+
 .admin-interface a:link,
 .admin-interface a:visited { color: #14764e; }
 html[data-theme="dark"] .admin-interface a:link,
@@ -433,8 +441,8 @@ html[data-theme="dark"] .admin-interface select { background: #0f172a; border-co
     box-sizing: border-box;
     background: var(--cf-surface);
     border: 1px solid var(--cf-border);
-    border-radius: var(--cf-radius);
-    box-shadow: var(--cf-shadow-sm);
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
     margin-bottom: 20px;
     overflow: hidden;
     transition: box-shadow 0.2s ease, transform 0.2s ease;
@@ -445,24 +453,23 @@ html[data-theme="dark"] .admin-interface select { background: #0f172a; border-co
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 16px 20px;
+    padding: 20px 24px;
     border-bottom: 1px solid var(--cf-border);
-    background: linear-gradient(100deg, rgba(31, 191, 122, 0.07), rgba(255, 255, 255, 0) 60%);
+    background: transparent;
 }
-html[data-theme="dark"] .cf-app-head { background: linear-gradient(100deg, rgba(31, 191, 122, 0.12), rgba(255, 255, 255, 0) 60%); }
 
 .cf-app-head .cf-app-icon {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     flex-shrink: 0;
-    border-radius: 11px;
+    border-radius: 12px;
     background: linear-gradient(135deg, var(--cf-forest), var(--cf-forest-2));
     color: var(--cf-mint);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 17px;
-    box-shadow: var(--cf-shadow-sm);
+    font-size: 20px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
 }
 .cf-app-head h2 {
     margin: 0;
@@ -492,7 +499,7 @@ html[data-theme="dark"] .cf-app-head { background: linear-gradient(100deg, rgba(
 /* model rows — pure flexbox: left identity, right actions, never overlapping */
 .cf-model-list {
     margin: 0;
-    padding: 14px 18px 18px;
+    padding: 18px 24px 24px;
     list-style: none;
     display: flex;
     flex-direction: column;
@@ -507,10 +514,10 @@ html[data-theme="dark"] .cf-app-head { background: linear-gradient(100deg, rgba(
     min-width: 0;
     box-sizing: border-box;
     gap: 14px;
-    padding: 10px 14px;
+    padding: 10px 16px;
     background: var(--cf-surface);
     border: 1px solid var(--cf-border);
-    border-radius: 10px;
+    border-radius: 12px;
     transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
     position: static !important;
 }
@@ -532,9 +539,16 @@ html[data-theme="dark"] .cf-model-row:hover { background: #1b2a42; }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
+    font-size: 17px;
 }
 html[data-theme="dark"] .cf-model-row .cf-model-icon { background: #1c2c44; color: #53d3a0; }
+
+/* lucide line-art sizing inside rows and buttons */
+.cf-model-row .cf-model-icon .icon,
+.cf-app-head .cf-app-icon .icon,
+.cf-quick-actions .cf-btn .icon,
+.cf-model-actions .cf-btn .icon,
+.cf-stat-ic .icon { line-height: 1; }
 
 /* left side: icon + title — grows to fill, never overlaps the buttons */
 .cf-model-info {
@@ -589,15 +603,15 @@ html[data-theme="dark"] .cf-model-row .cf-model-icon { background: #1c2c44; colo
     font-weight: 600;
     line-height: 1.4;
     text-decoration: none;
-    border-radius: 6px;
-    padding: 4px 12px;
-    min-height: 28px;
+    border-radius: 999px;
+    padding: 6px 14px;
+    min-height: 32px;
     white-space: nowrap;
     cursor: pointer;
     transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
     position: static;
 }
-.cf-btn .bi { font-size: 11px; }
+.cf-btn .bi, .cf-btn .icon { font-size: 12px; line-height: 1; }
 
 .cf-btn-add {
     background: rgba(31, 191, 122, 0.13);
@@ -1152,4 +1166,774 @@ html[data-theme="dark"] .admin-interface #changelist-filter #changelist-filter-c
         transition: transform 0.18s ease;
     }
     .admin-interface #changelist-filter.cf-collapsed > h2::after { transform: rotate(-90deg); }
+}
+
+/* ============================================================================
+   12. DESIGN SYSTEM v2 — typography, spacing, sidebar, headers, forms, buttons
+   SaaS dashboard hierarchy on top of Django's native admin markup.
+   ============================================================================ */
+
+/* ---- Spacing scale (4-8-12-16-20-24-32-40) ---- */
+.admin-interface {
+    --cf-space-1: 4px;
+    --cf-space-2: 8px;
+    --cf-space-3: 12px;
+    --cf-space-4: 16px;
+    --cf-space-5: 20px;
+    --cf-space-6: 24px;
+    --cf-space-8: 32px;
+    --cf-space-10: 40px;
+    --cf-radius-sm: 8px;
+    --cf-font: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* ============================================================================
+   13. SIDEBAR / NAV — structured app groups
+   #nav-sidebar ships hidden (left: -276px); we force it open & redesign it.
+   The <button> is hidden because the sidebar is always visible on desktop.
+   ============================================================================ */
+.admin-interface .main > #toggle-nav-sidebar { display: none; }
+
+.admin-interface .main > #nav-sidebar {
+    position: sticky;
+    top: 0;
+    left: 0;
+    margin-left: 0;
+    flex: 0 0 256px;
+    width: 256px;
+    max-width: 256px;
+    max-height: 100vh;
+    visibility: visible;
+    z-index: 30;
+    background: var(--cf-surface);
+    border-right: 1px solid var(--cf-border);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--cf-space-4) var(--cf-space-3) var(--cf-space-8);
+    scrollbar-width: thin;
+    box-sizing: border-box;
+}
+.admin-interface .main.shifted > #nav-sidebar + .content,
+.admin-interface .main > #nav-sidebar + .content {
+    max-width: calc(100% - 256px);
+}
+
+/* brand at top of sidebar */
+.admin-interface .main > #nav-sidebar .cf-nav-overview { margin-bottom: var(--cf-space-5); }
+
+/* sidebar scroll wrapper — plain stacked block so nothing leaks inline */
+.admin-interface #nav-sidebar .cf-nav-scroll {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ============================================================================
+   13.1 NAV STRUCTURE — clean list hierarchy
+   Each app becomes a labelled <ul> group; every model sits in its own <li>
+   so links can never bleed into each other on one line.
+   ============================================================================ */
+.admin-interface .cf-nav-sections { list-style: none; margin: 0; padding: 0; }
+
+.admin-interface .cf-nav-group {
+    list-style: none;
+    margin-bottom: var(--cf-space-4);
+    padding: 0;
+    width: 100%;
+}
+
+/* group label */
+.admin-interface .cf-nav-group-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--cf-muted);
+    padding: var(--cf-space-3) var(--cf-space-3) var(--cf-space-1);
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* the list that holds the model links — one column, each on its own row */
+.admin-interface .cf-nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* nav item (li) — full-width row, one per line */
+.admin-interface .cf-nav-item {
+    display: block;
+    width: 100%;
+    margin: 0 0 var(--cf-space-1);
+    padding: 0;
+    list-style: none;
+}
+.admin-interface .cf-nav-item:last-child { margin-bottom: 0; }
+
+/* the actual link inside the item — fills the whole row */
+.admin-interface .cf-nav-item > a {
+    display: flex;
+    align-items: center;
+    gap: var(--cf-space-3);
+    width: 100%;
+    min-height: 38px;
+    padding: 0 var(--cf-space-3);
+    border-radius: var(--cf-radius-sm);
+    color: var(--cf-text);
+    font-family: var(--cf-font);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.admin-interface .cf-nav-item > a:hover {
+    background: var(--cf-accent-soft);
+    color: var(--cf-text);
+}
+
+/* icon — fixed slot to the left, never wraps, never duplicates */
+.admin-interface .cf-nav-item .cf-nav-ic {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    text-align: center;
+}
+.admin-interface .cf-nav-item .cf-nav-ic i {
+    flex-shrink: 0;
+    width: 18px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--cf-muted);
+    transition: color 0.15s ease;
+}
+.admin-interface .cf-nav-item > a:hover .cf-nav-ic i { color: var(--cf-accent); }
+
+/* text label — takes remaining space, truncates instead of wrapping */
+.admin-interface .cf-nav-item .cf-nav-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* active state — a full-width highlighted block/card, not just colored text */
+.admin-interface .cf-nav-item.active > a,
+html[data-theme="dark"] .admin-interface .cf-nav-item.active > a {
+    background: linear-gradient(90deg, #e7f6ef, #f2fbf6);
+    color: #116b48;
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 var(--cf-mint-dark);
+}
+.admin-interface .cf-nav-item.active .cf-nav-ic i { color: #17a06a; }
+html[data-theme="dark"] .admin-interface .cf-nav-item.active > a { background: #173028; color: #7de3b6; }
+html[data-theme="dark"] .admin-interface .cf-nav-item.active .cf-nav-ic i { color: #7de3b6; }
+
+/* kill any default Django styling that would leak into our structure */
+.admin-interface #nav-sidebar ul { margin: 0; padding: 0; }
+.admin-interface #nav-sidebar li { list-style: none; }
+
+/* ============================================================================
+   14. PAGE HEADER — eyebrow / title / description (non-dashboard pages)
+   ============================================================================ */
+.admin-interface .cf-page-head { margin: 0 0 24px; }
+.admin-interface .cf-page-head .cf-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--cf-accent-soft);
+    color: var(--cf-accent);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+.admin-interface .cf-page-head h1 {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--cf-text);
+    margin: 0 0 6px;
+}
+.admin-interface .cf-page-head .cf-page-desc {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--cf-muted);
+    line-height: 1.5;
+    max-width: 640px;
+}
+
+/* ============================================================================
+   14.1 TOPBAR — white bar with crumbs (left) and user links (right),
+   replaces the classic header inside the app. Matches the preview.
+   ============================================================================ */
+.admin-interface .cf-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: var(--cf-surface);
+    border: 1px solid var(--cf-border);
+    border-radius: var(--cf-radius);
+    box-shadow: var(--cf-shadow-sm);
+    padding: 10px 16px;
+    margin-bottom: 24px;
+}
+.admin-interface .cf-topbar-crumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--cf-muted);
+    min-width: 0;
+    overflow: hidden;
+}
+.admin-interface .cf-topbar-crumbs i { color: var(--cf-mint-dark); }
+.admin-interface .cf-topbar-crumbs .cf-topbar-brand { white-space: nowrap; }
+.admin-interface .cf-topbar-crumbs b { color: var(--cf-text); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.admin-interface .cf-topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+.admin-interface .cf-topbar-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.admin-interface .cf-topbar-links a,
+.admin-interface .cf-topbar-links button {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--cf-muted);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.admin-interface .cf-topbar-links a:hover { color: var(--cf-accent); background: var(--cf-accent-soft); }
+.admin-interface .cf-topbar-links button.cf-logout { color: #d3312f; }
+.admin-interface .cf-topbar-links button.cf-logout:hover { color: #d3312f; background: rgba(211, 49, 47, 0.1); }
+.admin-interface .cf-topbar-links .bi { font-size: 13px; }
+.admin-interface .cf-topbar-links #logout-form { display: inline-flex; margin: 0; }
+.admin-interface .cf-topbar-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--cf-mint), var(--cf-mint-dark));
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+}
+/* theme toggle inside the topbar uses the same pill style as the header */
+.admin-interface .cf-topbar .cf-theme-toggle {
+    width: 34px;
+    height: 34px;
+    font-size: 15px;
+    border-radius: 50%;
+    border: 1px solid var(--cf-border);
+    background: var(--cf-bg);
+    color: var(--cf-text);
+}
+.admin-interface .cf-topbar .cf-theme-toggle:hover { background: var(--cf-accent-soft); transform: rotate(15deg); }
+.admin-interface .cf-topbar .cf-theme-toggle.is-dark .icon-sun { color: #ffd166; }
+
+/* dark-mode mirrors for topbar */
+html[data-theme="dark"] .admin-interface .cf-topbar .cf-theme-toggle { border-color: var(--cf-border); background: #1a2436; color: #e7eef5; }
+html[data-theme="dark"] .admin-interface .cf-topbar-crumbs b { color: #e7eef5; }
+
+/* ============================================================================
+   15. DASHBOARD HOME — section cards with model rows
+   ============================================================================ */
+.dashboard.admin-interface .cf-dash-head { align-items: flex-start; }
+.dashboard.admin-interface .cf-dash-head h1 { font-size: 26px; font-weight: 700; }
+/* full-width single column: the old Recent Actions side panel was removed */
+.dashboard.admin-interface .cf-dash-grid { grid-template-columns: minmax(0, 1fr); }
+
+/* quick-action buttons above the KPI cards */
+.admin-interface .cf-quick-actions .cf-btn-primary {
+    background: linear-gradient(135deg, #12b981, #0e9f6e);
+    color: #fff;
+    border: 1px solid rgba(14, 159, 110, 0.6);
+    box-shadow: 0 1px 2px rgba(14, 159, 110, 0.25);
+}
+.admin-interface .cf-quick-actions .cf-btn-primary:hover { filter: brightness(1.05); color: #fff; }
+.admin-interface .cf-quick-actions .cf-btn-outline {
+    background: var(--cf-surface);
+    color: var(--cf-text);
+    border: 1px solid var(--cf-border);
+}
+.admin-interface .cf-quick-actions .cf-btn-outline:hover {
+    border-color: var(--cf-mint);
+    color: #14764e;
+    background: #f1fbf6;
+}
+.admin-interface .cf-quick-actions .cf-btn {
+    height: 40px;
+    padding: 0 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+}
+html[data-theme="dark"] .admin-interface .cf-quick-actions .cf-btn-outline:hover {
+    background: #173028;
+    color: #7de3b6;
+}
+
+/* section header (card header) */
+.admin-interface .cf-app-head h2 {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+}
+.admin-interface .cf-model-row {
+    min-height: 46px;
+    padding: 8px 14px;
+}
+.admin-interface .cf-model-name { font-size: 14px; font-weight: 600; }
+
+/* action buttons — smaller than the model name */
+.admin-interface .cf-model-actions .cf-btn {
+    height: 30px;
+    padding: 0 12px;
+    font-size: 12px;
+    border-radius: var(--cf-radius-sm);
+}
+
+/* ============================================================================
+   16. FORMS — label / input / helper, 40-44px inputs
+   ============================================================================ */
+.admin-interface .form-row,
+.admin-interface fieldset.module .form-row { padding: 14px 18px; }
+
+.admin-interface .form-row label,
+.admin-interface .aligned label,
+.admin-interface .form-row .label { font-size: 13.5px; font-weight: 600; color: var(--cf-text); }
+
+.admin-interface input[type="text"],
+.admin-interface input[type="password"],
+.admin-interface input[type="email"],
+.admin-interface input[type="url"],
+.admin-interface input[type="number"],
+.admin-interface input[type="date"],
+.admin-interface input[type="search"],
+.admin-interface select,
+.admin-interface textarea {
+    min-height: 40px;
+    padding: 8px 13px;
+    border-radius: var(--cf-radius-sm);
+    font-family: var(--cf-font);
+    font-size: 14px;
+    color: var(--cf-text);
+    background: var(--cf-surface, #fbfdff);
+    border: 1px solid var(--cf-border);
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.admin-interface input[type="text"]:focus,
+.admin-interface input[type="password"]:focus,
+.admin-interface input[type="email"]:focus,
+.admin-interface input[type="url"]:focus,
+.admin-interface input[type="number"]:focus,
+.admin-interface input[type="date"]:focus,
+.admin-interface input[type="search"]:focus,
+.admin-interface select:focus,
+.admin-interface textarea:focus {
+    border-color: var(--cf-mint);
+    box-shadow: 0 0 0 3px rgba(31, 191, 122, 0.15);
+    outline: none;
+}
+
+.admin-interface .aligned .form-row input[type="text"],
+.admin-interface .aligned .form-row input[type="password"],
+.admin-interface .aligned .form-row input[type="email"],
+.admin-interface .aligned .form-row select { width: min(100%, 40em); }
+
+.admin-interface .help,
+.admin-interface div.help,
+.admin-interface .help-tooltip,
+.admin-interface p.help { font-size: 11.5px; color: var(--cf-muted); line-height: 1.4; margin: 5px 0 0; }
+
+/* password requirements — small secondary chips */
+.admin-interface ul.errorlist + .help,
+.admin-interface .aligned .form-row .help { font-size: 11.5px; }
+
+/* ============================================================================
+   17. ACTION BAR / SUBMIT BUTTONS — uniform 38-42px
+   ============================================================================ */
+.admin-interface .submit-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 16px 18px;
+    border-top: 1px solid var(--cf-border);
+    background: var(--cf-surface);
+}
+.admin-interface input[type="submit"],
+.admin-interface input[type="button"],
+.admin-interface .button,
+.admin-interface a.button {
+    height: 40px;
+    padding: 0 16px;
+    border-radius: var(--cf-radius-sm);
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.admin-interface input.default,
+.admin-interface .submit-row input.default { order: -1; }
+
+.admin-interface .submit-row a.deletelink { height: 40px; padding: 0 16px; display: inline-flex; align-items: center; border-radius: var(--cf-radius-sm); }
+
+/* object-tools (Add on changelists) */
+.admin-interface .object-tools a { height: 36px; padding: 0 14px; display: inline-flex; align-items: center; gap: 6px; }
+
+/* ============================================================================
+   18. RESPONSIVE — sidebar collapses under the mint threshold
+   ============================================================================ */
+@media (max-width: 1200px) {
+    .admin-interface .cf-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 1024px) {
+    .admin-interface .main > #nav-sidebar {
+        flex: 0 0 220px;
+        width: 220px;
+        max-width: 220px;
+    }
+    .admin-interface .main.shifted > #nav-sidebar + .content,
+    .admin-interface .main > #nav-sidebar + .content { max-width: calc(100% - 220px); }
+}
+
+@media (max-width: 767px) {
+    /* Django hides the sidebar entirely on small screens (responsive.css);
+       we restore its toggle button so users can reopen it as a slide-over. */
+    .admin-interface .main > #toggle-nav-sidebar {
+        display: flex;
+        position: fixed;
+        top: 76px;
+        left: 0;
+        z-index: 60;
+        width: 26px;
+        height: 40px;
+        border-radius: 0 10px 10px 0;
+        background: var(--cf-surface);
+        border: 1px solid var(--cf-border);
+        border-left: 0;
+        color: var(--cf-accent);
+        box-shadow: var(--cf-shadow-sm);
+        cursor: pointer;
+    }
+    .admin-interface .main > #nav-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 256px;
+        max-width: 85vw;
+        z-index: 55;
+        box-shadow: var(--cf-shadow);
+        margin-left: 0;
+        visibility: visible;
+        overflow-y: auto;
+    }
+    /* collapse by default: let Django's nav_sidebar.js add .shifted to show it */
+    .admin-interface .main > #nav-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.2s ease;
+    }
+    .admin-interface .main.shifted > #nav-sidebar {
+        transform: translateX(0);
+    }
+    .admin-interface .main > #nav-sidebar + .content,
+    .admin-interface .main.shifted > #nav-sidebar + .content { max-width: 100%; }
+
+    .admin-interface #content.colM,
+    .admin-interface #content.colMS,
+    .admin-interface .dashboard #content { padding: 16px; }
+    .admin-interface .cf-dash-grid { grid-template-columns: 1fr; }
+    .admin-interface .cf-stats { grid-template-columns: 1fr; }
+    .admin-interface .cf-dash-head { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .admin-interface .cf-model-row { flex-wrap: wrap; }
+    .admin-interface .cf-model-actions { width: 100%; justify-content: flex-start; margin-left: 0; }
+    .admin-interface .submit-row > * { flex: 1 1 auto; justify-content: center; }
+    .admin-interface .submit-row input[type="submit"],
+    .admin-interface .submit-row a.deletelink { width: 100%; }
+}
+
+/* dark-mode mirrors for the new system */
+@media (prefers-color-scheme: dark) {
+    html[data-theme="auto"] .admin-interface .cf-nav-item.active > a,
+    html:not([data-theme]) .admin-interface .cf-nav-item.active > a { background: #173028; color: #7de3b6; }
+    html[data-theme="auto"] .admin-interface .cf-nav-item.active .cf-nav-ic i,
+    html:not([data-theme]) .admin-interface .cf-nav-item.active .cf-nav-ic i { color: #7de3b6; }
+}
+
+/* ============================================================================
+   19. DESIGN-SYSTEM additions to match the approved preview
+   brand block inside the sidebar + dashboard stat cards
+   ============================================================================ */
+
+/* sidebar brand (mirrors the old header brand, now lives in #nav-sidebar) */
+.admin-interface .cf-nav-brand {
+    display: block;
+    padding: 6px 8px 16px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--cf-border);
+}
+.admin-interface .cf-nav-brand .cf-brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    text-decoration: none;
+}
+.admin-interface .cf-nav-brand .cf-brand-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--cf-mint), #17a06a);
+    color: #07130e;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(31, 191, 122, 0.35);
+}
+.admin-interface .cf-nav-brand .cf-brand-text {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--cf-text);
+    line-height: 1.25;
+}
+.admin-interface .cf-nav-brand .cf-brand-text em { font-style: normal; color: var(--cf-mint-dark); }
+html[data-theme="dark"] .admin-interface .cf-nav-brand .cf-brand-text em { color: #53d3a0; }
+.admin-interface .cf-nav-brand .cf-brand-badge {
+    display: block;
+    margin-top: 2px;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--cf-muted);
+}
+
+/* dashboard stat strip — uniform 4-column grid on desktop */
+.admin-interface .cf-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+}
+.admin-interface .cf-stat {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--cf-surface);
+    border: 1px solid var(--cf-border);
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+    padding: 18px 24px;
+    min-height: 64px;
+}
+.admin-interface .cf-stat-ic {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+.admin-interface .mint-ic  { color: #17a06a; background: #e2f8ee; }
+.admin-interface .amber-ic { color: #f25c05; background: #fff1e6; }
+.admin-interface .slate-ic { color: #16211d; background: #e9edf5; }
+.admin-interface .green-ic { color: #14764e; background: #eef7f2; }
+.admin-interface .cf-stat-body { min-width: 0; }
+.admin-interface .cf-stat-body strong {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--cf-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.admin-interface .cf-stat-body .cf-stat-currency {
+    display: inline;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--cf-muted);
+}
+.admin-interface .cf-stat-body span {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--cf-muted);
+    margin-top: 3px;
+}
+
+/* tighten dashboard to match preview density */
+.dashboard.admin-interface .cf-model-row { min-height: 44px; }
+.dashboard.admin-interface .cf-app-card { margin-bottom: 18px; }
+
+/* header: when branding is hidden (sidebar hosts it) keep height balanced */
+.admin-interface #header { padding: 10px 28px; min-height: 58px; }
+.admin-interface #header:has(> #branding:empty) { justify-content: flex-end; }
+
+/* ============================================================================
+   20. ANALYTICS DASHBOARD � stats + charts only
+   ============================================================================ */
+
+/* KPI trend chips */
+.admin-interface .cf-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 6px;
+}
+.admin-interface .cf-trend .icon { font-size: 13px; }
+.admin-interface .cf-trend-up     { color: #17a06a; }
+.admin-interface .cf-trend-neutral { color: var(--cf-muted); }
+
+/* charts grid */
+.admin-interface .cf-charts {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+.admin-interface .cf-card {
+    background: var(--cf-surface);
+    border: 1px solid var(--cf-border);
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+    padding: 22px 24px;
+    min-width: 0;
+}
+.admin-interface .cf-span-7 { grid-column: span 7; }
+.admin-interface .cf-span-6 { grid-column: span 6; }
+.admin-interface .cf-span-5 { grid-column: span 5; }
+.admin-interface .cf-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 10px;
+}
+.admin-interface .cf-card-head h3 { margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -0.01em; color: var(--cf-text); }
+.admin-interface .cf-card-tag { font-size: 11px; font-weight: 700; color: var(--cf-muted); white-space: nowrap; }
+.admin-interface .cf-chart-wrap { position: relative; height: 260px; }
+
+/* progress bars */
+.admin-interface .cf-progress-list { display: flex; flex-direction: column; gap: 6px; }
+.admin-interface .cf-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12.5px;
+    padding: 7px 0;
+}
+.admin-interface .cf-p-label {
+    width: 130px;
+    font-weight: 600;
+    color: var(--cf-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.admin-interface .cf-bar { flex: 1; min-width: 0; height: 8px; background: #eef1f5; border-radius: 999px; overflow: hidden; }
+.admin-interface .cf-bar > span { display: block; height: 100%; border-radius: 999px; }
+.admin-interface .cf-bar-mint   { background: linear-gradient(90deg, #34d399, #0e9f6e); }
+.admin-interface .cf-bar-amber  { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+.admin-interface .cf-bar-slate  { background: linear-gradient(90deg, #94a3b8, #64748b); }
+.admin-interface .cf-bar-orange { background: linear-gradient(90deg, #fdba74, #f97316); }
+.admin-interface .cf-p-val { width: 40px; text-align: right; font-weight: 800; color: var(--cf-text); flex-shrink: 0; }
+
+/* bottom strip */
+.admin-interface .cf-bottom {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 16px;
+}
+.admin-interface .cf-recent-list { list-style: none; margin: 4px 0 0; padding: 0; }
+.admin-interface .cf-recent-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px dashed var(--cf-border);
+    font-size: 13px;
+    color: var(--cf-text);
+}
+.admin-interface .cf-recent-list li:last-child { border-bottom: 0; }
+.admin-interface .cf-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.admin-interface .cf-dot-green  { background: #1fbf7a; }
+.admin-interface .cf-dot-orange { background: #f59e0b; }
+.admin-interface .cf-dot-slate  { background: #94a3b8; }
+.admin-interface .cf-recent-txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-interface .cf-recent-when { color: var(--cf-muted); font-size: 11.5px; white-space: nowrap; flex-shrink: 0; }
+.admin-interface .cf-recent-link { color: #14764e; font-weight: 700; text-decoration: none; }
+.admin-interface .cf-recent-link:hover { text-decoration: underline; }
+.admin-interface .cf-empty-mini { color: var(--cf-muted); font-size: 13px; }
+
+/* responsive */
+@media (max-width: 1100px) {
+    .admin-interface .cf-span-7 { grid-column: span 12; }
+    .admin-interface .cf-span-5 { grid-column: span 12; }
+}
+@media (max-width: 900px) {
+    .admin-interface .cf-span-6 { grid-column: span 12; }
+    .admin-interface .cf-bottom { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+    .admin-interface .cf-charts { grid-template-columns: 1fr; }
+    .admin-interface .cf-span-7,
+    .admin-interface .cf-span-6,
+    .admin-interface .cf-span-5 { grid-column: span 1; }
+    .admin-interface .cf-p-label { width: 90px; }
 }
