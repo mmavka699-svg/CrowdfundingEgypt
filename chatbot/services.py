@@ -1,9 +1,5 @@
 """
-chatbot/services.py — Native Function Calling tools for Gemini.
-
-These functions are passed directly to the Gemini API as tools.
-The LLM will automatically decide which function to call based on the user's intent.
-Data is returned as structured JSON/dictionaries instead of formatted strings.
+chatbot/services.py — Minified Native Function Calling tools for Gemini.
 """
 
 from decimal import Decimal
@@ -11,16 +7,10 @@ from django.db.models import Sum, Count, Avg, Q
 from django.utils import timezone
 
 def get_chatbot_tools(user):
-    """
-    Returns a list of callable tool functions scoped to the provided user.
-    These tools are injected into the Gemini API `tools` configuration.
-    """
+    """Returns callable tool functions scoped to the user."""
 
     def search_campaigns(search_terms: list[str] = None, status: str = None, category: str = None):
-        """
-        Search campaigns by keywords, status, or category.
-        Valid statuses: 'running', 'cancelled', 'ended', 'funded', 'coming_soon'.
-        """
+        """Search projects by keyword, status(running/cancelled/ended/funded/coming_soon), or category."""
         from projects.models import Project
 
         projects = Project.objects.all()
@@ -44,239 +34,166 @@ def get_chatbot_tools(user):
         if not projects:
             return {"error": "No campaigns found."}
 
-        results = []
-        for p in projects:
-            results.append({
+        return {"data": [
+            {
                 "title": p.title,
                 "status": p.status,
-                "target": float(p.total_target),
-                "raised": float(p.total_donated),
+                "target": int(p.total_target),
+                "raised": int(p.total_donated),
                 "cat": p.category.name,
-                "rating": float(p.average_rating)
-            })
-        return {"data": results}
+                "rate": float(p.average_rating)
+            } for p in projects
+        ]}
 
 
     def get_platform_stats():
-        """Aggregate platform-wide statistics like total projects, running projects, and total raised."""
+        """Get platform totals: projects, raised, donors, top categories, and all available categories list."""
         from projects.models import Project, Donation, Category
 
         total_projects = Project.objects.count()
         running_projects = Project.objects.filter(status=Project.Status.RUNNING).count()
-        total_raised = Donation.objects.aggregate(s=Sum("amount"))["s"] or Decimal("0.00")
+        total_raised = Donation.objects.aggregate(s=Sum("amount"))["s"] or Decimal("0")
         total_donors = Donation.objects.values("donor").distinct().count()
 
-        categories = (
-            Category.objects.annotate(
-                project_count=Count("projects"),
-                total_raised=Sum("projects__donations__amount"),
-            )
-            .order_by("-project_count")[:10]
-        )
+        categories = Category.objects.annotate(
+            project_count=Count("projects"),
+            total_raised=Sum("projects__donations__amount"),
+        ).order_by("-project_count")
+        
+        all_cats = [c.name for c in categories]
 
         cat_data = []
-        for cat in categories:
-            raised = cat.total_raised or Decimal("0.00")
+        for cat in categories[:10]:
             cat_data.append({
-                "name": cat.name,
-                "project_count": cat.project_count,
-                "raised": float(raised)
+                "n": cat.name,
+                "c": cat.project_count,
+                "r": int(cat.total_raised or 0)
             })
 
         return {
-            "total_campaigns": total_projects,
-            "running_campaigns": running_projects,
-            "total_raised": float(total_raised),
-            "total_donors": total_donors,
-            "top_categories": cat_data
+            "total_camp": total_projects,
+            "running_camp": running_projects,
+            "raised": int(total_raised),
+            "donors": total_donors,
+            "top_cats": cat_data,
+            "all_cats": all_cats
         }
 
 
     def get_my_donations():
-        """Return the authenticated user's own donation history."""
+        """Get authenticated user's donations."""
         from projects.models import Donation
 
         if not user or not user.is_authenticated:
-            return {"error": "User must log in to view donation history."}
+            return {"error": "Login required"}
 
-        donations = (
-            Donation.objects.filter(donor=user)
-            .select_related("project")
-            .order_by("-created_at")[:10]
-        )
+        donations = Donation.objects.filter(donor=user).select_related("project").order_by("-created_at")[:10]
 
         if not donations:
-            return {"message": "You haven't made any donations yet."}
-
-        results = []
-        for d in donations:
-            results.append({
-                "amount": float(d.amount),
-                "project": d.project.title,
-                "date": d.created_at.strftime('%Y-%m-%d')
-            })
+            return {"message": "No donations"}
 
         return {
-            "total_donated_overall": float(user.total_donations_amount),
-            "recent_donations": results
+            "total": int(user.total_donations_amount),
+            "recent": [{"amt": int(d.amount), "proj": d.project.title, "date": d.created_at.strftime('%Y-%m-%d')} for d in donations]
         }
 
 
     def get_my_wallet():
-        """Return the authenticated user's wallet balance and recent transactions."""
+        """Get user's wallet balance and transactions."""
         from accounts.models import WalletTransaction
 
         if not user or not user.is_authenticated:
-            return {"error": "User must log in to view wallet information."}
+            return {"error": "Login required"}
 
-        transactions = (
-            WalletTransaction.objects.filter(user=user)
-            .order_by("-created_at")[:10]
-        )
+        transactions = WalletTransaction.objects.filter(user=user).order_by("-created_at")[:10]
         
-        tx_list = []
-        for t in transactions:
-            direction = "+" if t.transaction_type == WalletTransaction.TransactionType.CREDIT else "-"
-            tx_list.append({
-                "amount_with_direction": f"{direction}{float(t.amount)}",
-                "description": t.description,
-                "date": t.created_at.strftime('%Y-%m-%d')
-            })
-
         return {
-            "current_balance": float(user.wallet_balance),
-            "recent_transactions": tx_list
+            "bal": int(user.wallet_balance),
+            "txs": [{"amt": f"{'+' if t.transaction_type == 'credit' else '-'}{int(t.amount)}", "desc": t.description} for t in transactions]
         }
 
 
     def get_how_it_works():
-        """Returns static platform usage guide (how to donate, wallet, create campaigns)."""
+        """Get platform rules (donate, wallet, create, register, profile, rate, report)."""
         return {
             "rules": [
-                "Anyone can create a fundraising campaign with target and deadline.",
-                "Users can donate using wallet, credit card, PayPal, Google Pay, Apple Pay.",
-                "Split payments (wallet + another method) are allowed.",
-                "Creators can cancel their project only if less than 25% of target is raised.",
-                "Cancelled projects automatically refund all wallet donations.",
-                "0% fees — 100% of donation goes to the campaign.",
-                "Users can rate and comment on projects."
+                "Register: Click 'Sign Up', enter details.",
+                "Profile: Edit picture, country, password from settings.",
+                "Create: Anyone can start a campaign with a target/deadline.",
+                "Donate: Use wallet, card, PayPal, Google/Apple Pay.",
+                "Cancel: Creators can cancel if <25% target raised. Refunds go to wallet.",
+                "Fees: 0% taken, 100% goes to campaign.",
+                "Interact: Users can comment, rate (1-5 stars), or report spam/fraud on campaigns."
             ]
         }
 
 
     def get_latest_campaigns():
-        """Fetch the latest running projects."""
+        """Get 5 newest running projects."""
         from projects.models import Project
 
         projects = Project.objects.filter(status=Project.Status.RUNNING).order_by("-created_at")[:5]
         if not projects:
-            return {"error": "No running campaigns found."}
+            return {"error": "None found"}
         
-        results = []
-        for p in projects:
-            results.append({
-                "title": p.title,
-                "target": float(p.total_target),
-                "raised": float(p.total_donated),
-                "cat": p.category.name,
-                "rating": float(p.average_rating)
-            })
-        return {"data": results}
+        return {"data": [{"title": p.title, "target": int(p.total_target), "raised": int(p.total_donated), "cat": p.category.name} for p in projects]}
 
 
     def get_featured_campaigns():
-        """Fetch the top featured running projects."""
+        """Get 5 featured running projects."""
         from projects.models import Project
 
         projects = Project.objects.filter(status=Project.Status.RUNNING, is_featured=True)[:5]
         if not projects:
-            return {"error": "No featured campaigns found."}
+            return {"error": "None found"}
         
-        results = []
-        for p in projects:
-            results.append({
-                "title": p.title,
-                "target": float(p.total_target),
-                "raised": float(p.total_donated),
-                "cat": p.category.name,
-                "rating": float(p.average_rating)
-            })
-        return {"data": results}
+        return {"data": [{"title": p.title, "target": int(p.total_target), "raised": int(p.total_donated), "cat": p.category.name} for p in projects]}
 
 
     def get_top_rated_campaigns():
-        """Fetch the top-rated running projects."""
+        """Get 5 top-rated running projects."""
         from projects.models import Project
         from django.db.models import Avg
 
-        projects = (
-            Project.objects.filter(status=Project.Status.RUNNING)
-            .annotate(avg_rating=Avg('ratings__stars'))
-            .filter(avg_rating__isnull=False)
-            .order_by("-avg_rating")[:5]
-        )
+        projects = Project.objects.filter(status=Project.Status.RUNNING).annotate(avg_rating=Avg('ratings__stars')).filter(avg_rating__isnull=False).order_by("-avg_rating")[:5]
         if not projects:
-            return {"error": "No rated campaigns found."}
+            return {"error": "None found"}
         
-        results = []
-        for p in projects:
-            results.append({
-                "title": p.title,
-                "rating": float(p.average_rating),
-                "target": float(p.total_target),
-                "raised": float(p.total_donated),
-            })
-        return {"data": results}
+        return {"data": [{"title": p.title, "rate": float(p.average_rating), "raised": int(p.total_donated)} for p in projects]}
 
 
     def get_my_created_campaigns():
-        """Return projects created by the authenticated user."""
+        """Get user's created projects."""
         from projects.models import Project
 
         if not user or not user.is_authenticated:
-            return {"error": "User must log in to view their created projects."}
+            return {"error": "Login required"}
 
         projects = Project.objects.filter(creator=user).order_by("-created_at")[:10]
 
         if not projects:
-            return {"message": "You haven't created any campaigns yet."}
+            return {"message": "None"}
 
-        results = []
-        for p in projects:
-            results.append({
-                "title": p.title,
-                "status": p.status,
-                "target": float(p.total_target),
-                "raised": float(p.total_donated)
-            })
-        return {"data": results}
+        return {"data": [{"title": p.title, "status": p.status, "target": int(p.total_target), "raised": int(p.total_donated)} for p in projects]}
 
 
     def get_project_comments(project_name: str):
-        """Find a project by name and return its latest comments."""
+        """Get recent comments for a specific project name."""
         from projects.models import Project, Comment
 
         project = Project.objects.filter(title__icontains=project_name).first()
 
         if not project:
-            return {"error": f"No matching campaign found for '{project_name}'."}
+            return {"error": "Not found"}
 
         comments = Comment.objects.filter(project=project).order_by("-created_at")[:5]
 
         if not comments:
-            return {"message": f"The campaign '{project.title}' doesn't have any comments yet."}
+            return {"message": "No comments"}
 
-        results = []
-        for c in comments:
-            body = c.body[:150] + ("..." if len(c.body) > 150 else "")
-            results.append({
-                "author": c.author.get_full_name() or c.author.email,
-                "comment": body
-            })
-            
         return {
-            "project_title": project.title,
-            "recent_comments": results
+            "title": project.title,
+            "cmts": [{"author": c.author.get_short_name() or "User", "text": c.body[:100]} for c in comments]
         }
 
     return [

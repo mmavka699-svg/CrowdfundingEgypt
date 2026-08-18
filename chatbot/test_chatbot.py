@@ -88,9 +88,9 @@ class ToolDataIsolationTests(ChatbotTestBase):
         # get_my_donations is at index 2
         get_my_donations = tools[2]
         result = get_my_donations()
-        self.assertIn("recent_donations", result)
-        self.assertEqual(result["recent_donations"][0]["amount"], 500.0)
-        self.assertEqual(result["recent_donations"][0]["project"], "Build a School in Aswan")
+        self.assertIn("recent", result)
+        self.assertEqual(result["recent"][0]["amt"], 500)
+        self.assertEqual(result["recent"][0]["proj"], "Build a School in Aswan")
 
     def test_other_user_sees_no_donations(self):
         """User B (who hasn't donated) gets an empty message."""
@@ -98,7 +98,7 @@ class ToolDataIsolationTests(ChatbotTestBase):
         get_my_donations = tools[2]
         result = get_my_donations()
         self.assertIn("message", result)
-        self.assertIn("haven't made any donations", result["message"])
+        self.assertIn("No donations", result["message"])
 
     def test_my_projects_returns_only_own_data(self):
         """User B's get_my_created_campaigns tool returns only user B's projects."""
@@ -114,7 +114,7 @@ class ToolDataIsolationTests(ChatbotTestBase):
         get_my_created = tools[7]
         result = get_my_created()
         self.assertIn("message", result)
-        self.assertIn("haven't created any campaigns", result["message"])
+        self.assertIn("None", result["message"])
 
     def test_search_campaigns_returns_matching_project(self):
         """A search query returns the matching project data."""
@@ -153,9 +153,9 @@ class ToolDataIsolationTests(ChatbotTestBase):
         tools = get_chatbot_tools(self.user_a)
         stats = tools[1]
         result = stats()
-        self.assertIn("total_campaigns", result)
-        self.assertIn("total_raised", result)
-        self.assertGreater(result["total_campaigns"], 0)
+        self.assertIn("total_camp", result)
+        self.assertIn("raised", result)
+        self.assertGreater(result["total_camp"], 0)
 
 
 # ---------------------------------------------------------------------------
