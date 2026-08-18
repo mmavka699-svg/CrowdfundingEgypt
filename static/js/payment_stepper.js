@@ -80,16 +80,155 @@
 
         // Focus management per step
         if (target === 4) {
-            var pwd = document.getElementById('donPasswordInput');
-            if (pwd) pwd.focus();
+            prepareVerifyStep();
+            var focusId = state.method === 'wallet' ? 'donPasswordInput'
+                        : (state.method === 'card' || state.secondaryMethod === 'card') ? 'donOtpInput'
+                        : (state.method === 'paypal' ? 'donPpEmail' : 'donBioConfirm');
+            var focusEl = document.getElementById(focusId);
+            if (focusEl && focusEl.focus) focusEl.focus();
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function nextFromPayment() {
-        // Card method -> card-details step; wallet methods -> straight to PIN
-        goToStep(state.method === 'card' || state.secondaryMethod === 'card' ? 3 : 4);
+        // Card method -> card-details step; wallet handled in methodNext; everything
+        // else (gateways) -> straight to the Verify step (they render their provider sheet there)
+        if (state.method === 'card' || state.secondaryMethod === 'card') {
+            goToStep(3);
+        } else {
+            goToStep(4);
+        }
     }
+
+    // ------------------------------------------------------------------
+    // STEP 4 — reveal the right verify control:
+    //   wallet  -> password | card/split -> 3-D Secure OTP | gateways -> provider sheet
+    // ------------------------------------------------------------------
+    function prepareVerifyStep() {
+        var passWrap   = el('donVerifyPassword');
+        var otpWrap    = el('donVerifyOtp');
+        var gwWrap     = el('donVerifyGateway');
+        var bioSheet   = el('donBioSheet');
+        var paypalPop  = el('donPaypalPopup');
+
+        if (passWrap) passWrap.style.display = 'none';
+        if (otpWrap)  otpWrap.style.display  = 'none';
+        if (gwWrap)   gwWrap.style.display   = 'none';
+
+        if (state.method === 'wallet') {
+            if (el('donVerifyTitle')) el('donVerifyTitle').textContent = 'Verify Password';
+            if (el('donVerifySub')) el('donVerifySub').textContent = '';
+            if (passWrap) passWrap.style.display = 'block';
+        } else if (state.method === 'card' || state.secondaryMethod === 'card') {
+            if (el('donVerifyTitle')) el('donVerifyTitle').textContent = 'Bank Confirmation';
+            if (el('donVerifySub')) el('donVerifySub').textContent = '';
+            if (otpWrap) otpWrap.style.display = 'block';
+        } else {
+            // Gateway (PayPal / Google Pay / Apple Pay)
+            if (el('donVerifyTitle')) el('donVerifyTitle').textContent = 'Complete Your Payment';
+            if (el('donVerifySub')) el('donVerifySub').textContent = '';
+            if (gwWrap) gwWrap.style.display = 'block';
+            setupGatewaySheet();
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // STEP 4 — gateway sheet (PayPal / Google Pay / Apple Pay)
+    // The user approves inside a simulated provider sheet/popup that lives
+    // right in the Verify panel (same place as the OTP), a token is returned,
+    // and the operation is submitted immediately -> success.
+    // ------------------------------------------------------------------
+    var GATEWAY_META = {
+        paypal:     { name: 'PayPal',     icon: 'fa-paypal' },
+        google_pay: { name: 'Google Pay', icon: 'fa-google-pay' },
+        apple_pay:  { name: 'Apple Pay',  icon: 'fa-apple-pay' }
+    };
+
+    var bioSheetEl = el('donBioSheet');
+    var paypalPopupEl = el('donPaypalPopup');
+
+    function isGatewayMethod(m) {
+        return m === 'paypal' || m === 'google_pay' || m === 'apple_pay';
+    }
+
+    function setupGatewaySheet() {
+        var meta = GATEWAY_META[state.method] || { name: 'Provider', icon: 'fa-brands' };
+
+        if (state.method === 'paypal') {
+            if (bioSheetEl) bioSheetEl.style.display = 'none';
+            if (paypalPopupEl) paypalPopupEl.style.display = 'block';
+            if (el('donPpAmount')) el('donPpAmount').textContent = CURRENCY + ' ' + formatNumber(state.amount);
+        } else {
+            if (bioSheetEl) {
+                bioSheetEl.style.display = 'block';
+                if (el('donBioIcon')) el('donBioIcon').className = 'fa-brands ' + meta.icon + ' don-sheet-sym';
+                if (el('donBioBrand')) el('donBioBrand').textContent = meta.name;
+                if (el('donBioAmount')) el('donBioAmount').textContent = CURRENCY + ' ' + formatNumber(state.amount);
+                if (el('donBioSecured')) el('donBioSecured').textContent =
+                    state.method === 'google_pay' ? 'Google Pay' : 'Apple / Google';
+                if (el('donBioSub')) el('donBioSub').textContent =
+                    'Authenticate with Face ID or Touch ID to confirm this payment via ' + meta.name + '.';
+            }
+            if (paypalPopupEl) paypalPopupEl.style.display = 'none';
+        }
+
+        var first = state.method === 'paypal' ? el('donPpEmail') : el('donBioConfirm');
+        if (first && first.focus) first.focus();
+    }
+
+    function gatewayLoading(id, loading, label) {
+        var btn = el(id);
+        if (!btn) return;
+        btn.disabled = loading;
+        if (loading) {
+            btn.setAttribute('data-orig', btn.innerHTML);
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> ' +
+                (label || 'Approving…');
+        } else {
+            btn.innerHTML = btn.getAttribute('data-orig') || btn.innerHTML;
+        }
+    }
+
+    function submitGateway(approvalId, approved) {
+        clearError(approvalId);
+        if (!approved) {
+            showError(approvalId, 'The payment was not approved by the provider. Please approve first.');
+            return;
+        }
+        var btnId = approvalId === 'donBioError' ? 'donBioConfirm' : 'donPpApprove';
+        gatewayLoading(btnId, true, approvalId === 'donBioError' ? 'Authenticating…' : 'Approving…');
+        var payload = {
+            amount: state.amount,
+            payment_method: state.method,
+            gateway_token: 'sim_' + state.method + '_approved'
+        };
+        // Small artificial delay so the biometric / login step feels real before the POST.
+        setTimeout(function () { submitPayment(payload, approvalId); }, 900);
+    }
+
+    // Biometric sheet: Tap to "authenticate" with Face ID / Touch ID.
+    if (el('donBioConfirm')) {
+        el('donBioConfirm').addEventListener('click', function () {
+            submitGateway('donBioError', true);
+        });
+    }
+    // PayPal popup: "Log In & Approve" -> provider returns token.
+    if (el('donPpApprove')) {
+        el('donPpApprove').addEventListener('click', function () {
+            var emailInput = el('donPpEmail'), passInput = el('donPpPass');
+            if ((emailInput && !emailInput.value.trim()) || (passInput && !passInput.value.trim())) {
+                showError('donPpError', 'Please sign in with your PayPal credentials to approve this payment.');
+                var foc = !emailInput.value.trim() ? emailInput : passInput;
+                if (foc && foc.focus) foc.focus();
+                return;
+            }
+            submitGateway('donPpError', true);
+        });
+    }
+    // Back out of the sheet to the payment-method step.
+    [el('donBioCancel'), el('donPpCancel'), el('donPpClose')].forEach(function (btn) {
+        if (btn) btn.addEventListener('click', function () { goToStep(2); });
+    });
 
     // ------------------------------------------------------------------
     // STEP 1 — Amount (+) presets
@@ -306,7 +445,8 @@
     }
 
     // ------------------------------------------------------------------
-    // STEP 4 -> submit the operation (single AJAX POST creates the record)
+    // Shared submit: single AJAX POST persists the operation for every path
+    // (wallet password / card OTP in the stepper, gateway token in the modal).
     // ------------------------------------------------------------------
     var confirmBtn = el('donConfirm');
     var confirmText = el('donConfirmText');
@@ -318,26 +458,77 @@
         if(spinner) spinner.classList.toggle('d-none', !loading);
     }
 
-    if (confirmBtn) {
-        confirmBtn.addEventListener('click', function () {
-            var pwd = getPasswordValue();
-            if (!pwd) {
-                showError('donError', 'Please enter your password to confirm.');
-                var pwdInput = el('donPasswordInput');
-                if (pwdInput) pwdInput.focus();
-                return;
-            }
-            clearError('donError');
+    function submitPayment(payload, errorBox) {
+        errorBox = errorBox || 'donError';
+        setConfirmLoading(true);
+        var csrf = el('donCsrfToken');
 
-            setConfirmLoading(true);
+        fetch(postUrl, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf ? csrf.value : '',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(function (response) { return response.json(); })
+            .then(function (result) {
+                setConfirmLoading(false);
+                gatewayLoading('donBioConfirm', false);
+                gatewayLoading('donPpApprove', false);
+
+                if (result.success) {
+                    state.redirect = result.redirect_url || redirectUrl;
+                    if(el('donSuccessAmount')) el('donSuccessAmount').textContent = result.amount + ' ' + CURRENCY;
+                    if(el('donSuccessTitle')) el('donSuccessTitle').textContent = result.project_title || '';
+                    goToStep(5);
+                } else {
+                    showError(errorBox, result.error || 'Something went wrong. Please try again.');
+                }
+            })
+            .catch(function () {
+                setConfirmLoading(false);
+                gatewayLoading('donBioConfirm', false);
+                gatewayLoading('donPpApprove', false);
+                showError(errorBox, 'Network error — please check your connection and try again.');
+            });
+    }
+
+if (confirmBtn) {
+        confirmBtn.addEventListener('click', function () {
+            var isCardFlow = state.method === 'card' || state.secondaryMethod === 'card';
 
             var payload = {
                 amount: state.amount,
-                payment_method: state.method,
-                password: pwd
+                payment_method: state.method
             };
+
+            if (state.method === 'wallet') {
+                var pwd = getPasswordValue();
+                if (!pwd) {
+                    showError('donError', 'Please enter your password to confirm.');
+                    var pwInput = el('donPasswordInput');
+                    if (pwInput) pwInput.focus();
+                    return;
+                }
+                payload.password = pwd;
+            } else if (isCardFlow) {
+                var otpInput = el('donOtpInput');
+                var otpValue = otpInput ? otpInput.value.trim() : '';
+                if (otpValue !== '123456') {
+                    showError('donError', 'Invalid confirmation code. Please enter the 6-digit code sent to your phone (Demo: 123456).');
+                    if (otpInput) otpInput.focus();
+                    return;
+                }
+                payload.otp = otpValue;
+            }
+
+            clearError('donError');
+
             // Card details travel only when a card is being used
-            if (state.method === 'card' || state.secondaryMethod === 'card') {
+            if (isCardFlow) {
                 payload.card_name = state.cardName;
                 payload.card_number = state.cardNumber;
                 payload.card_expiry = state.cardExpiry;
@@ -347,34 +538,7 @@
                 }
             }
 
-            var csrf = el('donCsrfToken');
-
-            fetch(postUrl, {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrf ? csrf.value : '',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify(payload)
-            })
-                .then(function (response) { return response.json(); })
-                .then(function (result) {
-                    setConfirmLoading(false);
-                    if (result.success) {
-                        state.redirect = result.redirect_url || redirectUrl;
-                        if(el('donSuccessAmount')) el('donSuccessAmount').textContent = result.amount + ' ' + CURRENCY;
-                        if(el('donSuccessTitle')) el('donSuccessTitle').textContent = result.project_title || '';
-                        goToStep(5);
-                    } else {
-                        showError('donError', result.error || 'Something went wrong. Please try again.');
-                    }
-                })
-                .catch(function () {
-                    setConfirmLoading(false);
-                    showError('donError', 'Network error — please check your connection and try again.');
-                });
+            submitPayment(payload, 'donError');
         });
     }
 

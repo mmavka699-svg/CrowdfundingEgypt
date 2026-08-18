@@ -56,9 +56,9 @@
                         <div class="don-amount-input">
                             <div class="input-group">
                                 <span class="input-group-text don-currency">EGP</span>
-                                <input type="text" id="donAmountInput" class="form-control don-amount-field"
+                                <input type="text" id="donAmountInput" name="topup_amount" class="form-control don-amount-field"
                                     inputmode="decimal" placeholder="0.00" aria-label="Charge amount"
-                                    data-currency="EGP">
+                                    autocomplete="new-password" data-currency="EGP">
                             </div>
                         </div>
 
@@ -208,20 +208,107 @@
                     </section>
 
                     <!-- ======================================================
-                         STEP 4 — ENTER PASSWORD
+                         STEP 4 — VERIFY
+                         card -> 3-D Secure OTP | gateways -> provider sheet
                          ====================================================== -->
                     <section class="don-panel" data-panel="4">
-                        <h2 class="don-panel-title h3">Verify Password</h2>
-                        <p class="don-panel-sub text-center">
-                            Please enter your account password to confirm this payment.
-                        </p>
+                        <h2 class="don-panel-title h3" id="donVerifyTitle">Verify</h2>
+                        <p class="don-panel-sub text-center" id="donVerifySub"></p>
 
-                        <div class="mb-3 px-4">
-                            <input type="password" id="donPasswordInput" class="form-control text-center fs-5 py-2"
-                                placeholder="Your Password" autocomplete="current-password">
+                        <!-- Mode 1: Card -> 3-D Secure OTP -->
+                        <div class="mb-3 px-4" id="donVerifyOtp" style="display:none;">
+                            <p class="text-muted small mb-2">We sent a 6-digit confirmation code to your phone
+                                (Demo: <strong>123456</strong>).</p>
+                            <input type="text" id="donOtpInput" class="form-control text-center fs-5 py-2"
+                                inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="one-time-code">
                         </div>
 
-                        <div class="don-error d-none" id="donError"></div>
+                        <!-- Mode 2: PayPal / Google Pay / Apple Pay -> simulated provider sheet -->
+                        <div id="donVerifyGateway" style="display:none;">
+
+                            <!-- Apple / Google: OS-style bottom sheet -->
+                            <div class="don-sheet" id="donBioSheet" style="display:none;">
+                                <div class="don-sheet-grabber"></div>
+
+                                <div class="don-sheet-head">
+                                    <i id="donBioIcon" class="fa-brands fa-apple-pay don-sheet-sym"></i>
+                                    <span id="donBioBrand">Apple Pay</span>
+                                    <span class="don-sheet-badge"><i class="bi bi-shield-check me-1"></i>Secure</span>
+                                </div>
+
+                                <div class="don-sheet-bill">
+                                    <div class="don-bill-row">
+                                        <span>Merchant</span>
+                                        <span class="fw-bold">Crowd-Funding Egypt</span>
+                                    </div>
+                                    <div class="don-bill-row">
+                                        <span>Amount</span>
+                                        <span class="don-bill-amount" id="donBioAmount">EGP 0.00</span>
+                                    </div>
+                                </div>
+
+                                <p class="don-sheet-sub" id="donBioSub">Authenticate with Face ID or Touch ID to confirm
+                                    this payment.</p>
+
+                                <button type="button" class="don-sheet-confirm" id="donBioConfirm">
+                                    <i class="bi bi-fingerprint me-2"></i> Authorize Payment
+                                </button>
+
+                                <div class="don-sheet-secure">
+                                    <i class="bi bi-shield-lock me-1"></i> Payment secured by
+                                    <span id="donBioSecured">Apple / Google</span>
+                                </div>
+
+                                <button type="button" class="don-sheet-cancel" id="donBioCancel">Cancel</button>
+
+                                <div class="don-error d-none mt-2" id="donBioError"></div>
+                            </div>
+
+                            <!-- PayPal: popup window -->
+                            <div class="don-sheet don-sheet-paypal" id="donPaypalPopup" style="display:none;">
+                                <div class="don-paypal-top">
+                                    <i class="fa-brands fa-paypal don-paypal-logo"></i>
+                                    <button type="button" class="don-sheet-close" id="donPpClose" aria-label="Close">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+
+                                <div class="don-paypal-body">
+                                    <h4 class="don-paypal-title">Log In &amp; Approve</h4>
+                                    <p class="don-sheet-sub">You're about to pay
+                                        <strong id="donPpAmount" class="text-body">EGP 0.00</strong> to
+                                        <strong class="text-body">Crowd-Funding Egypt</strong>.
+                                    </p>
+
+                                    <div class="mb-2">
+                                        <label class="form-label small">PayPal email</label>
+                                        <input type="email" class="form-control" id="donPpEmail" autocomplete="email"
+                                            placeholder="demo@paypal.com">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small">Password</label>
+                                        <input type="password" class="form-control" id="donPpPass"
+                                            autocomplete="current-password" placeholder="••••••••">
+                                    </div>
+
+                                    <button type="button" class="don-sheet-confirm" id="donPpApprove">
+                                        Log In &amp; Agree
+                                    </button>
+                                    <button type="button" class="don-sheet-cancel mb-1" id="donPpCancel">
+                                        Cancel and return to wallet top-up
+                                    </button>
+                                </div>
+
+                                <div class="don-paypal-foot">
+                                    <i class="bi bi-shield-check me-1"></i> Protected by PayPal Buyer Protection
+                                </div>
+
+                                <div class="don-error d-none mt-2 mx-3" id="donPpError"></div>
+                            </div>
+
+                        </div>
+
+                        <div class="don-error d-none mt-3" id="donError"></div>
 
                         <div class="don-actions">
                             <button type="button" class="don-back" id="donPinBack">

@@ -24,6 +24,10 @@ from .models import CustomUser
 from .tokens import account_activation_token, is_token_expired
 
 
+# Demo 3-D Secure OTP for card top-ups (matches projects.views.DEMO_OTP_CODE).
+DEMO_OTP_CODE = "123456"
+
+
 # ---------------------------------------------------------------------------
 # REGISTRATION + EMAIL ACTIVATION (24-hour expiring link)
 # ---------------------------------------------------------------------------
@@ -310,10 +314,20 @@ def charge_wallet_view(request):
         card_error = _validate_card_payload(payload)
         if card_error:
             return JsonResponse({"success": False, "error": card_error}, status=400)
-
-    password = str(payload.get("password") or "")
-    if not password or not request.user.check_password(password):
-        return JsonResponse({"success": False, "error": "Incorrect password. Please try again."}, status=400)
+        # 3-D Secure OTP (demo: fixed code)
+        otp = str(payload.get("otp") or "").strip()
+        if otp != DEMO_OTP_CODE:
+            return JsonResponse(
+                {"success": False, "error": "Invalid confirmation code. Please enter the 6-digit code sent to your phone (Demo: 123456)."},
+                status=400,
+            )
+    else:  # paypal / google_pay / apple_pay
+        gateway_token = str(payload.get("gateway_token") or "").strip()
+        if gateway_token != f"sim_{method}_approved":
+            return JsonResponse(
+                {"success": False, "error": "The payment was not approved by the provider. Please approve first."},
+                status=400,
+            )
 
     # Persist the top-up
     user = request.user

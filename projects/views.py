@@ -23,6 +23,11 @@ from .forms import (
 from .models import Project, ProjectImage, Category, Donation, Comment, Rating, Report
 
 
+# Demo 3-D Secure OTP: the phone-sent code is always this value in this sandbox,
+# so the flow can be exercised end-to-end without a real SMS gateway.
+DEMO_OTP_CODE = "123456"
+
+
 # ---------------------------------------------------------------------------
 # LIST / SEARCH / CATEGORY BROWSE
 # ---------------------------------------------------------------------------
@@ -430,17 +435,36 @@ def _process_ajax_donation(request, project):
 
     # (3) Card details (required when paying with a card or wallet_split with card)
     secondary_method = str(payload.get("secondary_payment_method") or "").strip()
-    if method == "card" or (method == "wallet_split" and secondary_method == "card"):
+    is_card = method == "card" or (method == "wallet_split" and secondary_method == "card")
+    if is_card:
         card_error = _validate_card_payload(payload)
         if card_error:
             return JsonResponse({"success": False, "error": card_error}, status=400)
 
-    # (4) Verification Password
-    password = str(payload.get("password") or "")
-    if not password or not request.user.check_password(password):
-        return JsonResponse(
-            {"success": False, "error": "Incorrect password. Please try again."}, status=400
-        )
+    # (4) Method-specific verification
+    #   wallet        -> account password
+    #   card / split  -> 3-D Secure OTP (demo: fixed code)
+    #   paypal/google/apple -> provider approval token (simulated)
+    if method == "wallet":
+        password = str(payload.get("password") or "")
+        if not password or not request.user.check_password(password):
+            return JsonResponse(
+                {"success": False, "error": "Incorrect password. Please try again."}, status=400
+            )
+    elif is_card:
+        otp = str(payload.get("otp") or "").strip()
+        if otp != DEMO_OTP_CODE:
+            return JsonResponse(
+                {"success": False, "error": "Invalid confirmation code. Please enter the 6-digit code sent to your phone (Demo: 123456)."},
+                status=400,
+            )
+    else:  # paypal / google_pay / apple_pay
+        gateway_token = str(payload.get("gateway_token") or "").strip()
+        if gateway_token != f"sim_{method}_approved":
+            return JsonResponse(
+                {"success": False, "error": "The payment was not approved by the provider. Please approve first."},
+                status=400,
+            )
 
     # (5) Persist the donation — single write point, after ALL validations pass
     from accounts.models import WalletTransaction

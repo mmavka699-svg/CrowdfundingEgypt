@@ -256,7 +256,7 @@
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* Dark-mode friendliness: reuse existing base overrides for surfaces  */
+/* Dash-mode friendliness: reuse existing base overrides for surfaces  */
 [data-theme="dark"] .don-card { background: var(--bg-card) !important; }
 [data-theme="dark"] .don-progress { background: var(--bg-hover) !important; }
 [data-theme="dark"] .don-summary { background: rgba(16,185,129,0.12) !important; border-color: rgba(16,185,129,0.3) !important; }
@@ -264,3 +264,108 @@
 [data-theme="dark"] .don-preset { background: var(--bg-surface) !important; color: var(--text-primary) !important; }
 [data-theme="dark"] .don-pin-input,
 [data-theme="dark"] .don-amount-field { background: var(--bg-surface) !important; color: var(--text-primary) !important; }
+
+/* ---- Gateway provider sheet (rendered inside the Verify panel) ---- */
+.don-sheet {
+    width: 100%;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    padding: 0.9rem 1.4rem 1.6rem;
+    animation: donSheetIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes donSheetIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.don-sheet-grabber {
+    display: none;
+}
+
+/* Sheet header: provider symbol + name + trust badge */
+.don-sheet-head {
+    display: flex; align-items: center; gap: 0.7rem; margin-bottom: 1rem;
+}
+.don-sheet-sym {
+    font-size: 1.9rem; line-height: 1; color: #111827; flex-shrink: 0;
+}
+.don-sheet-head > span:nth-child(2) {
+    font-weight: 800; font-size: 1.05rem; color: var(--text-primary);
+}
+.don-sheet-badge {
+    margin-left: auto; display: inline-flex; align-items: center; gap: 0.3rem;
+    background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;
+    font-size: 0.7rem; font-weight: 700; padding: 0.3rem 0.65rem; border-radius: 999px;
+}
+
+/* Bill rows (Merchant / Amount) */
+.don-sheet-bill {
+    background: #f8fafc; border: 1px solid var(--border-color);
+    border-radius: var(--radius-md); padding: 0.9rem 1.1rem; margin-bottom: 1rem;
+}
+.don-bill-row {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+}
+.don-bill-row + .don-bill-row { margin-top: 0.45rem; padding-top: 0.45rem; border-top: 1px dashed var(--border-color); }
+.don-bill-row span:first-child { color: var(--text-muted); font-size: 0.85rem; }
+.don-bill-amount { font-size: 1.6rem; font-weight: 800; color: #059669; }
+
+.don-sheet-sub { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.1rem; }
+
+.don-sheet-confirm,
+.don-sheet-cancel {
+    display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    width: 100%; border: none; cursor: pointer;
+    border-radius: var(--radius-pill); padding: 0.82rem; font-weight: 700; font-size: 0.95rem;
+    transition: all var(--transition-fast);
+}
+.don-sheet-confirm { background: #111827; color: #fff; margin-bottom: 0.55rem; }
+.don-sheet-confirm:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(15,23,42,0.25); }
+.don-sheet-confirm:disabled { opacity: 0.65; transform: none; box-shadow: none; }
+.don-sheet-cancel {
+    background: transparent; color: var(--text-secondary); font-weight: 600;
+    border: 1px solid var(--border-color);
+}
+.don-sheet-cancel:hover { background: #f1f5f9; }
+
+/* Security footer line */
+.don-sheet-secure {
+    margin: 0.35rem 0 0.9rem; text-align: center;
+    color: var(--text-muted); font-size: 0.72rem;
+    display: flex; align-items: center; justify-content: center; gap: 0.25rem;
+}
+
+/* PayPal popup window */
+.don-sheet-paypal {
+    border-radius: var(--radius-lg); padding: 0; overflow: hidden;
+    box-shadow: 0 14px 38px rgba(0, 60, 110, 0.25);
+}
+.don-paypal-top {
+    background: linear-gradient(135deg, #0070ba 0%, #0f6fc2 100%);
+    color: #fff; padding: 0.9rem 1.3rem;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.don-paypal-logo { font-size: 1.8rem; line-height: 1; }
+.don-paypal-top .don-sheet-close {
+    background: rgba(255,255,255,0.15); color: #fff; border: none !important;
+    padding: 0.35rem 0.55rem; border-radius: 8px;
+}
+.don-paypal-top .don-sheet-close:hover { background: rgba(255,255,255,0.28); color: #fff; }
+.don-paypal-body { padding: 1.3rem 1.4rem 0.8rem; }
+.don-paypal-title { font-weight: 800; margin-bottom: 0.35rem; }
+.don-paypal-body .don-sheet-confirm { background: #0070ba; margin-bottom: 0.55rem; }
+.don-paypal-body .don-sheet-confirm:hover { box-shadow: 0 8px 18px rgba(0, 112, 186, 0.4); }
+.don-paypal-foot {
+    background: #f5f8fb; border-top: 1px solid #e7edf3; color: #5b7a93;
+    font-size: 0.72rem; padding: 0.65rem 1.4rem;
+    display: flex; align-items: center; gap: 0.35rem;
+}
+
+[data-theme="dark"] .don-sheet { background: var(--bg-card) !important; }
+[data-theme="dark"] .don-sheet-sym { color: var(--text-primary) !important; }
+[data-theme="dark"] .don-sheet-head > span:nth-child(2) { color: var(--text-primary) !important; }
+[data-theme="dark"] .don-sheet-bill { background: var(--bg-hover) !important; }
+[data-theme="dark"] .don-sheet-cancel { color: var(--text-secondary) !important; }
+[data-theme="dark"] .don-sheet-secure { color: var(--text-muted) !important; }
+[data-theme="dark"] .don-paypal-foot { background: var(--bg-hover) !important; color: var(--text-muted) !important; }
