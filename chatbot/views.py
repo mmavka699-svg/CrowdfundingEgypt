@@ -9,10 +9,13 @@ Security layers:
   5. Hardened system prompt — refuses off-topic, injection, and data leaks
   6. ORM-scoped data — personal data always filtered by request.user
   7. ChatLog — every interaction is logged for admin review
+  8. Full error logging — stack traces stored in ChatLog.error_details
 """
 
 import json
+import logging
 import os
+import traceback
 
 import dotenv
 from django.conf import settings
@@ -28,12 +31,17 @@ from .services import get_chatbot_tools
 
 dotenv.load_dotenv()
 
+logger = logging.getLogger(__name__)
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 MAX_MESSAGE_LENGTH = 500
 RATE_LIMIT_MAX = 20        # max requests per window
 RATE_LIMIT_WINDOW = 3600   # window in seconds (1 hour)
+MAX_HISTORY_LENGTH = 10    # max conversation turns sent to Gemini
+API_TIMEOUT_MS = 30_000    # 30 seconds timeout for Gemini API
+MAX_TOOL_CALLS = 5         # max automatic function calling rounds
 
 
 # ---------------------------------------------------------------------------
@@ -77,11 +85,15 @@ about this specific platform.
    If asked, respond with: "I can only help with Crowdfunding Egypt platform \
    questions."
 
-6. RESPONSE STYLE:
-   - Be concise, helpful, and friendly
-   - Use Egyptian Pound (EGP) as the currency
-   - Format numbers with commas (e.g., 1,000,000 EGP)
-   - When listing campaigns, use bullet points
+6. RESPONSE STYLE (Funny & ELEGANT):
+   - Adopt a warm, highly professional, and "concierge" tone. You are a premium assistant for Crowdfunding Egypt.
+   - Always greet the user warmly and sign off gracefully when appropriate.
+   - Use sophisticated formatting: break long paragraphs into small, easily readable chunks.
+   - Use elegant emojis sparingly but effectively (e.g., ✨, 🏛️, 📈, 💼, 🤝) to add a touch of class without being overwhelming.
+   - Use Markdown headings (## or ###) to structure answers with elegant titles.
+   - Use bold text strategically to highlight key metrics, campaign titles, or important concepts.
+   - Provide context when answering. Instead of just giving a number, explain what it means with an encouraging tone.
+   - Use Egyptian Pound (EGP) as the currency, formatting numbers with commas (e.g., 1,000,000 EGP).
 
 Answer the user's question using the tools provided to fetch necessary \
 platform data. If the data is not available through a tool, say \
@@ -98,19 +110,21 @@ def _rate_limit_key(user_id):
 
 def _check_rate_limit(user):
     """
-    Returns True if the user is within the rate limit, False if exceeded.
-    Uses Django's cache framework (LocMemCache by default, works fine for
-    single-server student projects).
+    Returns (allowed: bool, retry_after: int).
+    - allowed: True if the user is within the rate limit.
+    - retry_after: Seconds until the rate limit resets (0 if allowed).
     """
     key = _rate_limit_key(user.id)
     count = cache.get(key, 0)
 
     if count >= RATE_LIMIT_MAX:
-        return False
+        # Estimate remaining TTL
+        ttl = cache.ttl(key) if hasattr(cache, 'ttl') else RATE_LIMIT_WINDOW
+        return False, ttl or RATE_LIMIT_WINDOW
 
     # Increment. If key is new, set it with the window TTL.
     cache.set(key, count + 1, timeout=RATE_LIMIT_WINDOW)
-    return True
+    return True, 0
 
 
 # ---------------------------------------------------------------------------
@@ -139,16 +153,23 @@ def _validate_message(raw_message):
 @require_POST
 def chat(request):
     """
-    JSON endpoint: accepts { "message": "..." }, returns { "reply": "..." }.
+    JSON endpoint: accepts { "message": "...", "history": [...] },
+    returns { "reply": "..." }.
     Protected by authentication, CSRF, rate limiting, and input validation.
     """
 
     # --- Rate limiting ---
-    if not _check_rate_limit(request.user):
-        return JsonResponse(
-            {"error": "You've sent too many messages. Please wait a while before trying again."},
+    allowed, retry_after = _check_rate_limit(request.user)
+    if not allowed:
+        resp = JsonResponse(
+            {
+                "error": f"You've sent too many messages. Please try again in {retry_after} seconds.",
+                "retry_after": retry_after,
+            },
             status=429,
         )
+        resp["Retry-After"] = str(retry_after)
+        return resp
 
     # --- Parse JSON body ---
     try:
@@ -163,10 +184,14 @@ def chat(request):
     if validation_error:
         return JsonResponse({"error": validation_error}, status=400)
 
+    # --- Trim history to prevent unbounded token usage ---
+    if len(raw_history) > MAX_HISTORY_LENGTH:
+        raw_history = raw_history[-MAX_HISTORY_LENGTH:]
+
     # --- Get User Tools ---
     tools = get_chatbot_tools(request.user)
 
-    # --- Call Gemini API with Native Function Calling ---
+    # --- Resolve API key ---
     current_api_key = (
         getattr(settings, "GOOGLE_API_KEY", None)
         or getattr(settings, "GEMINI_API_KEY", None)
@@ -179,13 +204,29 @@ def chat(request):
             status=500,
         )
 
+    # --- Resolve model name from env ---
+    model_name = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
+
     was_refused = False
 
     try:
+        # The genai SDK might require Content objects instead of raw dicts
+        parsed_history = []
+        for msg in raw_history:
+            role = msg.get("role", "user")
+            parts = msg.get("parts", [{"text": ""}])
+            # Depending on SDK version, we construct the dict safely
+            parsed_history.append(
+                types.Content(
+                    role=role,
+                    parts=[types.Part.from_text(text=p.get("text", "")) for p in parts]
+                )
+            )
+
         client = genai.Client(api_key=current_api_key)
         chat_session = client.chats.create(
-            model="gemini-3.1-flash-lite",
-            history=raw_history,
+            model=model_name,
+            history=parsed_history,
             config=types.GenerateContentConfig(
                 system_instruction=SYSTEM_PROMPT,
                 tools=tools,
@@ -195,29 +236,45 @@ def chat(request):
         reply_text = response.text or "I'm sorry, I couldn't generate a reply."
     except Exception as e:
         error_msg = str(e)
-        # If it's a rate limit / quota error, return a friendly chat reply instead of crashing
+        full_traceback = traceback.format_exc()
+
+        # Log the full error for debugging safely
+        user_email = getattr(request.user, "email", "unknown_user")
+        logger.error(
+            "Chatbot error for user %s: %s\n%s",
+            user_email, error_msg, full_traceback
+        )
+
+        # If it's a rate limit / quota error, return a friendly chat reply
         if "429" in error_msg or "quota" in error_msg.lower():
             reply_text = "I'm receiving too many requests right now. Please wait a few seconds and try again!"
             status_code = 200
             json_response = {"reply": reply_text}
-            was_refused = False
+        elif "timeout" in error_msg.lower() or "deadline" in error_msg.lower():
+            reply_text = "The request timed out. Please try again."
+            status_code = 200
+            json_response = {"reply": reply_text}
         else:
-            reply_text = "API_ERROR: " + error_msg[:150]
+            reply_text = "Something went wrong. Please try again later."
             status_code = 500
-            json_response = {"error": "Something went wrong. Please try again later."}
-            was_refused = False
+            json_response = {"error": reply_text}
 
-        # Log the error but don't expose internals to the user
-        ChatLog.objects.create(
-            user=request.user,
-            message=user_message[:500],
-            response_snippet=reply_text[:200],
-            intent="tool_call_error",
-            was_refused=was_refused,
-        )
+        # Log the error with full traceback to ChatLog
+        try:
+            ChatLog.objects.create(
+                user=request.user,
+                message=user_message[:500],
+                response_snippet=reply_text[:200],
+                intent="error",
+                was_refused=False,
+                error_details=full_traceback[:5000],
+            )
+        except Exception as log_error:
+            logger.error("Failed to save ChatLog on error: %s", log_error)
+
         return JsonResponse(json_response, status=status_code)
 
-    # --- Log the interaction ---
+    # --- Log the successful interaction ---
     ChatLog.objects.create(
         user=request.user,
         message=user_message[:500],

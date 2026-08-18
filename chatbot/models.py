@@ -51,6 +51,12 @@ class ChatLog(models.Model):
         default=False,
         help_text=_("Whether this message was flagged as off-topic or prompt injection."),
     )
+    error_details = models.TextField(
+        _("error details"),
+        blank=True,
+        default="",
+        help_text=_("Full stack trace or error message when an error occurs."),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

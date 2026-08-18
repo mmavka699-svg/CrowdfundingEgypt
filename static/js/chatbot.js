@@ -37,6 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Store conversation history
     let chatHistory = [];
+    const MAX_HISTORY = 10; // Cap history to control token usage
+    const API_TIMEOUT_MS = 35000; // 35 second timeout
 
     // Toggle Chatbot
     if (toggleBtn) {
@@ -103,20 +105,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // Simple formatter for chatbot responses
     function formatBotReply(text) {
         let html = text;
-        // Headers -> Bold
-        html = html.replace(/^#{1,6}\s+(.*)$/gm, '<strong>$1</strong>');
-        // Bold
-        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Premium Headings
+        html = html.replace(/^###\s+(.*)$/gm, '<h4 style="margin: 14px 0 6px 0; color: #1a4331; font-weight: 600; letter-spacing: 0.5px;">$1</h4>');
+        html = html.replace(/^##\s+(.*)$/gm, '<h3 style="margin: 18px 0 8px 0; color: #1a4331; font-weight: 700; border-bottom: 1px solid rgba(26,67,49,0.15); padding-bottom: 6px; letter-spacing: 0.5px;">$1</h3>');
+        html = html.replace(/^#\s+(.*)$/gm, '<h2 style="margin: 22px 0 10px 0; color: #1a4331; font-weight: 800; border-bottom: 2px solid rgba(26,67,49,0.2); padding-bottom: 6px; letter-spacing: 1px;">$1</h2>');
+        
+        // Blockquotes (Premium touch)
+        html = html.replace(/^>\s+(.*)$/gm, '<blockquote style="border-left: 4px solid #b8860b; background-color: rgba(184,134,11,0.05); padding: 8px 12px; margin: 10px 0; color: #555; font-style: italic; border-radius: 4px;">$1</blockquote>');
+
+        // Bold (Slightly colored to pop)
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #1a4331; font-weight: 700;">$1</strong>');
         // Italic
         html = html.replace(/\*([^\*\n]+)\*/g, '<em>$1</em>');
-        // Links
-        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: inherit; text-decoration: underline;">$1</a>');
-        // Bullet Points
-        html = html.replace(/^[\*\-]\s+(.*)$/gm, '&bull; $1');
+        // Links (Elegant gold/brown tone)
+        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: #b8860b; text-decoration: none; border-bottom: 1px solid #b8860b; padding-bottom: 1px; font-weight: 500; transition: opacity 0.2s;">$1</a>');
+        // Bullet Points (Custom elegant bullets)
+        html = html.replace(/^[\*\-]\s+(.*)$/gm, '<div style="margin-left: 8px; padding-left: 12px; position: relative; margin-bottom: 6px;"><span style="position: absolute; left: 0; color: #b8860b;">&bull;</span>$1</div>');
+        
         // Line breaks
         html = html.replace(/\n/g, '<br>');
+        
         // Clean up excessive line breaks
-        html = html.replace(/(<br>\s*){3,}/g, '<br><br>');
+        html = html.replace(/(<br>\s*){2,}/g, '<br><br>');
+        
+        // Remove <br> immediately after or before heading/blockquote tags so it doesn't look too spaced out
+        html = html.replace(/(<\/h[234]>|<\/blockquote>)\s*(<br>\s*)+/g, '$1');
+        html = html.replace(/(<br>\s*)+(<h[234]|<blockquote)/g, '$2');
+        
         return html;
     }
 
@@ -180,15 +195,26 @@ document.addEventListener('DOMContentLoaded', () => {
             // Push user message to history
             chatHistory.push({ role: 'user', parts: [{ text: message }] });
 
+            // Trim history to last MAX_HISTORY entries
+            const trimmedHistory = chatHistory.slice(-MAX_HISTORY);
+
             const csrftoken = getCookie('csrftoken');
+
+            // Create AbortController for timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+
             const response = await fetch('/api/chat/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrftoken
                 },
-                body: JSON.stringify({ message: message, history: chatHistory })
+                body: JSON.stringify({ message: message, history: trimmedHistory }),
+                signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
 
             const data = await response.json();
             hideTyping();
@@ -207,7 +233,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             hideTyping();
-            appendMessage("Network error. Please try again later.");
+            // Remove the user message from history on network/timeout errors
+            chatHistory.pop();
+            if (error.name === 'AbortError') {
+                appendMessage("The request timed out. Please try again.");
+            } else {
+                appendMessage("Network error. Please try again later.");
+            }
             console.error('Chatbot API Error:', error);
         } finally {
             inputField.disabled = false;
