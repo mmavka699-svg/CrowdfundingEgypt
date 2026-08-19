@@ -139,6 +139,18 @@ record created in the database.
                                     balance</span>
                             </span>
                         </label>
+
+                        {% for card in saved_cards %}
+                        <label class="don-method" data-method="saved_card_{{ card.id }}">
+                            <input type="radio" name="donMethod" value="saved_card_{{ card.id }}">
+                            <span class="don-radio"></span>
+                            <i class="bi bi-credit-card-fill don-method-icon text-primary"></i>
+                            <span>
+                                <span class="don-method-name d-block">Saved Card ({{ card.masked_number }})</span>
+                                <span class="don-method-desc">Expires {{ card.expiry }}</span>
+                            </span>
+                        </label>
+                        {% endfor %}
                         {% endif %}
 
                         <label class="don-method" data-method="paypal">
@@ -181,10 +193,6 @@ record created in the database.
                             </span>
                         </label>
 
-                        <!-- "+ Add New Card" triggers the same card-details step -->
-                        <button type="button" class="don-add-card mt-2" id="donAddCardBtn">
-                            <i class="bi bi-plus-circle"></i> Add New Card
-                        </button>
 
                         <div class="don-error d-none my-3" id="donMethodError"></div>
 
@@ -262,6 +270,13 @@ record created in the database.
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="form-check mt-4 mb-2 don-field ps-4 ms-1">
+                            <input class="form-check-input shadow-none" type="checkbox" id="donSaveCardCheck" style="cursor:pointer; width: 1.1rem; height: 1.1rem;">
+                            <label class="form-check-label text-muted small ms-2" for="donSaveCardCheck" style="cursor:pointer; padding-top:2px;">
+                                Save this card securely for future payments
+                            </label>
                         </div>
 
                         <div class="don-error d-none my-3" id="donCardError"></div>

@@ -336,10 +336,11 @@ def donate_view(request, slug):
     eligibility_error = _donation_eligibility_error(project, request.user)
 
     if request.method == "GET":
+        saved_cards = request.user.saved_cards.all() if request.user.is_authenticated else []
         return render(
             request,
             "projects/donate.html",
-            {"project": project, "eligibility_error": eligibility_error},
+            {"project": project, "eligibility_error": eligibility_error, "saved_cards": saved_cards},
         )
 
     # ---- POST handling below -------------------------------------------------
@@ -427,7 +428,7 @@ def _process_ajax_donation(request, project):
 
     # (2) Payment method whitelist
     method = str(payload.get("payment_method") or "").strip()
-    allowed_methods = {"paypal", "google_pay", "apple_pay", "card", "wallet", "wallet_split"}
+    allowed_methods = {"paypal", "google_pay", "apple_pay", "card", "wallet", "wallet_split", "saved_card"}
     if method not in allowed_methods:
         return JsonResponse(
             {"success": False, "error": "Please choose a valid payment method."}, status=400
@@ -436,10 +437,16 @@ def _process_ajax_donation(request, project):
     # (3) Card details (required when paying with a card or wallet_split with card)
     secondary_method = str(payload.get("secondary_payment_method") or "").strip()
     is_card = method == "card" or (method == "wallet_split" and secondary_method == "card")
+    is_saved_card = method == "saved_card" or (method == "wallet_split" and secondary_method == "saved_card")
+    
     if is_card:
         card_error = _validate_card_payload(payload)
         if card_error:
             return JsonResponse({"success": False, "error": card_error}, status=400)
+    elif is_saved_card:
+        saved_card_id = payload.get("saved_card_id")
+        if not request.user.saved_cards.filter(id=saved_card_id).exists():
+            return JsonResponse({"success": False, "error": "Invalid saved card."}, status=400)
 
     # (4) Method-specific verification
     #   wallet        -> account password
@@ -451,7 +458,7 @@ def _process_ajax_donation(request, project):
             return JsonResponse(
                 {"success": False, "error": "Incorrect password. Please try again."}, status=400
             )
-    elif is_card:
+    elif is_card or is_saved_card:
         otp = str(payload.get("otp") or "").strip()
         if otp != DEMO_OTP_CODE:
             return JsonResponse(
@@ -505,6 +512,19 @@ def _process_ajax_donation(request, project):
 
         # (6) Re-sync project status (e.g. FUNDED when the target is now reached)
         project.sync_status()
+
+        # (7) Save card if requested
+        if is_card and payload.get("save_card"):
+            from accounts.models import SavedCard
+            import uuid
+            card_number = str(payload.get("card_number") or "").replace(" ", "").replace("-", "")
+            SavedCard.objects.create(
+                user=request.user,
+                cardholder_name=payload.get("card_name"),
+                masked_number=f"**** **** **** {card_number[-4:]}",
+                expiry=payload.get("card_expiry"),
+                token=f"tok_card_{uuid.uuid4().hex[:8]}"
+            )
 
     return JsonResponse(
         {

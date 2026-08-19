@@ -7,9 +7,9 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <h1 class="fw-bold mb-4" style="color: var(--primary);">Wallet Transaction History</h1>
-            <div class="card border-0 shadow-sm rounded-4 p-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4" style="background-color: var(--bg-card); border-color: var(--border-color) !important; color: var(--text-primary);">
                 <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
-                    <h5 class="mb-0 text-muted">Current Balance: <strong class="text-dark">{{ user.wallet_balance|default:"0.00" }} EGP</strong></h5>
+                    <h5 class="mb-0 text-muted">Current Balance: <strong style="color: var(--text-primary);">{{ user.wallet_balance|default:"0.00" }} EGP</strong></h5>
                     <a href="{% url 'accounts:charge_wallet' %}" class="btn btn-primary btn-sm rounded-pill fw-bold">
                         <i class="bi bi-plus-circle me-1"></i> Charge Wallet
                     </a>
@@ -17,8 +17,8 @@
 
                 {% if transactions %}
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
+                    <table class="table table-hover align-middle" style="background-color: transparent; --bs-table-bg: transparent; --bs-table-color: var(--text-primary);">
+                        <thead style="background-color: rgba(128, 128, 128, 0.1);">
                             <tr>
                                 <th>Date</th>
                                 <th>Description</th>
@@ -29,7 +29,7 @@
                             {% for t in transactions %}
                             <tr>
                                 <td class="text-muted small">{{ t.created_at|date:"M d, Y H:i" }}</td>
-                                <td>{{ t.description }}</td>
+                                <td style="color: var(--text-primary);">{{ t.description }}</td>
                                 <td class="text-end fw-bold {% if t.transaction_type == 'credit' %}text-success{% else %}text-danger{% endif %}">
                                     {% if t.transaction_type == 'credit' %}+{% else %}-{% endif %}{{ t.amount }} EGP
                                 </td>

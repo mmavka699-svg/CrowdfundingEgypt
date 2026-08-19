@@ -291,7 +291,8 @@ from .models import WalletTransaction
 @login_required
 def charge_wallet_view(request):
     if request.method == "GET":
-        return render(request, "accounts/charge_wallet.html")
+        saved_cards = request.user.saved_cards.all()
+        return render(request, "accounts/charge_wallet.html", {"saved_cards": saved_cards})
         
     try:
         payload = json.loads(request.body or b"{}")
@@ -306,7 +307,7 @@ def charge_wallet_view(request):
         return JsonResponse({"success": False, "error": "Please enter a valid amount (minimum 1.00)."}, status=400)
 
     method = str(payload.get("payment_method") or "").strip()
-    allowed_methods = {"paypal", "google_pay", "apple_pay", "card"}
+    allowed_methods = {"paypal", "google_pay", "apple_pay", "card", "saved_card"}
     if method not in allowed_methods:
         return JsonResponse({"success": False, "error": "Please choose a valid payment method."}, status=400)
 
@@ -315,6 +316,16 @@ def charge_wallet_view(request):
         if card_error:
             return JsonResponse({"success": False, "error": card_error}, status=400)
         # 3-D Secure OTP (demo: fixed code)
+        otp = str(payload.get("otp") or "").strip()
+        if otp != DEMO_OTP_CODE:
+            return JsonResponse(
+                {"success": False, "error": "Invalid confirmation code. Please enter the 6-digit code sent to your phone (Demo: 123456)."},
+                status=400,
+            )
+    elif method == "saved_card":
+        saved_card_id = payload.get("saved_card_id")
+        if not request.user.saved_cards.filter(id=saved_card_id).exists():
+            return JsonResponse({"success": False, "error": "Invalid saved card."}, status=400)
         otp = str(payload.get("otp") or "").strip()
         if otp != DEMO_OTP_CODE:
             return JsonResponse(
@@ -340,6 +351,18 @@ def charge_wallet_view(request):
         transaction_type=WalletTransaction.TransactionType.CREDIT,
         description=f"Wallet top-up via {method.replace('_', ' ').title()}"
     )
+
+    if method == "card" and payload.get("save_card"):
+        from accounts.models import SavedCard
+        import uuid
+        card_number = str(payload.get("card_number") or "").replace(" ", "").replace("-", "")
+        SavedCard.objects.create(
+            user=request.user,
+            cardholder_name=payload.get("card_name"),
+            masked_number=f"**** **** **** {card_number[-4:]}",
+            expiry=payload.get("card_expiry"),
+            token=f"tok_card_{uuid.uuid4().hex[:8]}"
+        )
 
     return JsonResponse({"success": True, "amount": str(amount), "redirect_url": reverse("accounts:profile")})
 

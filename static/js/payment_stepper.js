@@ -65,7 +65,7 @@
         });
 
         // Update progress indicator
-        var cardSkipped = state.method !== 'card' && state.secondaryMethod !== 'card';   // step 3 only used for cards
+        var cardSkipped = (state.method !== 'card' && state.secondaryMethod !== 'card' && state.method !== 'wallet_split') || (state.method && state.method.startsWith('saved_card_'));   // step 3 only used for new cards
         steps.forEach(function (li) {
             var n = Number(li.dataset.step);
             li.classList.remove('active', 'done', 'skipped');
@@ -92,7 +92,7 @@
 
     function nextFromPayment() {
         // Card method -> card-details step; wallet handled in methodNext; everything
-        // else (gateways) -> straight to the Verify step (they render their provider sheet there)
+        // else (gateways, saved cards) -> straight to the Verify step (they render their provider sheet there)
         if (state.method === 'card' || state.secondaryMethod === 'card') {
             goToStep(3);
         } else {
@@ -119,7 +119,7 @@
             if (el('donVerifyTitle')) el('donVerifyTitle').textContent = 'Verify Password';
             if (el('donVerifySub')) el('donVerifySub').textContent = '';
             if (passWrap) passWrap.style.display = 'block';
-        } else if (state.method === 'card' || state.secondaryMethod === 'card') {
+        } else if (state.method === 'card' || state.secondaryMethod === 'card' || (state.method && state.method.startsWith('saved_card_'))) {
             if (el('donVerifyTitle')) el('donVerifyTitle').textContent = 'Bank Confirmation';
             if (el('donVerifySub')) el('donVerifySub').textContent = '';
             if (otpWrap) otpWrap.style.display = 'block';
@@ -499,11 +499,16 @@
 if (confirmBtn) {
         confirmBtn.addEventListener('click', function () {
             var isCardFlow = state.method === 'card' || state.secondaryMethod === 'card';
+            var isSavedCardFlow = state.method && state.method.startsWith('saved_card_');
 
             var payload = {
                 amount: state.amount,
-                payment_method: state.method
+                payment_method: isSavedCardFlow ? 'saved_card' : state.method
             };
+            
+            if (isSavedCardFlow) {
+                payload.saved_card_id = state.method.replace('saved_card_', '');
+            }
 
             if (state.method === 'wallet') {
                 var pwd = getPasswordValue();
@@ -514,7 +519,7 @@ if (confirmBtn) {
                     return;
                 }
                 payload.password = pwd;
-            } else if (isCardFlow) {
+            } else if (isCardFlow || isSavedCardFlow) {
                 var otpInput = el('donOtpInput');
                 var otpValue = otpInput ? otpInput.value.trim() : '';
                 if (otpValue !== '123456') {
@@ -535,6 +540,11 @@ if (confirmBtn) {
                 if(cardCvvInput) payload.card_cvv = cardCvvInput.value;
                 if (state.secondaryMethod) {
                     payload.secondary_payment_method = state.secondaryMethod;
+                }
+                
+                var saveCardCheck = el('donSaveCardCheck');
+                if (saveCardCheck && saveCardCheck.checked) {
+                    payload.save_card = true;
                 }
             }
 

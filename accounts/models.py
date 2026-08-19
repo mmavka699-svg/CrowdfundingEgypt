@@ -158,3 +158,18 @@ class WalletTransaction(models.Model):
 
     def __str__(self):
         return f"{self.get_transaction_type_display()} of {self.amount} EGP for {self.user}"
+
+
+class SavedCard(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_cards")
+    cardholder_name = models.CharField(max_length=60)
+    masked_number = models.CharField(max_length=20)
+    expiry = models.CharField(max_length=5)
+    token = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.masked_number} (Exp: {self.expiry})"
