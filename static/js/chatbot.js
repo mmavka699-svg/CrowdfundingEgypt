@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const isAuthenticated = window.userIsAuthenticated === true;
+    const welcomeMessage = isAuthenticated 
+        ? "Hi there! How can I help you with Crowd-Funding Egypt today?" 
+        : "Please <a href='/login/'>log in</a> to use the chatbot.";
+
     // 1. Inject HTML for the chatbot
     const chatbotHTML = `
         <div id="chatbot-container" class="d-none">
@@ -6,16 +11,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="chatbot-header-title">
                     <i class="fa-solid fa-robot"></i> CrowdFundingEgypt Chatbot
                 </div>
-                <button class="chatbot-close" id="chatbot-close-btn">&times;</button>
+                <div class="chatbot-header-actions">
+                    <button class="chatbot-btn" id="chatbot-clear-btn" title="Clear Chat"><i class="fa-solid fa-trash-can"></i></button>
+                    <button class="chatbot-btn d-none d-md-flex" id="chatbot-expand-btn" title="Expand"><i class="fa-solid fa-expand"></i></button>
+                    <button class="chatbot-btn chatbot-close" id="chatbot-close-btn" title="Close">&times;</button>
+                </div>
             </div>
             <div class="chatbot-messages" id="chatbot-messages">
                 <div class="chatbot-message chatbot-message-bot">
-                    <p>Hi there! How can I help you with Crowd-Funding Egypt today?</p>
+                    <p>${welcomeMessage}</p>
                 </div>
             </div>
             <div class="chatbot-input-area">
-                <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Type your message..." autocomplete="off">
-                <button class="chatbot-send-btn" id="chatbot-send-btn">
+                <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Type your message..." autocomplete="off" ${!isAuthenticated ? 'disabled' : ''}>
+                <button class="chatbot-send-btn" id="chatbot-send-btn" ${!isAuthenticated ? 'disabled' : ''}>
                     <i class="fa-solid fa-paper-plane"></i>
                 </button>
             </div>
@@ -31,6 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputField = document.getElementById('chatbot-input');
     const messagesContainer = document.getElementById('chatbot-messages');
 
+    // Store conversation history
+    let chatHistory = [];
+    const MAX_HISTORY = 10; // Cap history to control token usage
+    const API_TIMEOUT_MS = 35000; // 35 second timeout
+
     // Toggle Chatbot
     if (toggleBtn) {
         toggleBtn.addEventListener('click', () => {
@@ -44,6 +58,36 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
             container.classList.add('d-none');
+        });
+    }
+
+    const clearBtn = document.getElementById('chatbot-clear-btn');
+    const expandBtn = document.getElementById('chatbot-expand-btn');
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            chatHistory = []; // Reset history
+            messagesContainer.innerHTML = `
+                <div class="chatbot-message chatbot-message-bot">
+                    <p style="margin-bottom:0;">${welcomeMessage}</p>
+                </div>
+            `;
+        });
+    }
+
+    if (expandBtn) {
+        expandBtn.addEventListener('click', () => {
+            container.classList.toggle('chatbot-expanded');
+            const icon = expandBtn.querySelector('i');
+            if (container.classList.contains('chatbot-expanded')) {
+                icon.classList.remove('fa-expand');
+                icon.classList.add('fa-compress');
+                expandBtn.title = "Collapse";
+            } else {
+                icon.classList.remove('fa-compress');
+                icon.classList.add('fa-expand');
+                expandBtn.title = "Expand";
+            }
         });
     }
 
@@ -66,20 +110,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // Simple formatter for chatbot responses
     function formatBotReply(text) {
         let html = text;
-        // Headers -> Bold
-        html = html.replace(/^#{1,6}\s+(.*)$/gm, '<strong>$1</strong>');
-        // Bold
-        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Premium Headings
+        html = html.replace(/^###\s+(.*)$/gm, '<h4 style="margin: 14px 0 6px 0; color: #1a4331; font-weight: 600; letter-spacing: 0.5px;">$1</h4>');
+        html = html.replace(/^##\s+(.*)$/gm, '<h3 style="margin: 18px 0 8px 0; color: #1a4331; font-weight: 700; border-bottom: 1px solid rgba(26,67,49,0.15); padding-bottom: 6px; letter-spacing: 0.5px;">$1</h3>');
+        html = html.replace(/^#\s+(.*)$/gm, '<h2 style="margin: 22px 0 10px 0; color: #1a4331; font-weight: 800; border-bottom: 2px solid rgba(26,67,49,0.2); padding-bottom: 6px; letter-spacing: 1px;">$1</h2>');
+        
+        // Blockquotes (Premium touch)
+        html = html.replace(/^>\s+(.*)$/gm, '<blockquote style="border-left: 4px solid #b8860b; background-color: rgba(184,134,11,0.05); padding: 8px 12px; margin: 10px 0; color: #555; font-style: italic; border-radius: 4px;">$1</blockquote>');
+
+        // Bold (Slightly colored to pop)
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #1a4331; font-weight: 700;">$1</strong>');
         // Italic
         html = html.replace(/\*([^\*\n]+)\*/g, '<em>$1</em>');
-        // Links
-        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: inherit; text-decoration: underline;">$1</a>');
-        // Bullet Points
-        html = html.replace(/^[\*\-]\s+(.*)$/gm, '&bull; $1');
+        // Links (Elegant gold/brown tone)
+        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: #b8860b; text-decoration: none; border-bottom: 1px solid #b8860b; padding-bottom: 1px; font-weight: 500; transition: opacity 0.2s;">$1</a>');
+        // Bullet Points (Custom elegant bullets)
+        html = html.replace(/^[\*\-]\s+(.*)$/gm, '<div style="margin-left: 8px; padding-left: 12px; position: relative; margin-bottom: 6px;"><span style="position: absolute; left: 0; color: #b8860b;">&bull;</span>$1</div>');
+        
         // Line breaks
         html = html.replace(/\n/g, '<br>');
+        
         // Clean up excessive line breaks
-        html = html.replace(/(<br>\s*){3,}/g, '<br><br>');
+        html = html.replace(/(<br>\s*){2,}/g, '<br><br>');
+        
+        // Remove <br> immediately after or before heading/blockquote tags so it doesn't look too spaced out
+        html = html.replace(/(<\/h[234]>|<\/blockquote>)\s*(<br>\s*)+/g, '$1');
+        html = html.replace(/(<br>\s*)+(<h[234]|<blockquote)/g, '$2');
+        
         return html;
     }
 
@@ -140,28 +197,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 3. API Call
         try {
+            // Push user message to history
+            chatHistory.push({ role: 'user', parts: [{ text: message }] });
+
+            // Trim history to last MAX_HISTORY entries
+            const trimmedHistory = chatHistory.slice(-MAX_HISTORY);
+
             const csrftoken = getCookie('csrftoken');
+
+            // Create AbortController for timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+
             const response = await fetch('/api/chat/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrftoken
                 },
-                body: JSON.stringify({ message: message })
+                body: JSON.stringify({ message: message, history: trimmedHistory }),
+                signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
 
             const data = await response.json();
             hideTyping();
 
             if (response.ok) {
                 appendMessage(data.reply || "I'm sorry, I couldn't generate a reply.");
+                // Push bot reply to history
+                if (data.reply) {
+                    chatHistory.push({ role: 'model', parts: [{ text: data.reply }] });
+                }
             } else {
-                appendMessage("Error: " + (data.error || "Something went wrong."));
+                if (response.status === 401 || (data && data.needs_login)) {
+                    appendMessage("Please <a href='/login/'>log in</a> to use the chatbot.");
+                    inputField.disabled = true;
+                    if (sendBtn) sendBtn.disabled = true;
+                } else {
+                    appendMessage("Error: " + (data.error || "Something went wrong."));
+                }
+                // Remove the user message from history if the request failed
+                chatHistory.pop();
             }
 
         } catch (error) {
             hideTyping();
-            appendMessage("Network error. Please try again later.");
+            // Remove the user message from history on network/timeout errors
+            chatHistory.pop();
+            if (error.name === 'AbortError') {
+                appendMessage("The request timed out. Please try again.");
+            } else {
+                appendMessage("Network error. Please try again later.");
+            }
             console.error('Chatbot API Error:', error);
         } finally {
             inputField.disabled = false;

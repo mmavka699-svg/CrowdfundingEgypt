@@ -2845,19 +2845,45 @@ body:has(.report-project-modal.show) .modal-backdrop.show {
     gap: 0.5rem;
 }
 
-.chatbot-close {
+.chatbot-header-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.chatbot-btn {
     background: transparent;
     border: none;
     color: white;
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     line-height: 1;
     cursor: pointer;
     opacity: 0.8;
-    transition: opacity var(--transition-fast);
+    transition: opacity var(--transition-fast), transform 0.2s ease;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.chatbot-close:hover {
+.chatbot-btn:hover {
     opacity: 1;
+    transform: scale(1.1);
+}
+
+.chatbot-close {
+    font-size: 1.5rem;
+}
+
+#chatbot-container.chatbot-expanded {
+    width: 600px;
+    height: 700px;
+    max-width: 90vw;
+    max-height: 90vh;
+    bottom: 50%;
+    right: 50%;
+    transform: translate(50%, 50%);
+    border-radius: 1.5rem;
 }
 
 .chatbot-messages {
