@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const isAuthenticated = window.userIsAuthenticated === true;
+    const welcomeMessage = isAuthenticated 
+        ? "Hi there! How can I help you with Crowd-Funding Egypt today?" 
+        : "Please <a href='/login/'>log in</a> to use the chatbot.";
+
     // 1. Inject HTML for the chatbot
     const chatbotHTML = `
         <div id="chatbot-container" class="d-none">
@@ -14,12 +19,12 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div class="chatbot-messages" id="chatbot-messages">
                 <div class="chatbot-message chatbot-message-bot">
-                    <p>Hi there! How can I help you with Crowd-Funding Egypt today?</p>
+                    <p>${welcomeMessage}</p>
                 </div>
             </div>
             <div class="chatbot-input-area">
-                <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Type your message..." autocomplete="off">
-                <button class="chatbot-send-btn" id="chatbot-send-btn">
+                <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Type your message..." autocomplete="off" ${!isAuthenticated ? 'disabled' : ''}>
+                <button class="chatbot-send-btn" id="chatbot-send-btn" ${!isAuthenticated ? 'disabled' : ''}>
                     <i class="fa-solid fa-paper-plane"></i>
                 </button>
             </div>
@@ -64,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
             chatHistory = []; // Reset history
             messagesContainer.innerHTML = `
                 <div class="chatbot-message chatbot-message-bot">
-                    <p style="margin-bottom:0;">Hi there! How can I help you with Crowd-Funding Egypt today?</p>
+                    <p style="margin-bottom:0;">${welcomeMessage}</p>
                 </div>
             `;
         });
@@ -226,7 +231,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     chatHistory.push({ role: 'model', parts: [{ text: data.reply }] });
                 }
             } else {
-                appendMessage("Error: " + (data.error || "Something went wrong."));
+                if (response.status === 401 || (data && data.needs_login)) {
+                    appendMessage("Please <a href='/login/'>log in</a> to use the chatbot.");
+                    inputField.disabled = true;
+                    if (sendBtn) sendBtn.disabled = true;
+                } else {
+                    appendMessage("Error: " + (data.error || "Something went wrong."));
+                }
                 // Remove the user message from history if the request failed
                 chatHistory.pop();
             }

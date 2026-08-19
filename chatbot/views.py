@@ -142,7 +142,6 @@ def _validate_message(raw_message):
 # ---------------------------------------------------------------------------
 # Main chat endpoint
 # ---------------------------------------------------------------------------
-@login_required
 @require_POST
 def chat(request):
     """
@@ -150,6 +149,11 @@ def chat(request):
     returns { "reply": "..." }.
     Protected by authentication, CSRF, rate limiting, and input validation.
     """
+    if not request.user.is_authenticated:
+        return JsonResponse(
+            {"error": "Please log in to use the chatbot.", "needs_login": True}, 
+            status=401
+        )
 
     # --- Rate limiting ---
     allowed, retry_after = _check_rate_limit(request.user)
