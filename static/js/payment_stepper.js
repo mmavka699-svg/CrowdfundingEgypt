@@ -110,10 +110,19 @@
         var gwWrap     = el('donVerifyGateway');
         var bioSheet   = el('donBioSheet');
         var paypalPop  = el('donPaypalPopup');
+        var verifyActions = document.querySelector('.don-panel[data-panel="4"] .don-actions');
 
         if (passWrap) passWrap.style.display = 'none';
         if (otpWrap)  otpWrap.style.display  = 'none';
         if (gwWrap)   gwWrap.style.display   = 'none';
+
+        if (verifyActions) {
+            if (state.method === 'paypal') {
+                verifyActions.style.display = 'none';
+            } else {
+                verifyActions.style.display = '';
+            }
+        }
 
         if (state.method === 'wallet') {
             if (el('donVerifyTitle')) el('donVerifyTitle').textContent = 'Verify Password';
