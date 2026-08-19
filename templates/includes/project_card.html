@@ -14,7 +14,8 @@
                 style="font-size: 0.75rem; background-color: var(--accent, #f25c05); pointer-events: auto;">
                 <i class="bi bi-lightning-fill me-1"></i> Featured
             </span>
-            {% elif project.status == 'coming_soon' or project.campaign_state == 'future' %}
+            {% endif %}
+            {% if project.status == 'coming_soon' or project.campaign_state == 'future' %}
             <span class="badge bg-info text-white shadow-sm rounded-pill px-2.5 py-1.5 fw-semibold"
                 style="font-size: 0.75rem; pointer-events: auto;">
                 <i class="bi bi-hourglass-split me-1"></i> Coming Soon
