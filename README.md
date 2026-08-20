@@ -1,6 +1,6 @@
 # 🇪🇬 Crowd-Funding Egypt
 
-A modern, production-ready Egyptian Crowdfunding and Donation platform built with **Django 5.1 + PostgreSQL + Bootstrap 5 / Custom CSS**. 
+A modern, production-ready Egyptian Crowdfunding and Donation platform built with **Django 6.1 + SQLite + Bootstrap 5 / Custom CSS**. 
 
 This document serves as the complete technical spec: system architecture, environment setup, URL mappings, security rules, and test coverage.
 
@@ -89,7 +89,7 @@ pip install -r requirements.txt
 
 # 4. Configure Environment Variables
 cp .env.example .env
-# Update .env with your database credentials and secret key
+# Update .env with your secret key and email credentials
 
 # 5. Run Migrations
 python manage.py migrate
@@ -171,7 +171,7 @@ python manage.py test projects
 ## 🛡️ 6. Production Deployment Checklist
 
 - [ ] Set `DJANGO_DEBUG=False` and a secure cryptographically generated `DJANGO_SECRET_KEY` in `.env`.
-- [ ] Configure PostgreSQL database settings (`DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`).
+- [ ] SQLite is used by default. For production, consider migrating to PostgreSQL by updating `DATABASES` in `settings.py`.
 - [ ] Configure real SMTP email credentials (`EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL`).
 - [ ] Configure Facebook App ID & Secret for social authentication if enabled.
 - [ ] Run `python manage.py collectstatic` to bundle static assets.
