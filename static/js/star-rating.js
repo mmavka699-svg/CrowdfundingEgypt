@@ -48,15 +48,14 @@ document.addEventListener("DOMContentLoaded", function () {
                         paintStars(data.your_rating);
 
                         // Update the average rating badge shown near the title
-                        const avgBadge = document.querySelector(".fs-4.text-warning");
+                        const avgBadge = document.getElementById("avg-rating-display");
                         if (avgBadge) {
-                            avgBadge.innerHTML =
-                                `<i class="fa-solid fa-star"></i> ${data.average_rating}`;
+                            avgBadge.textContent = `${data.average_rating} / 5`;
                         }
-                        const countLabel = document.querySelector(".fs-4.text-warning + small");
+                        const countLabel = document.getElementById("ratings-count-display");
                         if (countLabel) {
                             countLabel.textContent =
-                                `${data.ratings_count} rating${data.ratings_count === 1 ? "" : "s"}`;
+                                `(${data.ratings_count} rating${data.ratings_count === 1 ? "" : "s"})`;
                         }
                     } else {
                         alert(data.error || "Could not submit rating.");

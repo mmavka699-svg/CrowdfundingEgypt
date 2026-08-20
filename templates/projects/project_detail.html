@@ -66,7 +66,7 @@
             <!-- Rating Summary Bar (Matching Screenshot 1) -->
             <div class="p-3 bg-white rounded-4 shadow-xs border mb-5 d-flex align-items-center justify-content-between flex-wrap gap-3">
                 <div class="d-flex align-items-center gap-2">
-                    <span class="fw-bold text-dark fs-5">{{ project.average_rating }} / 5</span>
+                    <span id="avg-rating-display" class="fw-bold text-dark fs-5">{{ project.average_rating }} / 5</span>
                     <div class="text-warning small" style="letter-spacing: -1px;">
                         <i class="fa-solid fa-star"></i>
                         <i class="fa-solid fa-star"></i>
@@ -74,7 +74,7 @@
                         <i class="fa-solid fa-star"></i>
                         <i class="fa-solid fa-star"></i>
                     </div>
-                    <span class="text-muted small">({{ project.ratings_count }} ratings)</span>
+                    <span id="ratings-count-display" class="text-muted small">({{ project.ratings_count }} ratings)</span>
                 </div>
 
                 {% if user.is_authenticated and user.id != project.creator.id %}
