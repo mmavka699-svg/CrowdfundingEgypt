@@ -2,7 +2,7 @@
 
 A modern, production-ready Egyptian Crowdfunding and Donation platform built with **Django 6.1 + SQLite + Bootstrap 5 / Custom CSS**. 
 
-This document serves as the complete technical spec: system architecture, environment setup, URL mappings, security rules, and test coverage.
+This project is deployed on **PythonAnywhere** and integrates powerful features like a **Wallet System**, **Facebook OAuth2**, and a **Google Gemini AI Chatbot**.
 
 ---
 
@@ -10,28 +10,29 @@ This document serves as the complete technical spec: system architecture, enviro
 
 ### 🔐 Authentication & Account Security
 * **Email-Based Authentication**: Uses email addresses as the primary login identifier (`USERNAME_FIELD = "email"`).
-* **Egyptian Mobile Phone Validation**: Enforces strict Egyptian phone regex validation (`^(?:\+20|0020|0)1[0125]\d{8}$`), supporting formats like `01012345678`, `+201123456789`, or `0020123456789`.
-* **24-Hour Email Activation & Auto-Login**: New users register in an unverified state (`is_active=False`). Upon clicking the 24-hour expiring activation link, accounts are verified, automatically logged in without re-typing credentials, and redirected to the home page.
-* **Complete Password Reset Flow**: Integrated password reset via email (`PasswordResetView` stack) featuring clean, branded HTML email templates and dynamic host detection.
-* **In-App Password Change**: Allows logged-in users to securely change their password via the Edit Profile page with `PasswordChangeForm` and `update_session_auth_hash` to keep session tokens active.
-* **Social Login**: Optional Facebook OAuth2 integration via `django-allauth`.
-* **Custom CSRF Failure Handling**: Friendly, branded error page (`core.views.csrf_failure_view`) explaining cookie requirements and token rotation.
+* **Egyptian Mobile Phone Validation**: Enforces strict Egyptian phone regex validation (`^(?:\+20|0020|0)1[0125]\d{8}$`).
+* **24-Hour Email Activation & Auto-Login**: New users register in an unverified state (`is_active=False`). Clicking the activation link verifies the account and automatically logs them in.
+* **Social Login**: Fully integrated Facebook OAuth2 login via `django-allauth`, properly configured to bypass standard email verification and sync profile pictures.
+* **Wallet System**: Every user has a built-in virtual wallet for tracking donations and refunds.
+* **Complete Password Management**: Includes email-based password resets and secure in-app password changes.
+
+### 🤖 AI Chatbot Assistant
+* **Google Gemini Integration**: A floating chatbot powered by the `google-generativeai` SDK.
+* **Context-Aware Assistance**: Answers questions about the platform, campaigns, and guides users on how to navigate the site.
 
 ### 💰 Campaign & Project Management
-* **Multi-Image Support**: Campaigns support multiple image uploads rendered as interactive carousels inside project cards and detail views.
-* **Admin-Managed Categories**: Seeded category system (`Category` model) for structured project discovery.
-* **Tagging System**: Integrated `django-taggit` for slug-based tag clouds and tagging.
-* **25%-Rule Campaign Cancellation**: Creators can only cancel a campaign if total raised donations are **under 25%** of the target goal (`Project.can_be_cancelled()`). Enforced strictly at both model and view levels.
-* **Self-Donation & Self-Rating Protection**: Project creators are strictly forbidden from donating to or rating their own campaigns, enforced with server-side validation.
-* **Nested Comments & Community Discussion**: Threaded comment discussions supporting nested replies (`Comment.parent` self-FK).
-* **AJAX Star Ratings**: Interactive 1–5 star rating system with `update_or_create` to ensure one rating per user.
-* **Reporting System**: DB-level `CheckConstraint` enforcing report targets (strictly a project OR a comment).
+* **Multi-Image Support**: Campaigns support multiple image uploads rendered as interactive carousels.
+* **Arabic Unicode Slugs**: Full support for creating projects with Arabic titles and URLs.
+* **Dynamic Target & Progress**: Progress bars instantly reflect wallet donations vs. targets.
+* **25%-Rule Campaign Cancellation**: Creators can only cancel a campaign if total raised donations are **under 25%** of the target goal. Canceling automatically issues **Wallet Refunds** to all donors.
+* **Self-Donation & Self-Rating Protection**: Project creators are strictly forbidden from donating to or rating their own campaigns.
+* **AJAX Star Ratings**: Interactive 1–5 star rating system that instantly updates the page via AJAX without requiring a full reload.
+* **Nested Comments**: Threaded comment discussions supporting nested replies.
 
 ### 🎨 Design System & Modern UI
-* **Deep Emerald & Warm Coral Palette**: Deep Emerald Green (`#0F5132` / `#198754`) representing growth, hope, and trust paired with Warm Coral / Amber Orange (`#E05D38` / `#F97316`) for high-converting CTA buttons ("Donate Now").
-* **Glassmorphism Navbar**: Translucent backdrop-blur sticky navbar with dynamic search autocomplete dropdown and brand icons.
-* **Hero Slider & Floating Stats**: Top 5 highest-rated project carousel with glassmorphism text overlays and live community stats.
-* **Modern Cards & Progress Bars**: Lift-on-hover cards (`.project-card`), category pill badges, and smooth animated gradient progress bars showing percentage raised vs. target EGP.
+* **Deep Emerald & Warm Coral Palette**: Deep Emerald Green (`#0F5132`) paired with Warm Coral / Amber Orange (`#F97316`) for high-converting CTA buttons.
+* **Glassmorphism Navbar**: Translucent backdrop-blur sticky navbar with dynamic search autocomplete dropdown.
+* **Mobile-First Layout**: Fully responsive campaign cards and detail pages tailored for mobile screens.
 * **Full Dark Mode**: CSS Custom Properties (`:root` / `[data-theme="dark"]`) supporting smooth light/dark theme switching.
 
 ---
@@ -41,28 +42,12 @@ This document serves as the complete technical spec: system architecture, enviro
 ```
 crowdfunding_egypt/
 ├── crowdfunding_egypt/       # Project config (settings, root urls, wsgi/asgi)
-├── accounts/                 # Custom user, auth, activation, profile, password management
-│   ├── models.py             # CustomUser (email as USERNAME_FIELD)
-│   ├── validators.py         # Egyptian phone regex validator
-│   ├── tokens.py             # 24-hour expiring activation token generator
-│   ├── adapters.py           # Facebook social-login adapter
-│   ├── forms.py / views.py / urls.py / admin.py / tests.py
-├── projects/                  # Campaigns, donations, comments, ratings, reports
-│   ├── models.py              # Category, Project, ProjectImage, Donation,
-│   │                          # Comment (nested), Rating, Report
-│   ├── forms.py / views.py / urls.py / admin.py / tests.py
-│   └── fixtures/categories.json   # Seed category fixtures
-├── core/                      # Homepage, discovery, and custom error handlers
-│   ├── views.py                # Home slider, search, CSRF failure handler
-│   └── context_processors.py   # Global category context injector
-├── templates/                  # Bootstrap 5 HTML templates
-│   ├── accounts/              # Auth, profile, password reset & change templates
-│   ├── core/                  # Home, about, csrf failure pages
-│   ├── includes/              # Component partials (project_card.html, navbar, etc.)
-│   └── projects/              # Project list, detail, creation, & donation views
-├── static/                    # Custom CSS & JS assets
-│   ├── css/style.css          # Design system, CSS variables, dark mode & components
-│   └── js/                    # Search autocomplete, star rating, theme toggle scripts
+├── accounts/                 # Custom user, wallet, activation, password management
+├── projects/                 # Campaigns, donations, comments, ratings, reports
+├── core/                     # Homepage, search, and custom error handlers
+├── chatbot/                  # Gemini AI Chatbot integration and API endpoints
+├── templates/                # Bootstrap 5 HTML templates
+├── static/                   # Custom CSS (glassmorphism/dark mode) & JS assets
 ├── requirements.txt
 ├── .env.example
 └── manage.py
@@ -70,7 +55,7 @@ crowdfunding_egypt/
 
 ---
 
-## 🚀 3. Setup & Installation
+## 🚀 3. Local Setup & Installation
 
 ```bash
 # 1. Clone the repository & enter project directory
@@ -79,19 +64,23 @@ cd CrowdfundingEgypt
 
 # 2. Create & activate a virtual environment
 python -m venv venv
-# On Linux/macOS:
-source venv/bin/activate
 # On Windows (PowerShell):
 .\venv\Scripts\Activate.ps1
+# On Linux/macOS:
+source venv/bin/activate
 
 # 3. Install dependencies
 pip install -r requirements.txt
 
 # 4. Configure Environment Variables
 cp .env.example .env
-# Update .env with your secret key and email credentials
+# Edit .env and fill in:
+# - DJANGO_SECRET_KEY
+# - EMAIL_HOST_USER & EMAIL_HOST_PASSWORD
+# - FACEBOOK_CLIENT_ID & FACEBOOK_CLIENT_SECRET
+# - GOOGLE_API_KEY (for Gemini Chatbot)
 
-# 5. Run Migrations
+# 5. Run Migrations (Uses SQLite by default)
 python manage.py migrate
 
 # 6. Load Seed Categories
@@ -104,75 +93,50 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-> **Note on Email Testing:** By default in development, emails are printed to the console (`EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'`). Check your terminal for activation links and password reset tokens.
+> **Note on Email Testing:** By default in development, emails are printed to the console if no SMTP credentials are provided. Check your terminal for activation links.
 
 ---
 
-## 🗺️ 4. URL Map
+## ☁️ 4. PythonAnywhere Deployment Guide
 
-| URL Route | View Handler | Description |
-|---|---|---|
-| `/` | `core.home_view` | Homepage with hero slider, featured, latest, & categories |
-| `/about/` | `core.about_view` | About platform page |
-| `/accounts/register/` | `accounts.register_view` | User signup (account created inactive) |
-| `/accounts/activate/<uidb64>/<token>/` | `accounts.activate_account_view` | 24h activation link with seamless auto-login |
-| `/accounts/activate/resend/` | `accounts.resend_activation_view` | Resend activation email link |
-| `/accounts/login/` | `accounts.login_view` | Email + password login (gated by activation) |
-| `/accounts/logout/` | `accounts.logout_view` | Logout view |
-| `/accounts/password-reset/` | `CustomPasswordResetView` | Forgot password email request |
-| `/accounts/password-reset/done/` | `CustomPasswordResetDoneView` | Password reset email sent confirmation |
-| `/accounts/password-reset/confirm/<uidb64>/<token>/` | `CustomPasswordResetConfirmView` | Password reset link target |
-| `/accounts/password-reset/complete/` | `CustomPasswordResetCompleteView` | Password reset successful notification |
-| `/accounts/password-change/` | `accounts.password_change_view` | In-app password change for logged-in users |
-| `/accounts/profile/` | `accounts.profile_view` | View user profile, created campaigns, & donations |
-| `/accounts/profile/edit/` | `accounts.profile_edit_view` | Edit user profile details (email locked) |
-| `/accounts/profile/delete/` | `accounts.profile_delete_view` | Delete account with password re-authentication |
-| `/projects/` | `projects.project_list_view` | Browse all active project campaigns |
-| `/projects/search/?q=` | `projects.search_projects_view` | Live search by title OR tag |
-| `/projects/new/` | `projects.project_create_view` | Create new campaign with image uploads |
-| `/projects/category/<slug>/` | `projects.category_detail_view` | Filter projects by category |
-| `/projects/tag/<slug>/` | `projects.tag_detail_view` | Filter projects by tag |
-| `/projects/<slug>/` | `projects.project_detail_view` | Full project detail page with sticky donation card |
-| `/projects/<slug>/edit/` | `projects.project_edit_view` | Edit campaign (creator only) |
-| `/projects/<slug>/cancel/` | `projects.project_cancel_view` | Cancel campaign (creator only, <25% raised) |
-| `/projects/<slug>/donate/` | `projects.donate_view` | Submit donation (creator restricted) |
-| `/projects/<slug>/comment/` | `projects.comment_create_view` | Post top-level comment or nested reply |
-| `/projects/<slug>/rate/` | `projects.rate_project_view` | AJAX 1–5 star rating (creator restricted) |
-| `/projects/<slug>/report/` | `projects.report_project_view` | Report project campaign |
+The project is optimized for deployment on the PythonAnywhere free tier using SQLite.
 
----
+1. Create a PythonAnywhere account and open a Bash console.
+2. Clone the repo and set up the virtual environment (as shown in Step 3 above).
+3. Create your `.env` file via the PythonAnywhere file manager and set:
+   ```env
+   DJANGO_DEBUG=False
+   DJANGO_ALLOWED_HOSTS=yourusername.pythonanywhere.com
+   ```
+4. Configure the **Web Tab**:
+   - Set the Virtualenv path to `/home/yourusername/CrowdfundingEgypt/venv`.
+   - Add Static File mappings:
+     - `/static/` -> `/home/yourusername/CrowdfundingEgypt/staticfiles`
+     - `/media/` -> `/home/yourusername/CrowdfundingEgypt/media`
+5. Edit your WSGI file (from the Web tab) to load `.env`:
+   ```python
+   import os, sys
+   from pathlib import Path
+   from dotenv import load_dotenv
 
-## 🧪 5. Testing & Verification
-
-The application includes automated unit & integration test suites covering all business rules:
-
-```bash
-# Run full project test suite
-python manage.py test
-
-# Run accounts tests
-python manage.py test accounts
-
-# Run projects tests
-python manage.py test projects
-```
-
-### Verified Test Scenarios:
-1. **Signup & Activation**: Registrations create unverified users; valid 24h token activates user, auto-logs in, and redirects to home.
-2. **Egyptian Phone Numbers**: Rejects non-Egyptian phone numbers (`013...`, 10 digits, etc.) and validates `010`, `011`, `012`, `015` prefixes.
-3. **Self-Donation Guard**: Creators attempting to POST donations to their own campaigns are rejected server-side with error messages.
-4. **Self-Rating Guard**: Creators attempting to rate their own project via AJAX receive an authorization error response.
-5. **25% Cancellation Rule**: Campaigns with <25% target raised can be cancelled; campaigns reaching ≥25% reject cancellation requests.
-6. **Password Management**: Full email reset flow verification + logged-in password change session persistence test.
-7. **Nested Comments**: Multilevel comment thread creation and tree structure.
+   project_home = '/home/yourusername/CrowdfundingEgypt'
+   load_dotenv(dotenv_path=Path(project_home) / '.env')
+   if project_home not in sys.path: sys.path.insert(0, project_home)
+   os.environ['DJANGO_SETTINGS_MODULE'] = 'crowdfunding_egypt.settings'
+   from django.core.wsgi import get_wsgi_application
+   application = get_wsgi_application()
+   ```
+6. Run `python manage.py collectstatic` in the console.
+7. Click the green **Reload** button on the Web tab!
 
 ---
 
-## 🛡️ 6. Production Deployment Checklist
+## 🛡️ 5. Facebook OAuth Configuration
 
-- [ ] Set `DJANGO_DEBUG=False` and a secure cryptographically generated `DJANGO_SECRET_KEY` in `.env`.
-- [ ] SQLite is used by default. For production, consider migrating to PostgreSQL by updating `DATABASES` in `settings.py`.
-- [ ] Configure real SMTP email credentials (`EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL`).
-- [ ] Configure Facebook App ID & Secret for social authentication if enabled.
-- [ ] Run `python manage.py collectstatic` to bundle static assets.
-- [ ] Set `ALLOWED_HOSTS` to your production domain name.
+If you are deploying to a live domain, you **must** update the Facebook Developer Console:
+1. Go to your App -> **Use cases** -> **Authentication**.
+2. Click **Customize** and ensure both `email` and `public_profile` permissions are added.
+3. Under **Facebook Login Settings**, add your Valid OAuth Redirect URIs:
+   - `https://yourdomain.com/`
+   - `https://yourdomain.com/accounts/social/facebook/login/callback/`
+4. Log into your live Django Admin Panel, go to **Sites**, and update the default `example.com` site to match your live domain exactly.
