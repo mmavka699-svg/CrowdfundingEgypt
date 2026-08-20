@@ -89,7 +89,10 @@ class Project(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             from django.utils.text import slugify
-            base_slug = slugify(self.title)[:260]
+            base_slug = slugify(self.title, allow_unicode=True)[:260]
+            if not base_slug:
+                # Fallback if title contains only un-slugifiable special chars
+                base_slug = uuid.uuid4().hex[:8]
             slug = base_slug
             counter = 1
             while Project.objects.filter(slug=slug).exclude(pk=self.pk).exists():
