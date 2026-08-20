@@ -9,7 +9,7 @@
                 style="font-size: 0.75rem; pointer-events: auto;">
                 <i class="bi bi-tag-fill me-1 text-success"></i> {{ project.category.name }}
             </span>
-            {% if project.is_featured or project.average_rating >= 4.5 %}
+            {% if project.is_featured %}
             <span class="badge bg-accent text-white shadow-sm rounded-pill px-2.5 py-1.5 fw-bold"
                 style="font-size: 0.75rem; background-color: var(--accent, #f25c05); pointer-events: auto;">
                 <i class="bi bi-lightning-fill me-1"></i> Featured
